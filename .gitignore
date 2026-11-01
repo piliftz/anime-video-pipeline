@@ -1,7 +1,7 @@
 # Python
 __pycache__/
 *.py[cod]
-.venv/
+.venv
 venv/
 .env
 
@@ -34,3 +34,6 @@ assets/images/scene_0*.png
 Thumbs.db
 .idea/
 .vscode/
+
+# AI-generated scene images (+ prompt sidecars) - regenerate with --generate-images
+assets/generated/

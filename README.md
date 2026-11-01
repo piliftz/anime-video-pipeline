@@ -210,7 +210,74 @@ Keep overlays away from the bottom-center area, where subtitles go.
 
 ---
 
-## 4. Using Stable Diffusion and AnimateDiff output
+## 4. Automated image generation (local ComfyUI)
+
+The pipeline can generate every scene's image for you with a **local ComfyUI** (your GPU, no
+cloud costs) and then render the video, in one command.
+
+### One-time setup (Windows PowerShell example)
+```powershell
+# 1. Tell the pipeline where ComfyUI lives (persists; open a NEW terminal afterwards)
+setx COMFYUI_DIR "C:\Users\<you>\comfyui-anime"
+# 2. Download + verify the anime model (Animagine XL 4.0, ~6.9 GB, resumable)
+.venv\Scripts\python scripts\setup_models.py
+```
+`setup_models.py --verify` checks every `.safetensors` file under ComfyUI's `models/` for
+truncated downloads. Re-running an interrupted download resumes it.
+
+### Every video
+```powershell
+make_video my_story.json --draft     # images (only new/changed scenes) + 540p preview
+make_video my_story.json             # images + full 1080p render
+```
+`make_video.cmd` runs `video_orchestrator.py ... --generate-images`. On macOS/Linux use
+`python scripts/video_orchestrator.py my_story.json --generate-images`.
+
+What happens:
+1. If ComfyUI isn't already running at `$COMFYUI_URL` (default `http://127.0.0.1:8189`), it is
+   started from `$COMFYUI_DIR` in the background (log: `temp/comfyui_server.log`), then stopped
+   when the images are done, which frees the GPU.
+2. Each scene with a `generate` block gets an SDXL image plus a hi-res second pass
+   (1344×768 → 2016×1152), saved to `assets/generated/<scene_id>.png` with a `.png.json`
+   sidecar recording the prompt, seed, model and settings.
+3. **Incremental:** only scenes whose prompt or settings changed are regenerated. Images you put
+   there yourself (no sidecar) are never overwritten unless you add `--force-images`.
+4. The video renders as usual.
+
+Generate images only: `python scripts/image_generator.py my_story.json [--scenes s02 --force]`.
+List the models ComfyUI sees: `python scripts/image_generator.py --list-checkpoints`.
+
+### Storyboard keys
+```json
+"image_generation": { "checkpoint": "animagine", "width": 1344, "height": 768, "steps": 28, "cfg": 5.0,
+                      "sampler": "euler_ancestral", "scheduler": "normal", "seed": 1000, "rating": "safe",
+                      "quality_tags": "...", "negative": "...",
+                      "hires": { "enabled": true, "scale": 1.5, "denoise": 0.4, "steps": 20 } },
+"characters": { "Hikari": { "tags": "long black hair, brown eyes, red scarf, school uniform" } },
+"scenes": [ { "id": "s02", "generate": { "characters": ["Hikari"],
+              "prompt": "1girl, solo, holding umbrella, train station, night, rain" } } ]
+```
+- A scene with `generate` and no `clip` uses `assets/generated/<id>.png` (`output_dir`).
+- The final prompt is assembled as counts (`1girl`…) → character tags → scene tags → rating →
+  quality tags, which is Animagine's recommended order. Use **Danbooru-style tags**, not sentences.
+- `checkpoint` matches by substring. If unset, the first checkpoint containing "animagine" is used.
+- Per-scene overrides: `negative` (appended), `seed`, `width`, `height`, `rating`.
+- Seeds are deterministic (base seed + scene id), so re-running reproduces the same image.
+  Change a scene's `seed` to get a different take.
+
+### Honest limits
+- **Character consistency is approximate.** Reusing the same `characters` tags keeps hair, eye
+  color and outfit stable, but faces still vary between scenes. Locking a face takes a character
+  LoRA or IP-Adapter, which this automation does not wire up yet.
+- **Two characters in one image bleed together:** the model can swap hair colors or outfits
+  between them. Prefer one character per shot, or regenerate with a different `seed`.
+- Hands and text inside images are unreliable (a known Animagine limitation).
+- With 8 GB of VRAM, expect very roughly 30–90 s per image including the hi-res pass. Lower
+  `hires.scale` or disable it if you run out of GPU memory.
+
+`my_story.json` is a complete 5-scene example that uses only generated images.
+
+## 5. Using Stable Diffusion and AnimateDiff output
 
 The pipeline doesn't care which tool generated your media. It only needs files on disk.
 
@@ -240,7 +307,7 @@ Model weights (`*.safetensors`, `*.ckpt`) and rendered media are already gitigno
 
 ---
 
-## 5. Pushing to GitHub
+## 6. Pushing to GitHub
 
 ```bash
 git add -A
@@ -261,7 +328,7 @@ Git LFS (`git lfs track "*.png"`) rather than committing them directly.
 
 ---
 
-## 6. Troubleshooting
+## 7. Troubleshooting
 
 | Symptom | Cause / fix |
 |---|---|
@@ -272,6 +339,10 @@ Git LFS (`git lfs track "*.png"`) rather than committing them directly.
 | Colors look washed out or shifted in one player | The output is tagged BT.709 limited range. Compare in mpv or VLC; some web previews ignore the tags. |
 | Render too slow | Use `--draft` while iterating, `--scenes` to render one shot, lower speed-line `count`, or turn bloom off with `"bloom": 0`. |
 | Narration cut off or overlapping | Increase `narration.tail`, or remove `duration` so the scene sizes itself to the narration. |
+| `ComfyUI is not running ... no ComfyUI folder is known` | Set `COMFYUI_DIR` (`setx COMFYUI_DIR "C:\path\to\ComfyUI"`, then open a new terminal), or start ComfyUI yourself first. |
+| `ComfyUI exited during startup` | Read `temp/comfyui_server.log`. Usually a broken ComfyUI venv; start it manually once to see the error. |
+| `out of GPU memory` during image generation | Lower `image_generation.hires.scale` (e.g. 1.25) or set `hires.enabled` to false. Close other GPU apps and the other ComfyUI. |
+| `Checkpoint ... not found` | Run `python scripts/setup_models.py`, or check `--list-checkpoints` and fix `image_generation.checkpoint`. |
 
 ---
 

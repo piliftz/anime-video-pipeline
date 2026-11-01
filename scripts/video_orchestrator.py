@@ -32,6 +32,7 @@ from pathlib import Path
 import numpy as np
 from PIL import Image, ImageDraw
 
+from image_generator import default_generated_clip, image_gen_config, validate_generate
 from pipeline_utils import (
     TEMP_DIR,
     PipelineError,
@@ -102,6 +103,7 @@ SCENE_DEFAULTS = {
     "fx": {},
     "text_overlays": [],
     "transition_in": None,     # {"type": "crossfade"|"fade_black"|"cut", "duration": s}
+    "generate": None,          # {"prompt", "characters", "negative", "seed", "width", "height", "rating"}
 }
 NARRATION_DEFAULTS = {"text": "", "speaker": None, "offset": 0.3, "tail": 0.6, "subtitle": True}
 OVERLAY_DEFAULTS = {
@@ -177,6 +179,8 @@ def load_storyboard(path: Path) -> tuple[dict, Path]:
         "transitions": deep_merge({"default": TRANSITION_DEFAULTS}, raw.get("transitions")),
         "subtitles": deep_merge(SUBTITLE_DEFAULTS, raw.get("subtitles")),
         "fx_defaults": deep_merge(FX_DEFAULTS, raw.get("fx_defaults")),
+        "characters": raw.get("characters", {}),
+        "image_generation": image_gen_config(raw),
         "scenes": [],
     }
     scenes = raw.get("scenes")
@@ -188,6 +192,8 @@ def load_storyboard(path: Path) -> tuple[dict, Path]:
         scene = deep_merge(SCENE_DEFAULTS, s)
         scene["id"] = str(scene["id"] or f"scene_{i:02d}")
         scene["_file_index"] = i
+        if scene["generate"] and not scene["clip"]:
+            scene["clip"] = default_generated_clip(raw, scene["id"])
         scene["fx"] = deep_merge(sb["fx_defaults"], s.get("fx"))
         nar = s.get("narration")
         if isinstance(nar, str):
@@ -224,7 +230,10 @@ def validate_storyboard(sb: dict, base_dir: Path, allow_missing: bool) -> list[s
                 errors.append(f"[{sid}] has no 'clip' (use --allow-missing for a placeholder card).")
         elif not src.exists():
             if not allow_missing:
-                errors.append(f"[{sid}] clip not found: {src}")
+                hint = " (it has a 'generate' block: add --generate-images)" if sc["generate"] else ""
+                errors.append(f"[{sid}] clip not found: {src}{hint}")
+        if sc["generate"]:
+            errors += validate_generate(sid, sc["generate"], sb["characters"])
         elif classify_media(src) == "unknown":
             errors.append(f"[{sid}] unsupported clip type: {src.suffix}")
         if sc["extend"] not in VALID_EXTEND:
@@ -661,6 +670,11 @@ def render(args: argparse.Namespace) -> Path:
     require_binary("ffmpeg")
     require_binary("ffprobe")
     storyboard_path = args.storyboard.resolve()
+    if args.generate_images and not args.dry_run:
+        from image_generator import generate_images
+
+        ids = [s.strip() for s in args.scenes.split(",")] if args.scenes else None
+        generate_images(storyboard_path, ids, args.force_images, args.comfy_url, args.comfy_dir)
     sb, base_dir = load_storyboard(storyboard_path)
     proj = sb["project"]
 
@@ -784,6 +798,11 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--crf", type=int, help="Override final x264 CRF (lower = higher quality).")
     p.add_argument("--threads", type=int, help="ffmpeg encoder threads.")
     p.add_argument("--keep-temp", action="store_true", help="Keep the lossless master in temp/.")
+    p.add_argument("--generate-images", action="store_true",
+                   help="First generate/refresh images for scenes with a 'generate' block via local ComfyUI.")
+    p.add_argument("--force-images", action="store_true", help="With --generate-images: regenerate all.")
+    p.add_argument("--comfy-url", help="ComfyUI URL (default $COMFYUI_URL or http://127.0.0.1:8189).")
+    p.add_argument("--comfy-dir", help="ComfyUI folder to auto-start if not running (default $COMFYUI_DIR).")
     p.add_argument("-v", "--verbose", action="store_true")
     return p
 

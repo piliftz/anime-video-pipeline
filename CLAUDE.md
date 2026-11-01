@@ -17,6 +17,11 @@ scripts/
   subtitle_generator.py   cue building, SRT/ASS writers, final ffmpeg encode (burn-in)
   video_orchestrator.py   main entry: storyboard -> timeline -> scenes -> master -> final MP4
   make_demo_assets.py     procedural placeholder assets so the template renders out of the box
+  comfy_client.py         stdlib HTTP client for ComfyUI (/prompt, /history, /view, /object_info) + auto-start
+  image_generator.py      storyboard `generate` blocks -> SDXL (+hires) graphs -> assets/generated/*.png + sidecars
+  setup_models.py         resumable Hugging Face model download into $COMFYUI_DIR + safetensors integrity check
+make_video.cmd            Windows one-command entry: orchestrator --generate-images
+my_story.json             full example storyboard using only generated images
 storyboard_template.json  reference storyboard; every supported key appears here
 assets/ {clips,images,audio/bgm,fonts}   inputs (fonts/ is passed to libass as fontsdir)
 temp/                     voiceover cache, timeline JSON, ASS, lossless master (gitignored)
@@ -42,7 +47,14 @@ python scripts/video_orchestrator.py storyboard_template.json --scenes scene_02 
 python scripts/voiceover_generator.py --list-voices --locale ja-JP
 python scripts/cinematic_fx.py assets/images/scene_01.png --frame 2 -o temp/still.png --duration 5 --grade anime_vivid
 python scripts/subtitle_generator.py from-timeline temp/sakura_horizon_timeline.json
+python scripts/video_orchestrator.py my_story.json --generate-images --draft     # needs ComfyUI ($COMFYUI_DIR)
+python scripts/image_generator.py my_story.json --scenes s02_hikari --force
+python scripts/setup_models.py --verify
 ```
+ComfyUI is optional: everything except `--generate-images` works without it. There is no real
+ComfyUI in the cloud sandbox; test the client against a mock that implements the same HTTP routes
+and validates graphs against real node input names (check ComfyUI's `nodes.py` on GitHub when
+changing graphs).
 Verification after any code change (there is no test suite yet):
 ```bash
 python -m py_compile scripts/*.py && python -m pyflakes scripts/
@@ -69,6 +81,9 @@ a visual change works without inspecting frames.
 - Storyboard paths resolve **relative to the storyboard file's directory**.
 - New storyboard keys need: a default in the relevant `*_DEFAULTS` dict, validation in
   `validate_storyboard`, an example in `storyboard_template.json`, and a README entry.
+- ComfyUI graphs use only core nodes (CheckpointLoaderSimple, CLIPTextEncode, EmptyLatentImage, KSampler,
+  VAEDecode/Encode, ImageScaleBy, SaveImage). Validate checkpoint/sampler/scheduler names via `/object_info`
+  before queueing. Never overwrite an image that has no `.png.json` sidecar (user-supplied) without --force.
 - Every module is runnable as a script (`python scripts/x.py`) and imports siblings by bare
   name (`from pipeline_utils import ...`). Don't convert to package-relative imports without
   updating every entry point.

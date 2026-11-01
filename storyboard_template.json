@@ -2,7 +2,10 @@
   "project": {
     "title": "Sakura Horizon - Demo Short",
     "output": "output/sakura_horizon.mp4",
-    "resolution": [1920, 1080],
+    "resolution": [
+      1920,
+      1080
+    ],
     "fps": 24,
     "fit": "cover",
     "background_color": "#000000",
@@ -11,26 +14,63 @@
     "tune": "animation",
     "audio_bitrate": "192k"
   },
-
   "voice_defaults": {
     "voice": "en-US-AnaNeural",
     "rate": "+0%",
     "pitch": "+0Hz",
     "volume": "+0%"
   },
-
-  "speakers": {
-    "Narrator": { "voice": "en-US-GuyNeural", "rate": "-5%", "subtitle_color": "#2B1B5A" },
-    "Hikari":   { "voice": "en-US-AnaNeural", "pitch": "+15Hz", "subtitle_color": "#D6336C" },
-    "Ren":      { "voice": "en-US-ChristopherNeural", "subtitle_color": "#1C5D99" }
+  "image_generation": {
+    "checkpoint": "animagine",
+    "output_dir": "assets/generated",
+    "width": 1344,
+    "height": 768,
+    "steps": 28,
+    "cfg": 5.0,
+    "sampler": "euler_ancestral",
+    "scheduler": "normal",
+    "seed": 1000,
+    "rating": "safe",
+    "quality_tags": "masterpiece, high score, great score, absurdres",
+    "negative": "lowres, bad anatomy, bad hands, text, error, missing finger, extra digits, fewer digits, cropped, worst quality, low quality, low score, bad score, average score, signature, watermark, username, blurry",
+    "hires": {
+      "enabled": true,
+      "scale": 1.5,
+      "denoise": 0.4,
+      "steps": 20,
+      "upscale_method": "lanczos"
+    }
   },
-
+  "characters": {
+    "Hikari": {
+      "tags": "long black hair, brown eyes, red scarf, school uniform"
+    },
+    "Ren": {
+      "tags": "short silver hair, blue eyes, black jacket"
+    }
+  },
+  "speakers": {
+    "Narrator": {
+      "voice": "en-US-GuyNeural",
+      "rate": "-5%",
+      "subtitle_color": "#2B1B5A"
+    },
+    "Hikari": {
+      "voice": "en-US-AnaNeural",
+      "pitch": "+15Hz",
+      "subtitle_color": "#D6336C"
+    },
+    "Ren": {
+      "voice": "en-US-ChristopherNeural",
+      "subtitle_color": "#1C5D99"
+    }
+  },
   "audio": {
     "narration_volume": 1.0,
     "clip_audio_volume": 0.6,
     "bgm": {
       "path": "assets/audio/bgm/theme.wav",
-      "volume": 0.30,
+      "volume": 0.3,
       "loop": true,
       "duck_to": 0.35,
       "duck_fade": 0.4,
@@ -38,11 +78,12 @@
       "fade_out": 2.5
     }
   },
-
   "transitions": {
-    "default": { "type": "crossfade", "duration": 0.6 }
+    "default": {
+      "type": "crossfade",
+      "duration": 0.6
+    }
   },
-
   "subtitles": {
     "enabled": true,
     "burn_in": true,
@@ -60,15 +101,21 @@
       "margin_v": 64
     }
   },
-
   "fx_defaults": {
-    "color_grade": { "enabled": true, "preset": "anime_vivid", "intensity": 0.85 },
-    "ken_burns": { "enabled": false },
-    "speed_lines": { "enabled": false },
+    "color_grade": {
+      "enabled": true,
+      "preset": "anime_vivid",
+      "intensity": 0.85
+    },
+    "ken_burns": {
+      "enabled": false
+    },
+    "speed_lines": {
+      "enabled": false
+    },
     "fade_in": 0.0,
     "fade_out": 0.0
   },
-
   "scenes": [
     {
       "id": "scene_01",
@@ -82,7 +129,11 @@
         "tail": 0.8
       },
       "fx": {
-        "ken_burns": { "enabled": true, "preset": "push_in", "easing": "ease_in_out" },
+        "ken_burns": {
+          "enabled": true,
+          "preset": "push_in",
+          "easing": "ease_in_out"
+        },
         "fade_in": 1.0
       },
       "text_overlays": [
@@ -99,7 +150,16 @@
           "fade_in": 0.6,
           "fade_out": 0.6
         }
-      ]
+      ],
+      "generate": {
+        "prompt": "no humans, scenery, hills, sunrise, cherry blossoms, petals, wind, wide shot",
+        "characters": [],
+        "negative": "",
+        "seed": null,
+        "width": null,
+        "height": null,
+        "rating": null
+      }
     },
     {
       "id": "scene_02",
@@ -117,7 +177,11 @@
         "tail": 0.5
       },
       "fx": {
-        "color_grade": { "enabled": true, "preset": "anime_vivid", "intensity": 1.0 },
+        "color_grade": {
+          "enabled": true,
+          "preset": "anime_vivid",
+          "intensity": 1.0
+        },
         "speed_lines": {
           "enabled": true,
           "style": "horizontal",
@@ -126,7 +190,10 @@
           "opacity": 0.45
         }
       },
-      "transition_in": { "type": "crossfade", "duration": 0.5 }
+      "transition_in": {
+        "type": "crossfade",
+        "duration": 0.5
+      }
     },
     {
       "id": "scene_03",
@@ -141,8 +208,15 @@
         "tail": 0.6
       },
       "fx": {
-        "color_grade": { "enabled": true, "preset": "anime_pastel", "intensity": 0.9 },
-        "ken_burns": { "enabled": true, "preset": "drift" },
+        "color_grade": {
+          "enabled": true,
+          "preset": "anime_pastel",
+          "intensity": 0.9
+        },
+        "ken_burns": {
+          "enabled": true,
+          "preset": "drift"
+        },
         "speed_lines": {
           "enabled": true,
           "style": "radial",
@@ -152,7 +226,9 @@
           "start": 1.2
         }
       },
-      "transition_in": { "type": "cut" }
+      "transition_in": {
+        "type": "cut"
+      }
     },
     {
       "id": "scene_04",
@@ -166,11 +242,21 @@
         "tail": 1.5
       },
       "fx": {
-        "color_grade": { "enabled": true, "preset": "night_blue", "intensity": 0.8 },
-        "ken_burns": { "enabled": true, "preset": "pull_out" },
+        "color_grade": {
+          "enabled": true,
+          "preset": "night_blue",
+          "intensity": 0.8
+        },
+        "ken_burns": {
+          "enabled": true,
+          "preset": "pull_out"
+        },
         "fade_out": 1.5
       },
-      "transition_in": { "type": "fade_black", "duration": 1.0 },
+      "transition_in": {
+        "type": "fade_black",
+        "duration": 1.0
+      },
       "text_overlays": [
         {
           "text": "To be continued...",
