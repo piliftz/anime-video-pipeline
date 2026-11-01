@@ -19,7 +19,9 @@ Examples:
 from __future__ import annotations
 
 import argparse
+import os
 import re
+import subprocess
 import sys
 import textwrap
 from dataclasses import dataclass
@@ -304,14 +306,24 @@ def final_encode(
     import ffmpeg  # ffmpeg-python handles filter-argument escaping for us
 
     require_binary("ffmpeg")
+    src, output = Path(src).resolve(), Path(output).resolve()
     ensure_dir(output.parent)
     inp = ffmpeg.input(str(src))
     video = inp.video
+    # Paths inside a filtergraph need ffmpeg's two-level escaping, which breaks on Windows
+    # drive letters (C:\...). So ffmpeg runs *inside* the subtitle's folder and the filter
+    # only ever sees a bare filename plus a relative, forward-slash fonts path.
+    workdir = None
     if ass_path is not None:
+        ass_path = Path(ass_path).resolve()
+        workdir = ass_path.parent
         kwargs = {}
         if fonts_dir and Path(fonts_dir).is_dir() and any(Path(fonts_dir).iterdir()):
-            kwargs["fontsdir"] = str(fonts_dir)
-        video = video.filter("ass", str(ass_path), **kwargs)
+            try:
+                kwargs["fontsdir"] = Path(os.path.relpath(Path(fonts_dir).resolve(), workdir)).as_posix()
+            except ValueError:  # Windows: fonts dir on a different drive than temp/
+                log.warning("assets/fonts is on another drive than %s; using system fonts only.", workdir)
+        video = video.filter("ass", ass_path.name, **kwargs)
     # RGB master -> BT.709 limited-range 4:2:0 (see pipeline_utils.BT709_VF for why).
     video = video.filter("scale", out_color_matrix="bt709", out_range="tv").filter("format", "yuv420p")
 
@@ -331,11 +343,12 @@ def final_encode(
         out_kwargs.update({"scodec": "mov_text"})
     out = ffmpeg.output(*streams, str(output), **out_kwargs).global_args("-hide_banner", "-loglevel", "warning", "-stats")
     log.info("Encoding %s (crf=%s, preset=%s%s)", output, crf, preset, ", burning subtitles" if ass_path else "")
-    log.debug("ffmpeg %s", " ".join(out.get_args()))
-    try:
-        out.run(overwrite_output=overwrite)
-    except ffmpeg.Error as exc:
-        raise PipelineError(f"ffmpeg final encode failed for {output}") from exc
+    cmd = out.compile(overwrite_output=overwrite)
+    log.debug("ffmpeg (cwd=%s): %s", workdir, " ".join(cmd))
+    proc = subprocess.run(cmd, cwd=workdir)
+    if proc.returncode != 0:
+        raise PipelineError(f"ffmpeg final encode failed for {output} (exit {proc.returncode}); see the ffmpeg "
+                            "messages above.")
     return output
 
 
