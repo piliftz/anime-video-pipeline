@@ -20,6 +20,8 @@ scripts/
   comfy_client.py         stdlib HTTP client for ComfyUI (/prompt, /history, /view, /object_info) + auto-start
   image_generator.py      storyboard `generate` blocks -> SDXL (+hires) graphs -> assets/generated/*.png + sidecars
   setup_models.py         resumable Hugging Face model download into $COMFYUI_DIR + safetensors integrity check
+  video_generator.py      keyframe -> Wan 2.2 TI2V-5B image-to-video (graph = official template + start_image);
+                          frames returned as lossless PNGs into a folder (usable as a scene clip) + MP4 preview
 make_video.cmd            Windows one-command entry: orchestrator --generate-images
 my_story.json             full example storyboard using only generated images
 storyboard_template.json  reference storyboard; every supported key appears here
@@ -50,6 +52,8 @@ python scripts/subtitle_generator.py from-timeline temp/sakura_horizon_timeline.
 python scripts/video_orchestrator.py my_story.json --generate-images --draft     # needs ComfyUI ($COMFYUI_DIR)
 python scripts/image_generator.py my_story.json --scenes s02_hikari --force
 python scripts/setup_models.py --verify
+python scripts/setup_models.py --model wan2.2-ti2v-5b
+python scripts/video_generator.py assets/generated/s02_hikari.png --prompt "..." [--length 121 --size 1280x704]
 ```
 ComfyUI is optional: everything except `--generate-images` works without it. There is no real
 ComfyUI in the cloud sandbox; test the client against a mock that implements the same HTTP routes
@@ -82,7 +86,9 @@ a visual change works without inspecting frames.
 - New storyboard keys need: a default in the relevant `*_DEFAULTS` dict, validation in
   `validate_storyboard`, an example in `storyboard_template.json`, and a README entry.
 - ComfyUI graphs use only core nodes (CheckpointLoaderSimple, CLIPTextEncode, EmptyLatentImage, KSampler,
-  VAEDecode/Encode, ImageScaleBy, SaveImage). Validate checkpoint/sampler/scheduler names via `/object_info`
+  VAEDecode/Encode, ImageScaleBy, SaveImage; for Wan also UNETLoader, ModelSamplingSD3, CLIPLoader, VAELoader,
+  LoadImage via /upload/image, Wan22ImageToVideoLatent). Video frames come back via SaveImage, NOT SaveVideo
+  (its inputs change often). Validate checkpoint/sampler/scheduler names via `/object_info`
   before queueing. Never overwrite an image that has no `.png.json` sidecar (user-supplied) without --force.
 - Every module is runnable as a script (`python scripts/x.py`) and imports siblings by bare
   name (`from pipeline_utils import ...`). Don't convert to package-relative imports without

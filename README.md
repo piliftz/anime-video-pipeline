@@ -277,6 +277,18 @@ List the models ComfyUI sees: `python scripts/image_generator.py --list-checkpoi
 
 `my_story.json` is a complete 5-scene example that uses only generated images.
 
+### Image-to-video (experimental): Wan 2.2 TI2V-5B
+Animates a keyframe into a real moving clip (default 5 s, 1280×704, 24 fps).
+```powershell
+.venv\Scripts\python scripts\setup_models.py --model wan2.2-ti2v-5b          # ~17 GB, resumable
+.venv\Scripts\python scripts\video_generator.py assets\generated\s02_hikari.png --prompt "anime style, scarf and hair sway in the wind, rain falls, slow camera push-in"
+```
+Output: lossless frames in `assets/generated/clips/<name>/` (usable directly as a scene `clip`),
+plus `output/<name>_wan_preview.mp4`. Write the prompt as plain English describing the scene **and
+the motion/camera**. `--length` must be 4n+1 (49 ≈ 2 s, 121 = 5 s); `--size 960x544` is about 2×
+faster. Model weights load as fp8 by default to fit 8 GB of VRAM and 16 GB of RAM. Speed and quality
+on an 8 GB laptop GPU are still being measured.
+
 ## 5. Using Stable Diffusion and AnimateDiff output
 
 The pipeline doesn't care which tool generated your media. It only needs files on disk.

@@ -113,6 +113,29 @@ class ComfyClient:
             time.sleep(poll)
         raise PipelineError(f"Timed out after {timeout:.0f}s waiting for ComfyUI prompt {prompt_id}.")
 
+    def upload_image(self, path: Path, name: str | None = None) -> str:
+        """Upload a local image to ComfyUI's input folder; return the value LoadImage expects."""
+        path = Path(path)
+        name = name or path.name
+        boundary = uuid.uuid4().hex
+        parts = []
+        for key, value in (("type", "input"), ("overwrite", "true")):
+            parts.append(f'--{boundary}\r\nContent-Disposition: form-data; name="{key}"\r\n\r\n{value}\r\n'.encode())
+        parts.append((f'--{boundary}\r\nContent-Disposition: form-data; name="image"; filename="{name}"\r\n'
+                      "Content-Type: image/png\r\n\r\n").encode() + path.read_bytes() + b"\r\n")
+        body = b"".join(parts) + f"--{boundary}--\r\n".encode()
+        req = urllib.request.Request(self.url + "/upload/image", data=body, method="POST",
+                                     headers={"Content-Type": f"multipart/form-data; boundary={boundary}"})
+        try:
+            with urllib.request.urlopen(req, timeout=self.timeout) as resp:
+                info = json.loads(resp.read())
+        except urllib.error.HTTPError as exc:
+            raise PipelineError(f"Uploading {path.name} to ComfyUI failed: HTTP {exc.code}") from exc
+        except (urllib.error.URLError, ConnectionError, TimeoutError) as exc:
+            raise PipelineError(f"Cannot reach ComfyUI at {self.url} ({exc}).") from exc
+        sub = info.get("subfolder") or ""
+        return f"{sub}/{info['name']}" if sub else info["name"]
+
     def download(self, image_ref: dict) -> bytes:
         query = urllib.parse.urlencode({
             "filename": image_ref["filename"],

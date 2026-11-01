@@ -35,6 +35,18 @@ MODELS = {
         "license": "CreativeML Open RAIL++-M (commercial use allowed with its conditions)",
         "about": "SDXL anime checkpoint; default for this pipeline.",
     },
+    # Files and folders exactly as listed in ComfyUI's official template video_wan2_2_5B_ti2v.json.
+    "wan2.2-ti2v-5b": {
+        "files": [
+            ("Comfy-Org/Wan_2.2_ComfyUI_Repackaged", "split_files/diffusion_models/wan2.2_ti2v_5B_fp16.safetensors",
+             "diffusion_models"),
+            ("Comfy-Org/Wan_2.1_ComfyUI_repackaged", "split_files/text_encoders/umt5_xxl_fp8_e4m3fn_scaled.safetensors",
+             "text_encoders"),
+            ("Comfy-Org/Wan_2.2_ComfyUI_Repackaged", "split_files/vae/wan2.2_vae.safetensors", "vae"),
+        ],
+        "license": "Apache 2.0 (Wan 2.2)",
+        "about": "Wan 2.2 TI2V-5B image-to-video (~17 GB total: model 9.3 + text encoder 6.3 + VAE 1.3).",
+    },
 }
 DEFAULT_MODELS = ["animagine-xl-4.0"]
 CHUNK = 4 * 1024 * 1024
@@ -130,10 +142,28 @@ def download(url: str, dest: Path, expected: int, retries: int = 8) -> None:
     part.replace(dest)
 
 
-def install(name: str, comfy_dir: Path) -> Path:
+def file_size(repo: str, path: str, _cache: dict = {}) -> int:
+    if repo not in _cache:
+        info = _get_json(f"{HF}/api/models/{repo}?blobs=true")
+        _cache[repo] = {s["rfilename"]: int(s.get("size") or 0) for s in info.get("siblings", [])}
+    if path not in _cache[repo]:
+        raise PipelineError(f"{path} is no longer in {repo} on Hugging Face; the repo layout changed.")
+    return _cache[repo][path]
+
+
+def install(name: str, comfy_dir: Path) -> list[Path]:
     spec = MODELS[name]
-    folder = ensure_dir(comfy_dir / "models" / spec["folder"])
+    log.info("Model %s: %s  [license: %s]", name, spec["about"], spec["license"])
+    if "files" in spec:
+        return [fetch(comfy_dir, repo, path, file_size(repo, path), folder, name)
+                for repo, path, folder in spec["files"]]
     filename, size = resolve_file(spec["repo"])
+    return [fetch(comfy_dir, spec["repo"], filename, size, spec["folder"], name)]
+
+
+def fetch(comfy_dir: Path, repo: str, repo_path: str, size: int, folder_name: str, name: str) -> Path:
+    folder = ensure_dir(comfy_dir / "models" / folder_name)
+    filename = repo_path.rsplit("/", 1)[-1]
     dest = folder / filename
     if dest.exists():
         ok, have, need = verify_safetensors(dest)
@@ -143,8 +173,7 @@ def install(name: str, comfy_dir: Path) -> Path:
         log.warning("%s is incomplete (%.2f of %.2f GB); re-downloading.", dest.name, have / 1e9, need / 1e9)
         dest.rename(dest.with_name(dest.name + ".part"))
     log.info("Downloading %s (%s, %.2f GB) -> %s", name, filename, size / 1e9, folder)
-    log.info("License: %s", spec["license"])
-    download(f"{HF}/{spec['repo']}/resolve/main/{filename}", dest, size)
+    download(f"{HF}/{repo}/resolve/main/{repo_path}", dest, size)
     ok, have, need = verify_safetensors(dest)
     if not ok:
         raise PipelineError(f"{dest} failed verification ({have} of {need} bytes). Delete it and re-run.")
@@ -178,7 +207,7 @@ def main(argv: list[str] | None = None) -> int:
     try:
         if args.list:
             for k, v in MODELS.items():
-                print(f"{k:<20} {v['repo']:<36} {v['about']}  [{v['license']}]")
+                print(f"{k:<18} {v['about']}  [{v['license']}]")
             return 0
         if not args.comfy_dir:
             raise PipelineError("Pass --comfy-dir or set COMFYUI_DIR to your ComfyUI folder.")
