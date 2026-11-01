@@ -2,11 +2,13 @@
   "project": {
     "title": "Last Train to Hoshimachi",
     "output": "output/last_train.mp4",
-    "resolution": [1920, 1080],
+    "resolution": [
+      1920,
+      1080
+    ],
     "fps": 24,
     "fit": "cover"
   },
-
   "image_generation": {
     "checkpoint": "animagine",
     "output_dir": "assets/generated",
@@ -18,85 +20,194 @@
     "scheduler": "normal",
     "seed": 2024,
     "rating": "safe",
-    "hires": { "enabled": true, "scale": 1.5, "denoise": 0.4, "steps": 20 }
+    "hires": {
+      "enabled": true,
+      "scale": 1.5,
+      "denoise": 0.4,
+      "steps": 20
+    }
   },
-
   "characters": {
-    "Hikari": { "tags": "long black hair, brown eyes, red scarf, serafuku, school uniform" },
-    "Ren":    { "tags": "short silver hair, blue eyes, black jacket, white shirt" }
+    "Hikari": {
+      "tags": "long black hair, brown eyes, red scarf, serafuku, school uniform"
+    },
+    "Ren": {
+      "tags": "short silver hair, blue eyes, black jacket, white shirt"
+    }
   },
-
   "speakers": {
-    "Narrator": { "voice": "en-US-GuyNeural", "rate": "-5%", "subtitle_color": "#2B1B5A" },
-    "Hikari":   { "voice": "en-US-AnaNeural", "pitch": "+15Hz", "subtitle_color": "#D6336C" },
-    "Ren":      { "voice": "en-US-ChristopherNeural", "subtitle_color": "#1C5D99" }
+    "Narrator": {
+      "voice": "en-US-GuyNeural",
+      "rate": "-5%",
+      "subtitle_color": "#2B1B5A"
+    },
+    "Hikari": {
+      "voice": "en-US-AnaNeural",
+      "pitch": "+15Hz",
+      "subtitle_color": "#D6336C"
+    },
+    "Ren": {
+      "voice": "en-US-ChristopherNeural",
+      "subtitle_color": "#1C5D99"
+    }
   },
-
   "audio": {
-    "bgm": { "path": "assets/audio/bgm/theme.wav", "volume": 0.25, "duck_to": 0.35 }
+    "bgm": {
+      "path": "assets/audio/bgm/theme.wav",
+      "volume": 0.25,
+      "duck_to": 0.35
+    }
   },
-
-  "transitions": { "default": { "type": "crossfade", "duration": 0.6 } },
-
+  "transitions": {
+    "default": {
+      "type": "crossfade",
+      "duration": 0.6
+    }
+  },
   "fx_defaults": {
-    "color_grade": { "enabled": true, "preset": "night_blue", "intensity": 0.6 }
+    "color_grade": {
+      "enabled": true,
+      "preset": "night_blue",
+      "intensity": 0.6
+    }
   },
-
   "scenes": [
     {
       "id": "s01_station",
       "generate": {
-        "prompt": "no humans, scenery, train station, night, rain, puddles, reflections, neon lights, city, wide shot"
+        "prompt": "no humans, scenery, train station, night, rain, puddles, reflections, neon lights, city, wide shot",
+        "negative": "sign, signboard, kanji, english text, letters"
       },
-      "narration": { "speaker": "Narrator", "text": "In Hoshimachi, the last train leaves at midnight. Nobody misses it twice." },
-      "fx": { "ken_burns": { "enabled": true, "preset": "push_in" }, "fade_in": 1.0 },
+      "narration": {
+        "speaker": "Narrator",
+        "text": "In Hoshimachi, the last train leaves at midnight. Nobody misses it twice."
+      },
+      "fx": {
+        "ken_burns": {
+          "enabled": true,
+          "preset": "push_in"
+        },
+        "fade_in": 1.0
+      },
       "text_overlays": [
-        { "text": "LAST TRAIN TO HOSHIMACHI", "start": 0.5, "end": 4.0, "font_size": 104,
-          "stroke_color": "#1C5D99", "animation": "slide_up" }
+        {
+          "text": "LAST TRAIN TO HOSHIMACHI",
+          "start": 0.5,
+          "end": 4.0,
+          "font_size": 104,
+          "stroke_color": "#1C5D99",
+          "animation": "slide_up"
+        }
       ]
     },
     {
       "id": "s02_hikari",
       "generate": {
-        "characters": ["Hikari"],
+        "characters": [
+          "Hikari"
+        ],
         "prompt": "1girl, solo, holding umbrella, transparent umbrella, train station platform, night, rain, looking up, upper body"
       },
-      "narration": { "speaker": "Hikari", "text": "Two minutes. If he doesn't come, I'm leaving without him." },
-      "fx": { "ken_burns": { "enabled": true, "preset": "drift" } }
+      "narration": {
+        "speaker": "Hikari",
+        "text": "Two minutes. If he doesn't come, I'm leaving without him."
+      },
+      "fx": {
+        "ken_burns": {
+          "enabled": true,
+          "preset": "drift"
+        }
+      }
     },
     {
       "id": "s03_ren_runs",
       "generate": {
-        "characters": ["Ren"],
+        "characters": [
+          "Ren"
+        ],
         "prompt": "1boy, solo, running, city street, night, rain, wet hair, determined, dynamic angle, motion lines"
       },
-      "narration": { "speaker": "Ren", "text": "Wait! Hold the doors!" },
-      "fx": {
-        "ken_burns": { "enabled": true, "preset": "pan_right" },
-        "speed_lines": { "enabled": true, "style": "horizontal", "opacity": 0.45 }
+      "narration": {
+        "speaker": "Ren",
+        "text": "Wait! Hold the doors!"
       },
-      "transition_in": { "type": "cut" }
+      "fx": {
+        "ken_burns": {
+          "enabled": true,
+          "preset": "pan_right"
+        },
+        "speed_lines": {
+          "enabled": true,
+          "style": "horizontal",
+          "opacity": 0.45
+        }
+      },
+      "transition_in": {
+        "type": "cut"
+      }
     },
     {
-      "id": "s04_together",
+      "id": "s04_hikari_smirk",
       "generate": {
-        "characters": ["Hikari", "Ren"],
-        "prompt": "1boy, 1girl, sharing umbrella, train station platform, night, rain, train headlights, cowboy shot, smile"
+        "characters": [
+          "Hikari"
+        ],
+        "prompt": "1girl, solo, smug, smile, closed mouth, holding umbrella, transparent umbrella, train station platform, night, rain, train headlights, portrait, looking at viewer"
       },
-      "narration": { "speaker": "Hikari", "text": "You're late. Again." },
-      "fx": { "ken_burns": { "enabled": true, "preset": "push_in" } }
+      "narration": {
+        "speaker": "Hikari",
+        "text": "You're late. Again."
+      },
+      "fx": {
+        "ken_burns": {
+          "enabled": true,
+          "preset": "push_in"
+        }
+      }
+    },
+    {
+      "id": "s04b_boarding",
+      "duration": 3.5,
+      "generate": {
+        "prompt": "1boy, 1girl, from behind, silhouette, sharing umbrella, walking, open train door, train interior light, train station platform, night, rain, wide shot",
+        "negative": "multiple boys, multiple girls, crowd"
+      },
+      "fx": {
+        "ken_burns": {
+          "enabled": true,
+          "preset": "drift"
+        }
+      }
     },
     {
       "id": "s05_departure",
       "generate": {
         "prompt": "no humans, scenery, train, moving train, night, city lights, bridge, rain, wide shot"
       },
-      "narration": { "speaker": "Narrator", "text": "And for once, the last train left with both of them on board." },
-      "fx": { "ken_burns": { "enabled": true, "preset": "pull_out" }, "fade_out": 1.5 },
-      "transition_in": { "type": "fade_black", "duration": 1.0 },
+      "narration": {
+        "speaker": "Narrator",
+        "text": "And for once, the last train left with both of them on board."
+      },
+      "fx": {
+        "ken_burns": {
+          "enabled": true,
+          "preset": "pull_out"
+        },
+        "fade_out": 1.5
+      },
+      "transition_in": {
+        "type": "fade_black",
+        "duration": 1.0
+      },
       "text_overlays": [
-        { "text": "To be continued...", "start": 3.0, "position": "top_right", "font_size": 64,
-          "color": "#FFE8A3", "animation": "fade" }
+        {
+          "text": "To be continued...",
+          "start": 3.0,
+          "position": "top_right",
+          "font_size": 64,
+          "color": "#FFE8A3",
+          "animation": "fade"
+        }
       ]
     }
   ]
