@@ -1,0 +1,190 @@
+{
+  "project": {
+    "title": "Sakura Horizon - Demo Short",
+    "output": "output/sakura_horizon.mp4",
+    "resolution": [1920, 1080],
+    "fps": 24,
+    "fit": "cover",
+    "background_color": "#000000",
+    "crf": 16,
+    "preset": "slow",
+    "tune": "animation",
+    "audio_bitrate": "192k"
+  },
+
+  "voice_defaults": {
+    "voice": "en-US-AnaNeural",
+    "rate": "+0%",
+    "pitch": "+0Hz",
+    "volume": "+0%"
+  },
+
+  "speakers": {
+    "Narrator": { "voice": "en-US-GuyNeural", "rate": "-5%", "subtitle_color": "#2B1B5A" },
+    "Hikari":   { "voice": "en-US-AnaNeural", "pitch": "+15Hz", "subtitle_color": "#D6336C" },
+    "Ren":      { "voice": "en-US-ChristopherNeural", "subtitle_color": "#1C5D99" }
+  },
+
+  "audio": {
+    "narration_volume": 1.0,
+    "clip_audio_volume": 0.6,
+    "bgm": {
+      "path": "assets/audio/bgm/theme.wav",
+      "volume": 0.30,
+      "loop": true,
+      "duck_to": 0.35,
+      "duck_fade": 0.4,
+      "fade_in": 1.5,
+      "fade_out": 2.5
+    }
+  },
+
+  "transitions": {
+    "default": { "type": "crossfade", "duration": 0.6 }
+  },
+
+  "subtitles": {
+    "enabled": true,
+    "burn_in": true,
+    "export_srt": true,
+    "soft_subtitles": false,
+    "show_speaker": true,
+    "max_chars_per_line": 42,
+    "max_lines": 2,
+    "style": {
+      "font": "DejaVu Sans",
+      "font_size": 54,
+      "outline_color": "#2B1B5A",
+      "outline": 4.5,
+      "shadow": 2.0,
+      "margin_v": 64
+    }
+  },
+
+  "fx_defaults": {
+    "color_grade": { "enabled": true, "preset": "anime_vivid", "intensity": 0.85 },
+    "ken_burns": { "enabled": false },
+    "speed_lines": { "enabled": false },
+    "fade_in": 0.0,
+    "fade_out": 0.0
+  },
+
+  "scenes": [
+    {
+      "id": "scene_01",
+      "order": 1,
+      "clip": "assets/images/scene_01.png",
+      "min_duration": 4.0,
+      "narration": {
+        "speaker": "Narrator",
+        "text": "Every spring, the wind carries a promise across the hills of Hoshimachi.",
+        "offset": 0.6,
+        "tail": 0.8
+      },
+      "fx": {
+        "ken_burns": { "enabled": true, "preset": "push_in", "easing": "ease_in_out" },
+        "fade_in": 1.0
+      },
+      "text_overlays": [
+        {
+          "text": "SAKURA HORIZON",
+          "start": 0.4,
+          "end": 3.6,
+          "position": "center",
+          "font_size": 128,
+          "color": "#FFFFFF",
+          "stroke_color": "#D6336C",
+          "stroke_width": 8,
+          "animation": "slide_up",
+          "fade_in": 0.6,
+          "fade_out": 0.6
+        }
+      ]
+    },
+    {
+      "id": "scene_02",
+      "order": 2,
+      "clip": "assets/clips/scene_02.mp4",
+      "clip_start": 0.0,
+      "clip_end": null,
+      "playback_speed": 1.0,
+      "extend": "loop",
+      "keep_clip_audio": false,
+      "narration": {
+        "speaker": "Hikari",
+        "text": "Wait for me! The festival starts in five minutes!",
+        "offset": 0.2,
+        "tail": 0.5
+      },
+      "fx": {
+        "color_grade": { "enabled": true, "preset": "anime_vivid", "intensity": 1.0 },
+        "speed_lines": {
+          "enabled": true,
+          "style": "horizontal",
+          "count": 70,
+          "color": "#FFFFFF",
+          "opacity": 0.45
+        }
+      },
+      "transition_in": { "type": "crossfade", "duration": 0.5 }
+    },
+    {
+      "id": "scene_03",
+      "order": 3,
+      "clip": "assets/clips/scene_03",
+      "sequence_fps": 8,
+      "extend": "boomerang",
+      "narration": {
+        "speaker": "Ren",
+        "text": "Then stop staring at the petals and run!",
+        "offset": 0.3,
+        "tail": 0.6
+      },
+      "fx": {
+        "color_grade": { "enabled": true, "preset": "anime_pastel", "intensity": 0.9 },
+        "ken_burns": { "enabled": true, "preset": "drift" },
+        "speed_lines": {
+          "enabled": true,
+          "style": "radial",
+          "count": 110,
+          "inner_radius": 0.42,
+          "opacity": 0.5,
+          "start": 1.2
+        }
+      },
+      "transition_in": { "type": "cut" }
+    },
+    {
+      "id": "scene_04",
+      "order": 4,
+      "clip": "assets/images/scene_04.png",
+      "min_duration": 5.0,
+      "narration": {
+        "speaker": "Narrator",
+        "text": "And under the festival lanterns, a new story began.",
+        "offset": 0.5,
+        "tail": 1.5
+      },
+      "fx": {
+        "color_grade": { "enabled": true, "preset": "night_blue", "intensity": 0.8 },
+        "ken_burns": { "enabled": true, "preset": "pull_out" },
+        "fade_out": 1.5
+      },
+      "transition_in": { "type": "fade_black", "duration": 1.0 },
+      "text_overlays": [
+        {
+          "text": "To be continued...",
+          "start": 2.5,
+          "position": "top_right",
+          "font_size": 64,
+          "color": "#FFE8A3",
+          "stroke_color": "#1A1033",
+          "stroke_width": 5,
+          "box_color": "#000000",
+          "box_opacity": 0.35,
+          "animation": "fade"
+        }
+      ]
+    }
+  ]
+}

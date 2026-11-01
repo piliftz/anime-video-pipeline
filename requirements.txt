@@ -1,0 +1,6 @@
+# Python >= 3.10. FFmpeg (with libass for subtitle burn-in) must be installed separately.
+moviepy>=2.1,<3        # 2.x API (with_*, subclipped, transform); 1.x is NOT compatible
+edge-tts>=7.0,<8       # SentenceBoundary events + proxy argument
+ffmpeg-python>=0.2.0
+pillow>=10.1           # ImageFont.load_default(size), Image.resize(box=...)
+numpy>=1.26

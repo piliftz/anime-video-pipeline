@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+
+# Working + render folders (keep the folders themselves)
+temp/*
+!temp/.gitkeep
+output/*
+!output/.gitkeep
+
+# Rendered / heavy media
+*.mp4
+*.mkv
+*.mov
+*.wav
+*.mp3
+*.srt
+*.ass
+
+# Generated demo frames (regenerate with scripts/make_demo_assets.py)
+assets/clips/scene_03/
+assets/images/scene_0*.png
+
+# Model weights never belong in git
+*.safetensors
+*.ckpt
+*.pt
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
