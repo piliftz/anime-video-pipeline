@@ -22,6 +22,8 @@ scripts/
   setup_models.py         resumable Hugging Face model download into $COMFYUI_DIR + safetensors integrity check
   video_generator.py      keyframe -> Wan 2.2 TI2V-5B image-to-video (graph = official template + start_image);
                           frames returned as lossless PNGs into a folder (usable as a scene clip) + MP4 preview
+  contact_sheet.py        labeled grid of generated takes (rows per take group, '#n · seed') for picking
+series/arc_forge/         the show: bible.md (design lock), ep01_pilot.script.json (EN/JA), character_refs.json
 make_video.cmd            Windows one-command entry: orchestrator --generate-images
 my_story.json             full example storyboard using only generated images
 promo/                    Remotion + Three.js + GSAP promo toolkit (TitleCard, Teaser, CountdownReel); see

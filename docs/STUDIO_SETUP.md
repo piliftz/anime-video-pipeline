@@ -63,8 +63,14 @@ tested. They aren't listed yet because neither has been run on your machine.
 
 ## Production order for the pilot
 1. **Phase 0 Wan test**: decides how much real motion the show can have.
-2. **Character keyframes**: Kaito, Rei and Gōda reference images from `bible.md` tags; pick the best
-   seeds and lock them.
+2. **Character keyframes**: 18 reference candidates (4 portraits + 2 full-body per character):
+   ```powershell
+   .venv\Scripts\python scripts\image_generator.py series\arc_forge\character_refs.json
+   .venv\Scripts\python scripts\contact_sheet.py assets\generated\arc_forge\refs -o output\refs_sheet.png
+   start output\refs_sheet.png
+   ```
+   Pick the best take per character (e.g. "Kaito portrait #3"); its seed and image get locked into
+   `bible.md` and reused for every shot of that character.
 3. **Cold open** (`ep01_pilot.script.json`, cuts c001–c009): produce it end to end as the
    quality bar for the episode.
 4. **Voices**: audition the casting in `bible.md` and wire up Kokoro (EN) and VOICEVOX (JA).

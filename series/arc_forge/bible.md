@@ -41,7 +41,7 @@ in silhouette, or far away (this avoids traits swapping, as seen in the test run
 - **Palette:** hair `#F2F5FA` · eyes `#19E6FF` · uniform `#E8ECF2` · trim `#19E6FF`
 
 ### Instructor Tetsu Gōda (剛田テツ) — exam proctor, interrogator
-- **Tags:** `1boy, mature male, muscular, short gray hair, scar on face, gray trench coat, stern`
+- **Tags:** `mature male, muscular, short gray hair, scar on face, gray trench coat, stern`
 - **Palette:** coat `#4A505E` · hair `#9AA1AC`
 
 ### Introduced in Ep 2 (remedial squad)
