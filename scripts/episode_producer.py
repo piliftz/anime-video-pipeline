@@ -90,7 +90,7 @@ def wan_length(duration: float, fps: int) -> int:
 # Stage 1: keyframes
 # --------------------------------------------------------------------------- #
 def stage_keyframes(ep: Episode, cut_ids: list[str] | None, force: bool, comfy_url, comfy_dir) -> None:
-    from contact_sheet import build_sheet, collect
+    from contact_sheet import build_sheet, collect, save_sheet
     from image_generator import generate_images
 
     for cut in ep.cuts:
@@ -115,8 +115,7 @@ def stage_keyframes(ep: Episode, cut_ids: list[str] | None, force: bool, comfy_u
     sb_path = save_json(TEMP_DIR / f"{ep.name}_keyframes.json", storyboard)
     generate_images(sb_path, cut_ids, force, comfy_url, comfy_dir)
     sheet = build_sheet(collect(ep.keyframe_dir, None), tile_h=300, cols=3)
-    out = ensure_dir(OUTPUT_DIR) / f"{ep.name}_keyframes.png"
-    sheet.save(out)
+    out = save_sheet(sheet, OUTPUT_DIR / f"{ep.name}_keyframes.png")
     print(f"Review the keyframes: {out}")
 
 

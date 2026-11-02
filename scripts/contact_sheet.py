@@ -15,6 +15,7 @@ import argparse
 import json
 import re
 import sys
+import time
 from pathlib import Path
 
 from PIL import Image, ImageDraw
@@ -88,6 +89,22 @@ def build_sheet(files: list[Path], tile_h: int = 420, cols: int | None = None) -
     return sheet
 
 
+def save_sheet(sheet: Image.Image, path: Path) -> Path:
+    """Save, tolerating a locked target. On Windows an image viewer (e.g. Photos) that has the
+    previous sheet open locks the file and the save fails with 'Invalid argument'/'Permission
+    denied'. Then save under a timestamped name instead of crashing."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        sheet.save(path)
+        return path
+    except OSError as exc:
+        alt = path.with_name(f"{path.stem}_{time.strftime('%H%M%S')}{path.suffix}")
+        sheet.save(alt)
+        log.warning("Could not overwrite %s (%s); it is probably open in an image viewer. Saved %s instead.",
+                    path.name, exc.strerror or exc, alt.name)
+        return alt
+
+
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(description="Make a labeled contact sheet from a folder of images.")
     p.add_argument("folder", type=Path)
@@ -100,9 +117,8 @@ def main(argv: list[str] | None = None) -> int:
     setup_logging(args.verbose)
     try:
         sheet = build_sheet(collect(args.folder, args.filter), args.tile_height, args.cols)
-        args.output.parent.mkdir(parents=True, exist_ok=True)
-        sheet.save(args.output)
-        print(f"{args.output}  ({sheet.width}x{sheet.height})")
+        out = save_sheet(sheet, args.output)
+        print(f"{out}  ({sheet.width}x{sheet.height})")
         return 0
     except PipelineError as exc:
         log.error("%s", exc)
