@@ -22,9 +22,12 @@ scripts/
   setup_models.py         resumable Hugging Face model download into $COMFYUI_DIR + safetensors integrity check
   video_generator.py      keyframe -> Wan 2.2 TI2V-5B image-to-video (graph = official template + start_image);
                           frames returned as lossless PNGs into a folder (usable as a scene clip) + MP4 preview
+  episode_producer.py     episode script -> keyframes -> Wan motion (ONE ComfyUI session, resumable via job hash)
+                          -> assembled storyboard -> orchestrator render. Stages: keyframes|motion|assemble|status
   lock_refs.py            copy picked reference takes -> series/<show>/refs/*.jpg + record seed/prompt
   contact_sheet.py        labeled grid of generated takes (rows per take group, '#n · seed') for picking
-series/arc_forge/         the show: bible.md (design lock), ep01_pilot.script.json (EN/JA), character_refs.json
+series/arc_forge/         the show: bible.md, characters.json (canonical tags), ep01_pilot.script.json (EN/JA,
+                          'production' block + per-cut motion wan|still|clip), character_refs.json, locked_refs.json
 make_video.cmd            Windows one-command entry: orchestrator --generate-images
 my_story.json             full example storyboard using only generated images
 promo/                    Remotion + Three.js + GSAP promo toolkit (TitleCard, Teaser, CountdownReel); see
@@ -60,6 +63,8 @@ python scripts/subtitle_generator.py from-timeline temp/sakura_horizon_timeline.
 python scripts/video_orchestrator.py my_story.json --generate-images --draft     # needs ComfyUI ($COMFYUI_DIR)
 python scripts/image_generator.py my_story.json --scenes s02_hikari --force
 python scripts/setup_models.py --verify
+python scripts/episode_producer.py series/arc_forge/ep01_pilot.script.json keyframes|motion|status
+python scripts/episode_producer.py series/arc_forge/ep01_pilot.script.json assemble --draft --tts-fallback silence
 python scripts/setup_models.py --model wan2.2-ti2v-5b
 python scripts/video_generator.py assets/generated/s02_hikari.png --prompt "..." [--length 121 --size 1280x704]
 ```

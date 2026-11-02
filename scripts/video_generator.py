@@ -103,48 +103,67 @@ def write_preview(frames_dir: Path, out: Path, fps: int) -> Path:
     return out
 
 
-def animate(image: Path, prompt: str, out_dir: Path, cfg: dict, seed: int = 42, negative: str = WAN_NEGATIVE,
-            comfy_url: str | None = None, comfy_dir: str | None = None, keep_comfy: bool = False) -> dict:
-    from comfy_client import DEFAULT_URL, ComfyServer
+def validate_video_cfg(cfg: dict) -> None:
+    if (int(cfg["length"]) - 1) % 4:
+        raise PipelineError(f"length must be 4n+1 (e.g. 49, 81, 121); got {cfg['length']}.")
+    if int(cfg["width"]) % 32 or int(cfg["height"]) % 32:
+        raise PipelineError("Width and height must be multiples of 32 (e.g. 1280x704, 960x544).")
 
+
+def preflight(client, cfg: dict) -> None:
+    """Check models, weight dtype, sampler and scheduler once per ComfyUI session."""
+    check_models(client)
+    if cfg["weight_dtype"] not in client.combo_options("UNETLoader", "weight_dtype"):
+        raise PipelineError(f"weight_dtype '{cfg['weight_dtype']}' not supported by this ComfyUI.")
+    for field, key in (("sampler_name", "sampler"), ("scheduler", "scheduler")):
+        options = client.combo_options("KSampler", field)
+        if cfg[key] not in options:
+            raise PipelineError(f"{field} '{cfg[key]}' unknown to this ComfyUI. Options: {', '.join(options)}")
+
+
+def animate_with_client(client, image: Path, prompt: str, out_dir: Path, cfg: dict, seed: int = 42,
+                        negative: str = WAN_NEGATIVE) -> dict:
+    """Animate one keyframe using an already-running ComfyUI. Reusing one session across many
+    cuts keeps the ~17 GB of Wan models loaded instead of reloading them for every clip."""
     image = Path(image).resolve()
     if not image.is_file():
         raise PipelineError(f"Keyframe not found: {image}")
-    if (int(cfg["length"]) - 1) % 4:
-        raise PipelineError(f"--length must be 4n+1 (e.g. 49, 81, 121); got {cfg['length']}.")
-    if int(cfg["width"]) % 32 or int(cfg["height"]) % 32:
-        raise PipelineError("Width and height must be multiples of 32 (e.g. 1280x704, 960x544).")
-    with ComfyServer(comfy_url or DEFAULT_URL, comfy_dir, keep_running=keep_comfy) as client:
-        check_models(client)
-        if cfg["weight_dtype"] not in client.combo_options("UNETLoader", "weight_dtype"):
-            raise PipelineError(f"weight_dtype '{cfg['weight_dtype']}' not supported by this ComfyUI.")
-        for field, key in (("sampler_name", "sampler"), ("scheduler", "scheduler")):
-            options = client.combo_options("KSampler", field)
-            if cfg[key] not in options:
-                raise PipelineError(f"{field} '{cfg[key]}' unknown to this ComfyUI. Options: {', '.join(options)}")
-        digest = hashlib.sha1(image.read_bytes()).hexdigest()[:10]
-        uploaded = client.upload_image(image, f"anime_pipeline_{image.stem}_{digest}.png")
-        graph = build_wan_graph(uploaded, prompt, negative, seed, cfg, f"anime_pipeline/clips/{image.stem}")
-        log.info("Animating %s: %dx%d, %d frames (%.1f s), %d steps, weights %s",
-                 image.name, cfg["width"], cfg["height"], cfg["length"], (cfg["length"] - 1) / cfg["fps"],
-                 cfg["steps"], cfg["weight_dtype"])
-        log.info("This can take many minutes on an 8 GB laptop GPU; ComfyUI's own progress is in "
-                 "temp/comfyui_server.log (or its console if you started it yourself).")
-        t0 = time.time()
-        outputs = client.wait(client.submit(graph), timeout=6 * 3600)
-        gen_seconds = time.time() - t0
-        frames = (outputs.get("save") or {}).get("images") or []
-        if not frames:
-            raise PipelineError("ComfyUI finished but returned no frames.")
-        ensure_dir(out_dir)
-        for old in out_dir.glob("frame_*.png"):
-            old.unlink()
-        for i, ref in enumerate(frames, start=1):
-            (out_dir / f"frame_{i:05d}.png").write_bytes(client.download(ref))
+    validate_video_cfg(cfg)
+    digest = hashlib.sha1(image.read_bytes()).hexdigest()[:10]
+    uploaded = client.upload_image(image, f"anime_pipeline_{image.stem}_{digest}.png")
+    graph = build_wan_graph(uploaded, prompt, negative, seed, cfg, f"anime_pipeline/clips/{out_dir.name}")
+    log.info("Animating %s: %dx%d, %d frames (%.1f s), %d steps, weights %s",
+             image.name, cfg["width"], cfg["height"], cfg["length"], (cfg["length"] - 1) / cfg["fps"],
+             cfg["steps"], cfg["weight_dtype"])
+    t0 = time.time()
+    outputs = client.wait(client.submit(graph), timeout=6 * 3600)
+    gen_seconds = time.time() - t0
+    frames = (outputs.get("save") or {}).get("images") or []
+    if not frames:
+        raise PipelineError("ComfyUI finished but returned no frames.")
+    ensure_dir(out_dir)
+    for old in out_dir.glob("frame_*.png"):
+        old.unlink()
+    for i, ref in enumerate(frames, start=1):
+        (out_dir / f"frame_{i:05d}.png").write_bytes(client.download(ref))
     meta = {"keyframe": str(image), "prompt": prompt, "negative": negative, "seed": seed, **cfg,
             "frames": len(frames), "generation_seconds": round(gen_seconds, 1)}
     save_json(out_dir / "clip.json", meta)
+    log.info("Clip done in %.1f min -> %s", gen_seconds / 60, out_dir)
     return meta
+
+
+def animate(image: Path, prompt: str, out_dir: Path, cfg: dict, seed: int = 42, negative: str = WAN_NEGATIVE,
+            comfy_url: str | None = None, comfy_dir: str | None = None, keep_comfy: bool = False) -> dict:
+    """Single-clip convenience wrapper: starts/stops ComfyUI around one animate_with_client call."""
+    from comfy_client import DEFAULT_URL, ComfyServer
+
+    validate_video_cfg(cfg)
+    with ComfyServer(comfy_url or DEFAULT_URL, comfy_dir, keep_running=keep_comfy) as client:
+        preflight(client, cfg)
+        log.info("This can take many minutes on an 8 GB laptop GPU; ComfyUI's own progress is in "
+                 "temp/comfyui_server.log (or its console if you started it yourself).")
+        return animate_with_client(client, image, prompt, out_dir, cfg, seed, negative)
 
 
 def _size(value: str) -> tuple[int, int]:

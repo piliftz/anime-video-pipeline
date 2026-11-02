@@ -1,8 +1,14 @@
 {
   "format": "arcforge-episode-script/v1",
-  "series": { "en": "Arc-Forge: Ignition", "ja": "アーク・フォージ：イグニッション" },
+  "series": {
+    "en": "Arc-Forge: Ignition",
+    "ja": "アーク・フォージ：イグニッション"
+  },
   "episode": 1,
-  "title": { "en": "The Zero-Catalyst Drop", "ja": "ゼロ・カタリスト・ドロップ" },
+  "title": {
+    "en": "The Zero-Catalyst Drop",
+    "ja": "ゼロ・カタリスト・ドロップ"
+  },
   "status": "cold open written; acts A/B outlined",
   "target_runtime_sec": 1200,
   "notes": [
@@ -11,7 +17,8 @@
     "One named character per shot (traits swap when two named characters share a close shot).",
     "keyframe_prompt: Animagine tag style; the named characters' tags from bible.md are prepended automatically.",
     "motion_prompt: plain English for Wan 2.2: describe what moves and how the camera moves.",
-    "ja_review: a native speaker must check these lines before the Japanese dub is published."
+    "ja_review: a native speaker must check these lines before the Japanese dub is published.",
+    "motion: 'wan' = animated with Wan 2.2 (slow: minutes per clip); 'still' = keyframe + pipeline camera; 'clip' = pre-rendered frames (e.g. the Remotion title card, path relative to this file). 'fx' (any motion type) = pipeline effects such as ken_burns or speed_lines."
   ],
   "segments": [
     {
@@ -19,115 +26,186 @@
       "time": "0:00-1:20",
       "location": "Spark-Forge Academy detention block, interrogation room",
       "time_of_day": "night",
-      "music": { "cue": "silence -> low synth drone (Kaito leitmotif, solo piano note at c006)" },
+      "music": {
+        "cue": "silence -> low synth drone (Kaito leitmotif, solo piano note at c006)"
+      },
       "cuts": [
         {
-          "id": "c001", "duration": 3.0, "shot": "Establishing, static wide",
+          "id": "c001",
+          "duration": 3.0,
+          "shot": "Establishing, static wide",
           "action": "Empty interrogation room. A fluorescent tube flickers over a steel table and two chairs.",
           "characters": [],
           "keyframe_prompt": "no humans, scenery, interrogation room, steel table, two chairs, fluorescent light, dark, concrete wall, one-way mirror, cinematic lighting, wide shot",
           "motion_prompt": "the ceiling light flickers on and off, dust floats in the light beam, very slow camera push-in",
-          "sfx": ["fluorescent buzz", "distant water drip"],
-          "dialogue": []
+          "sfx": [
+            "fluorescent buzz",
+            "distant water drip"
+          ],
+          "dialogue": [],
+          "motion": "wan"
         },
         {
-          "id": "c002", "duration": 3.0, "shot": "Insert, top-down close-up",
+          "id": "c002",
+          "duration": 3.0,
+          "shot": "Insert, top-down close-up",
           "action": "Kaito's cuffed hands on the table. Faint ember-orange light dies out in hairline cracks of the cuffs.",
           "characters": [],
           "keyframe_prompt": "close-up, hands, handcuffs, bandaged hand, fingerless gloves, steel table, glowing cracks, orange glow, dark, from above",
           "motion_prompt": "the fingers twitch slightly, the orange glow in the cracks slowly fades out, no camera movement",
-          "sfx": ["metal chain clink"],
-          "dialogue": []
+          "sfx": [
+            "metal chain clink"
+          ],
+          "dialogue": [],
+          "motion": "wan"
         },
         {
-          "id": "c003", "duration": 5.0, "shot": "Over-the-shoulder from behind Gōda",
+          "id": "c003",
+          "duration": 5.0,
+          "shot": "Over-the-shoulder from behind Gōda",
           "action": "Gōda, seen from behind, drops a file on the table. Kaito is a blurred shape across the table.",
-          "characters": ["Goda"],
+          "characters": [
+            "Goda"
+          ],
           "keyframe_prompt": "1boy, from behind, back view, interrogation room, steel table, file folder, dim lighting, over the shoulder shot, depth of field",
           "motion_prompt": "the man drops a file folder onto the table, papers slide, the camera holds still",
-          "sfx": ["file slap on steel"],
+          "sfx": [
+            "file slap on steel"
+          ],
           "dialogue": [
             {
-              "speaker": "Goda", "emotion": "cold", "delivery": "measured",
+              "speaker": "Goda",
+              "emotion": "cold",
+              "delivery": "measured",
               "en": "Kaito Kurogane. Rank Zero. Catalyst output: zero. Every test since you were born.",
               "ja": "黒鉄カイト。ランク・ゼロ。触媒出力……ゼロ。生まれてから、一度もだ。",
               "ja_review": true
             }
-          ]
+          ],
+          "motion": "wan"
         },
         {
-          "id": "c004", "duration": 3.0, "shot": "Extreme close-up, eyes",
+          "id": "c004",
+          "duration": 3.0,
+          "shot": "Extreme close-up, eyes",
           "action": "Kaito's amber eyes, light flicker reflected in them. He slowly looks up.",
-          "characters": ["Kaito"],
+          "characters": [
+            "Kaito"
+          ],
           "keyframe_prompt": "1boy, solo, eyes focus, close-up, amber eyes, black hair, orange hair streak, dim light, reflection in eyes, serious",
           "motion_prompt": "the eyes slowly look up toward the camera, flickering light reflects in the pupils",
           "sfx": [],
-          "dialogue": []
+          "dialogue": [],
+          "motion": "wan"
         },
         {
-          "id": "c005", "duration": 5.0, "shot": "Insert, photo on table",
+          "id": "c005",
+          "duration": 5.0,
+          "shot": "Insert, photo on table",
           "action": "A photo slides into frame: a huge orange crystal fissure, dead and gray on one side.",
           "characters": [],
           "keyframe_prompt": "no humans, photograph on table, glowing orange crystal fissure, cracked ground, half of the crystal gray and dead, steel table, close-up",
           "motion_prompt": "a photograph slides across the table into the center of the frame and stops",
-          "sfx": ["paper slide"],
+          "sfx": [
+            "paper slide"
+          ],
           "dialogue": [
             {
-              "speaker": "Goda", "emotion": "pressing", "delivery": "off-screen",
+              "speaker": "Goda",
+              "emotion": "pressing",
+              "delivery": "off-screen",
               "en": "Then explain this. A Class-A Wildfire Vein died the second you touched it.",
               "ja": "なら、これを説明しろ。クラスAのワイルドファイア・ベインが、お前が触れた瞬間に死んだ。",
               "ja_review": true
             }
-          ]
+          ],
+          "motion": "still",
+          "fx": {
+            "ken_burns": {
+              "enabled": true,
+              "preset": "push_in"
+            }
+          }
         },
         {
-          "id": "c006", "duration": 5.0, "shot": "Medium, from behind Kaito",
+          "id": "c006",
+          "duration": 5.0,
+          "shot": "Medium, from behind Kaito",
           "action": "Kaito from behind, head lowered, cuffed hands in his lap.",
-          "characters": ["Kaito"],
+          "characters": [
+            "Kaito"
+          ],
           "keyframe_prompt": "1boy, solo, from behind, back view, sitting, head down, handcuffs, gray blazer, interrogation room, dim lighting, lonely",
           "motion_prompt": "the boy's shoulders rise and fall with a slow breath, the light flickers once, static camera",
           "sfx": [],
           "dialogue": [
             {
-              "speaker": "Kaito", "emotion": "quiet, shaken", "delivery": "soft",
+              "speaker": "Kaito",
+              "emotion": "quiet, shaken",
+              "delivery": "soft",
               "en": "I don't know. I just... didn't want anyone to burn.",
               "ja": "……わかりません。ただ……誰にも、燃えてほしくなかった。",
               "ja_review": true
             }
-          ]
+          ],
+          "motion": "wan"
         },
         {
-          "id": "c007", "duration": 1.5, "shot": "Smash cut, memory flash (impact frame)",
+          "id": "c007",
+          "duration": 1.5,
+          "shot": "Smash cut, memory flash (impact frame)",
           "action": "Half-second flash: an orange fire vein erupting across an arena floor, students' silhouettes.",
           "characters": [],
           "keyframe_prompt": "no humans, arena, giant orange fire erupting from cracked ground, crystal fissure, explosion, sparks, silhouettes, dramatic, high contrast",
           "motion_prompt": "fire bursts upward violently, sparks fly toward the camera, fast camera shake",
-          "fx": ["impact_frame", "speed_lines:radial"],
-          "sfx": ["fire roar", "glass shatter"],
-          "dialogue": []
+          "sfx": [
+            "fire roar",
+            "glass shatter"
+          ],
+          "dialogue": [],
+          "motion": "wan",
+          "fx": {
+            "speed_lines": {
+              "enabled": true,
+              "style": "radial",
+              "opacity": 0.5
+            }
+          }
         },
         {
-          "id": "c008", "duration": 5.0, "shot": "Medium wide, Gōda leans back",
+          "id": "c008",
+          "duration": 5.0,
+          "shot": "Medium wide, Gōda leans back",
           "action": "Gōda leans back, face half in shadow, hand over mouth, studying Kaito.",
-          "characters": ["Goda"],
+          "characters": [
+            "Goda"
+          ],
           "keyframe_prompt": "1boy, solo, sitting, leaning back, hand over mouth, half of face in shadow, interrogation room, steel table, dim lighting, looking at viewer",
           "motion_prompt": "the man slowly leans back in the chair, the shadow moves across his face, slow push-in",
-          "sfx": ["chair creak"],
+          "sfx": [
+            "chair creak"
+          ],
           "dialogue": [
             {
-              "speaker": "Goda", "emotion": "decisive", "delivery": "low",
+              "speaker": "Goda",
+              "emotion": "decisive",
+              "delivery": "low",
               "en": "Then let's start from the beginning.",
               "ja": "なら……最初から話してもらおうか。",
               "ja_review": true
             }
-          ]
+          ],
+          "motion": "wan"
         },
         {
-          "id": "c009", "duration": 5.0, "shot": "Title card",
+          "id": "c009",
+          "duration": 5.0,
+          "shot": "Title card",
           "action": "Hard cut to black, then the Remotion TitleCard (episode 1).",
           "characters": [],
-          "clip": "assets/generated/clips/title_card",
-          "dialogue": []
+          "clip": "../../assets/generated/clips/title_card",
+          "dialogue": [],
+          "motion": "clip"
         }
       ]
     },
@@ -174,5 +252,66 @@
         "Slums under the towers. A hooded figure holds a vial of glowing Vein crystal: 'So the zero finally woke up.'"
       ]
     }
-  ]
+  ],
+  "production": {
+    "characters_file": "characters.json",
+    "work_dir": "../../assets/generated/arc_forge/ep01",
+    "fps": 24,
+    "image": {
+      "checkpoint": "animagine",
+      "width": 1344,
+      "height": 768,
+      "steps": 28,
+      "cfg": 5.0,
+      "sampler": "euler_ancestral",
+      "scheduler": "normal",
+      "seed": 3100,
+      "rating": "safe",
+      "hires": {
+        "enabled": true,
+        "scale": 1.5,
+        "denoise": 0.4,
+        "steps": 20
+      }
+    },
+    "video": {
+      "width": 1280,
+      "height": 704,
+      "steps": 20,
+      "weight_dtype": "fp8_e4m3fn",
+      "seed": 42,
+      "style_prefix": "anime style, cel shading, cinematic lighting"
+    },
+    "assembly": {
+      "grade": {
+        "preset": "night_blue",
+        "intensity": 0.45
+      },
+      "voices_en": {
+        "Kaito": {
+          "voice": "en-US-AndrewNeural"
+        },
+        "Goda": {
+          "voice": "en-US-GuyNeural",
+          "rate": "-6%",
+          "pitch": "-8Hz"
+        },
+        "Rei": {
+          "voice": "en-US-AriaNeural"
+        }
+      },
+      "subtitles": {
+        "show_speaker": false,
+        "max_chars_per_line": 46,
+        "style": {
+          "font_size": 46,
+          "outline": 2.4,
+          "shadow": 1.2,
+          "outline_color": "#000000",
+          "blur": 0.4,
+          "margin_v": 54
+        }
+      }
+    }
+  }
 }

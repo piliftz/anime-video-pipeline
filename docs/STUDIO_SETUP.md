@@ -22,7 +22,7 @@ C:\Users\<you>\
 | Stage | Tool | Status | Notes |
 |---|---|---|---|
 | Keyframes | ComfyUI + Animagine XL 4.0 | ✅ | `make_video` / `image_generator.py`, tested on your laptop (~55 s/image) |
-| Motion | Wan 2.2 TI2V-5B | 🧪 | `video_generator.py`, the Phase 0 test. **Run this first.** |
+| Motion | Wan 2.2 TI2V-5B | ✅ (slow) | Phase 0 passed on your laptop: **38.1 min for one 5 s clip** (first run, incl. model load). `episode_producer.py motion` batches cuts in one session |
 | Promo | Remotion + Three.js + GSAP | ✅ | `promo/`, renders tested in the cloud sandbox |
 | Assembly | Python pipeline (moviepy + ffmpeg) | ✅ | lossless master, a single final encode |
 | English voices | edge-tts (current) → Kokoro-82M | ✅ / 📋 | Kokoro 0.9.4, Apache-2.0, **needs Python ≤ 3.12** |
@@ -72,6 +72,13 @@ tested. They aren't listed yet because neither has been run on your machine.
    Pick the best take per character (e.g. "Kaito portrait #3"); its seed and image get locked into
    `bible.md` and reused for every shot of that character.
 3. **Cold open** (`ep01_pilot.script.json`, cuts c001–c009): produce it end to end as the
-   quality bar for the episode.
+   quality bar for the episode:
+   ```powershell
+   .venv\Scripts\python scripts\episode_producer.py series\arc_forge\ep01_pilot.script.json keyframes
+   start output\ep01_cold_open_keyframes.png            # review; fix a cut by adding "seed": N to it
+   .venv\Scripts\python scripts\episode_producer.py series\arc_forge\ep01_pilot.script.json motion      # hours: run overnight
+   .venv\Scripts\python scripts\episode_producer.py series\arc_forge\ep01_pilot.script.json status
+   .venv\Scripts\python scripts\episode_producer.py series\arc_forge\ep01_pilot.script.json assemble --draft
+   ```
 4. **Voices**: audition the casting in `bible.md` and wire up Kokoro (EN) and VOICEVOX (JA).
 5. Then Act A and Act B, cut by cut.
