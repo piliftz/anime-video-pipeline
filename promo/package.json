@@ -1,0 +1,30 @@
+{
+  "name": "arc-forge-promo",
+  "private": true,
+  "description": "Arc-Forge: Ignition — programmatic title cards, teasers and countdown reels (Remotion + Three.js + GSAP)",
+  "scripts": {
+    "studio": "remotion studio src/index.ts",
+    "typecheck": "tsc --noEmit",
+    "render:title": "remotion render src/index.ts TitleCard out/title_card.mp4",
+    "render:teaser": "remotion render src/index.ts Teaser out/teaser.mp4",
+    "render:countdown": "remotion render src/index.ts CountdownReel out/countdown_reel.mp4",
+    "render:title:frames": "remotion render src/index.ts TitleCard ../assets/generated/clips/title_card --sequence --image-format=png",
+    "still:title": "remotion still src/index.ts TitleCard out/title_card.png --frame=80"
+  },
+  "dependencies": {
+    "@react-three/fiber": "9.8.2",
+    "@remotion/cli": "4.0.540",
+    "@remotion/fonts": "4.0.540",
+    "@remotion/three": "4.0.540",
+    "gsap": "3.15.0",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "remotion": "4.0.540",
+    "three": "0.187.0"
+  },
+  "devDependencies": {
+    "@types/react": "19.3.0",
+    "@types/three": "0.187.0",
+    "typescript": "5.9.3"
+  }
+}

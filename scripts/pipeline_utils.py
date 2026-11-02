@@ -10,6 +10,7 @@ import copy
 import json
 import logging
 import math
+import re
 import shutil
 import subprocess
 from functools import lru_cache
@@ -169,9 +170,14 @@ def classify_media(path: Path) -> str:
     return "unknown"
 
 
+def _natural_key(path: Path) -> list:
+    """Sort 'frame-2' before 'frame-10' (numbers compared as numbers, not text)."""
+    return [int(t) if t.isdigit() else t.lower() for t in re.split(r"(\d+)", path.name)]
+
+
 def list_frames(directory: Path) -> list[Path]:
     frames = sorted(
-        p for p in Path(directory).iterdir() if p.suffix.lower() in IMAGE_EXTENSIONS
+        (p for p in Path(directory).iterdir() if p.suffix.lower() in IMAGE_EXTENSIONS), key=_natural_key
     )
     if not frames:
         raise PipelineError(f"No image frames found in sequence directory {directory}")

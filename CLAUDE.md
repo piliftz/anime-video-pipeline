@@ -24,6 +24,11 @@ scripts/
                           frames returned as lossless PNGs into a folder (usable as a scene clip) + MP4 preview
 make_video.cmd            Windows one-command entry: orchestrator --generate-images
 my_story.json             full example storyboard using only generated images
+promo/                    Remotion + Three.js + GSAP promo toolkit (TitleCard, Teaser, CountdownReel); see
+                          promo/README.md. Rule: every pixel is a pure function of useCurrentFrame()
+                          (no Math.random, no r3f useFrame, GSAP only via useGsapTimeline seek). Fonts are
+                          bundled in promo/public/fonts. Verify with `npx tsc --noEmit` and
+                          `npx remotion still ... --gl=swangle --browser-executable=<headless chrome>`.
 storyboard_template.json  reference storyboard; every supported key appears here
 assets/ {clips,images,audio/bgm,fonts}   inputs (fonts/ is passed to libass as fontsdir)
 temp/                     voiceover cache, timeline JSON, ASS, lossless master (gitignored)
