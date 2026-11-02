@@ -1,0 +1,178 @@
+{
+  "format": "arcforge-episode-script/v1",
+  "series": { "en": "Arc-Forge: Ignition", "ja": "アーク・フォージ：イグニッション" },
+  "episode": 1,
+  "title": { "en": "The Zero-Catalyst Drop", "ja": "ゼロ・カタリスト・ドロップ" },
+  "status": "cold open written; acts A/B outlined",
+  "target_runtime_sec": 1200,
+  "notes": [
+    "Every dialogue line carries both languages. Timing per cut is set by the LONGER of the two dubs.",
+    "No lip-sync: speaking characters are framed from behind, off-screen, in silhouette, or as an eyes/hands close-up.",
+    "One named character per shot (traits swap when two named characters share a close shot).",
+    "keyframe_prompt: Animagine tag style; the named characters' tags from bible.md are prepended automatically.",
+    "motion_prompt: plain English for Wan 2.2: describe what moves and how the camera moves.",
+    "ja_review: a native speaker must check these lines before the Japanese dub is published."
+  ],
+  "segments": [
+    {
+      "id": "cold_open",
+      "time": "0:00-1:20",
+      "location": "Spark-Forge Academy detention block, interrogation room",
+      "time_of_day": "night",
+      "music": { "cue": "silence -> low synth drone (Kaito leitmotif, solo piano note at c006)" },
+      "cuts": [
+        {
+          "id": "c001", "duration": 3.0, "shot": "Establishing, static wide",
+          "action": "Empty interrogation room. A fluorescent tube flickers over a steel table and two chairs.",
+          "characters": [],
+          "keyframe_prompt": "no humans, scenery, interrogation room, steel table, two chairs, fluorescent light, dark, concrete wall, one-way mirror, cinematic lighting, wide shot",
+          "motion_prompt": "the ceiling light flickers on and off, dust floats in the light beam, very slow camera push-in",
+          "sfx": ["fluorescent buzz", "distant water drip"],
+          "dialogue": []
+        },
+        {
+          "id": "c002", "duration": 3.0, "shot": "Insert, top-down close-up",
+          "action": "Kaito's cuffed hands on the table. Faint ember-orange light dies out in hairline cracks of the cuffs.",
+          "characters": [],
+          "keyframe_prompt": "close-up, hands, handcuffs, bandaged hand, fingerless gloves, steel table, glowing cracks, orange glow, dark, from above",
+          "motion_prompt": "the fingers twitch slightly, the orange glow in the cracks slowly fades out, no camera movement",
+          "sfx": ["metal chain clink"],
+          "dialogue": []
+        },
+        {
+          "id": "c003", "duration": 5.0, "shot": "Over-the-shoulder from behind Gōda",
+          "action": "Gōda, seen from behind, drops a file on the table. Kaito is a blurred shape across the table.",
+          "characters": ["Goda"],
+          "keyframe_prompt": "1boy, from behind, back view, interrogation room, steel table, file folder, dim lighting, over the shoulder shot, depth of field",
+          "motion_prompt": "the man drops a file folder onto the table, papers slide, the camera holds still",
+          "sfx": ["file slap on steel"],
+          "dialogue": [
+            {
+              "speaker": "Goda", "emotion": "cold", "delivery": "measured",
+              "en": "Kaito Kurogane. Rank Zero. Catalyst output: zero. Every test since you were born.",
+              "ja": "黒鉄カイト。ランク・ゼロ。触媒出力……ゼロ。生まれてから、一度もだ。",
+              "ja_review": true
+            }
+          ]
+        },
+        {
+          "id": "c004", "duration": 3.0, "shot": "Extreme close-up, eyes",
+          "action": "Kaito's amber eyes, light flicker reflected in them. He slowly looks up.",
+          "characters": ["Kaito"],
+          "keyframe_prompt": "1boy, solo, eyes focus, close-up, amber eyes, black hair, orange hair streak, dim light, reflection in eyes, serious",
+          "motion_prompt": "the eyes slowly look up toward the camera, flickering light reflects in the pupils",
+          "sfx": [],
+          "dialogue": []
+        },
+        {
+          "id": "c005", "duration": 5.0, "shot": "Insert, photo on table",
+          "action": "A photo slides into frame: a huge orange crystal fissure, dead and gray on one side.",
+          "characters": [],
+          "keyframe_prompt": "no humans, photograph on table, glowing orange crystal fissure, cracked ground, half of the crystal gray and dead, steel table, close-up",
+          "motion_prompt": "a photograph slides across the table into the center of the frame and stops",
+          "sfx": ["paper slide"],
+          "dialogue": [
+            {
+              "speaker": "Goda", "emotion": "pressing", "delivery": "off-screen",
+              "en": "Then explain this. A Class-A Wildfire Vein died the second you touched it.",
+              "ja": "なら、これを説明しろ。クラスAのワイルドファイア・ベインが、お前が触れた瞬間に死んだ。",
+              "ja_review": true
+            }
+          ]
+        },
+        {
+          "id": "c006", "duration": 5.0, "shot": "Medium, from behind Kaito",
+          "action": "Kaito from behind, head lowered, cuffed hands in his lap.",
+          "characters": ["Kaito"],
+          "keyframe_prompt": "1boy, solo, from behind, back view, sitting, head down, handcuffs, gray blazer, interrogation room, dim lighting, lonely",
+          "motion_prompt": "the boy's shoulders rise and fall with a slow breath, the light flickers once, static camera",
+          "sfx": [],
+          "dialogue": [
+            {
+              "speaker": "Kaito", "emotion": "quiet, shaken", "delivery": "soft",
+              "en": "I don't know. I just... didn't want anyone to burn.",
+              "ja": "……わかりません。ただ……誰にも、燃えてほしくなかった。",
+              "ja_review": true
+            }
+          ]
+        },
+        {
+          "id": "c007", "duration": 1.5, "shot": "Smash cut, memory flash (impact frame)",
+          "action": "Half-second flash: an orange fire vein erupting across an arena floor, students' silhouettes.",
+          "characters": [],
+          "keyframe_prompt": "no humans, arena, giant orange fire erupting from cracked ground, crystal fissure, explosion, sparks, silhouettes, dramatic, high contrast",
+          "motion_prompt": "fire bursts upward violently, sparks fly toward the camera, fast camera shake",
+          "fx": ["impact_frame", "speed_lines:radial"],
+          "sfx": ["fire roar", "glass shatter"],
+          "dialogue": []
+        },
+        {
+          "id": "c008", "duration": 5.0, "shot": "Medium wide, Gōda leans back",
+          "action": "Gōda leans back, face half in shadow, hand over mouth, studying Kaito.",
+          "characters": ["Goda"],
+          "keyframe_prompt": "1boy, solo, sitting, leaning back, hand over mouth, half of face in shadow, interrogation room, steel table, dim lighting, looking at viewer",
+          "motion_prompt": "the man slowly leans back in the chair, the shadow moves across his face, slow push-in",
+          "sfx": ["chair creak"],
+          "dialogue": [
+            {
+              "speaker": "Goda", "emotion": "decisive", "delivery": "low",
+              "en": "Then let's start from the beginning.",
+              "ja": "なら……最初から話してもらおうか。",
+              "ja_review": true
+            }
+          ]
+        },
+        {
+          "id": "c009", "duration": 5.0, "shot": "Title card",
+          "action": "Hard cut to black, then the Remotion TitleCard (episode 1).",
+          "characters": [],
+          "clip": "assets/generated/clips/title_card",
+          "dialogue": []
+        }
+      ]
+    },
+    {
+      "id": "act_a",
+      "time": "1:25-8:30",
+      "status": "outline",
+      "beats": [
+        "Morning of the ranking exam. Kaito's run to the academy (comedy: late, catalyst gate refuses to open for a Zero).",
+        "Catalyst reading ceremony: every scanner reads 0. Laughter. Gōda doesn't laugh.",
+        "Rei Shinonome's S-rank demonstration: flawless cyan constructs. Her eyes catch Kaito once.",
+        "Hazard-simulation exam briefing: teams must stabilize simulated Wildfire Veins.",
+        "Kaito teamed with no one ('Zeroes don't get teams'). He enters anyway."
+      ]
+    },
+    {
+      "id": "act_b",
+      "time": "8:30-16:30",
+      "status": "outline",
+      "beats": [
+        "Simulation glitch: the training vein turns real. Readings spike, alarms. (Plant: a technician quietly removes a device.)",
+        "Students trapped behind fire. Rei shields them but her construct is cracking.",
+        "Kaito runs IN while everyone runs out (impact frames, speed lines).",
+        "He grabs the vein bare-handed. Gray frost-cracks climb his arm. The vein goes dark.",
+        "Every catalyst within ten meters flickers off, including Rei's. Silence.",
+        "Security drones surround him. 'Unregistered catalyst anomaly.' He's taken down."
+      ]
+    },
+    {
+      "id": "resolution",
+      "time": "16:30-19:30",
+      "status": "outline",
+      "beats": [
+        "Back in the interrogation room. Gōda believes him and isn't allowed to say so.",
+        "The Director on a monitor (face unseen): 'Find out what he is. Quietly.'",
+        "Kaito alone, flexing his numb hand. The frost-cracks haven't fully faded."
+      ]
+    },
+    {
+      "id": "stinger",
+      "time": "19:30-20:00",
+      "status": "outline",
+      "beats": [
+        "Slums under the towers. A hooded figure holds a vial of glowing Vein crystal: 'So the zero finally woke up.'"
+      ]
+    }
+  ]
+}
