@@ -5,26 +5,74 @@
   "picks": {
     "Kaito": {
       "portrait": {
-        "take": "ref_kaito_portrait_2"
+        "take": "ref_kaito_portrait_2",
+        "file": "refs/kaito_portrait.jpg",
+        "seed": 7002,
+        "checkpoint": "animagine-xl-4.0.safetensors",
+        "size": [
+          832,
+          1216
+        ],
+        "prompt": "1boy, solo, spiky hair, black hair, streaked hair, orange hair streak, amber eyes, gray blazer, school uniform, rolled up sleeves, bandaged hand, fingerless gloves, upper body, looking at viewer, determined, slight smile, simple background, grey background, character portrait, safe, masterpiece, high score, great score, absurdres"
       },
       "fullbody": {
-        "take": "ref_kaito_fullbody_2"
+        "take": "ref_kaito_fullbody_2",
+        "file": "refs/kaito_fullbody.jpg",
+        "seed": 8002,
+        "checkpoint": "animagine-xl-4.0.safetensors",
+        "size": [
+          832,
+          1216
+        ],
+        "prompt": "1boy, solo, spiky hair, black hair, streaked hair, orange hair streak, amber eyes, gray blazer, school uniform, rolled up sleeves, bandaged hand, fingerless gloves, full body, standing, looking at viewer, determined, slight smile, simple background, grey background, safe, masterpiece, high score, great score, absurdres"
       }
     },
     "Rei": {
       "portrait": {
-        "take": "ref_rei_portrait_2"
+        "take": "ref_rei_portrait_2",
+        "file": "refs/rei_portrait.jpg",
+        "seed": 7002,
+        "checkpoint": "animagine-xl-4.0.safetensors",
+        "size": [
+          832,
+          1216
+        ],
+        "prompt": "1girl, solo, very long hair, white hair, high ponytail, cyan eyes, white uniform, military uniform, white gloves, serious, upper body, looking at viewer, expressionless, cold stare, simple background, grey background, character portrait, safe, masterpiece, high score, great score, absurdres"
       },
       "fullbody": {
-        "take": "ref_rei_fullbody_2"
+        "take": "ref_rei_fullbody_2",
+        "file": "refs/rei_fullbody.jpg",
+        "seed": 8002,
+        "checkpoint": "animagine-xl-4.0.safetensors",
+        "size": [
+          832,
+          1216
+        ],
+        "prompt": "1girl, solo, very long hair, white hair, high ponytail, cyan eyes, white uniform, military uniform, white gloves, serious, full body, standing, looking at viewer, expressionless, cold stare, simple background, grey background, safe, masterpiece, high score, great score, absurdres"
       }
     },
     "Goda": {
       "portrait": {
-        "take": "ref_goda_portrait_3"
+        "take": "ref_goda_portrait_3",
+        "file": "refs/goda_portrait.jpg",
+        "seed": 7003,
+        "checkpoint": "animagine-xl-4.0.safetensors",
+        "size": [
+          832,
+          1216
+        ],
+        "prompt": "1boy, solo, mature male, muscular, short gray hair, scar on face, gray trench coat, stern, upper body, looking at viewer, frown, arms crossed, simple background, grey background, character portrait, safe, masterpiece, high score, great score, absurdres"
       },
       "fullbody": {
-        "take": "ref_goda_fix_fullbody_2"
+        "take": "ref_goda_fix_fullbody_2",
+        "file": "refs/goda_fullbody.jpg",
+        "seed": 8102,
+        "checkpoint": "animagine-xl-4.0.safetensors",
+        "size": [
+          832,
+          1216
+        ],
+        "prompt": "1boy, solo, mature male, muscular, short gray hair, scar on face, gray trench coat, stern, dark skin, dark-skinned male, black turtleneck, full body, standing, looking at viewer, frown, arms crossed, simple background, grey background, safe, masterpiece, high score, great score, absurdres"
       }
     }
   }
