@@ -52,7 +52,7 @@ Picked from `character_refs.json`, recorded in `locked_refs.json` (seed and exac
 |---|---|---|
 | Kaito | take #2 (seed 7002) | take #2 (seed 8002) |
 | Rei | take #2 (seed 7002) | take #2 (seed 8002) |
-| Gōda | take #3 (seed 7003) | #2 for now; to be replaced by a `ref_goda_fix_fullbody_*` take (dark skin, no invented object) |
+| Gōda | take #3 (seed 7003) | fix take #2 (seed 8102): dark skin, black turtleneck, plain background |
 
 ### Introduced in Ep 2 (remedial squad)
 - **Mina Hoshizaki (星崎ミナ)**: gadget inventor. `short orange hair, goggles on head, oversized jacket, tool belt`

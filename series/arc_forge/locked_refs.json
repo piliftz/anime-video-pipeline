@@ -24,8 +24,7 @@
         "take": "ref_goda_portrait_3"
       },
       "fullbody": {
-        "take": "ref_goda_fullbody_2",
-        "note": "Has an invented black/orange spiked object behind him and paler skin than portrait #3. Replace with a regenerated take (ref_goda_fix_*) once picked."
+        "take": "ref_goda_fix_fullbody_2"
       }
     }
   }
