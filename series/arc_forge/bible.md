@@ -41,8 +41,18 @@ in silhouette, or far away (this avoids traits swapping, as seen in the test run
 - **Palette:** hair `#F2F5FA` · eyes `#19E6FF` · uniform `#E8ECF2` · trim `#19E6FF`
 
 ### Instructor Tetsu Gōda (剛田テツ) — exam proctor, interrogator
-- **Tags:** `mature male, muscular, short gray hair, scar on face, gray trench coat, stern`
+- **Tags:** `mature male, dark skin, dark-skinned male, muscular, short gray hair, scar on face, gray trench coat, black turtleneck, stern`
 - **Palette:** coat `#4A505E` · hair `#9AA1AC`
+
+### Locked references
+Picked from `character_refs.json`, recorded in `locked_refs.json` (seed and exact prompt), copied to
+`refs/` by `scripts/lock_refs.py`. These images are the identity anchors for every later shot
+(IP-Adapter input). A seed alone does not keep a character consistent in new poses.
+| Character | Portrait | Full body |
+|---|---|---|
+| Kaito | take #2 (seed 7002) | take #2 (seed 8002) |
+| Rei | take #2 (seed 7002) | take #2 (seed 8002) |
+| Gōda | take #3 (seed 7003) | #2 for now; to be replaced by a `ref_goda_fix_fullbody_*` take (dark skin, no invented object) |
 
 ### Introduced in Ep 2 (remedial squad)
 - **Mina Hoshizaki (星崎ミナ)**: gadget inventor. `short orange hair, goggles on head, oversized jacket, tool belt`

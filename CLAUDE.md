@@ -22,6 +22,7 @@ scripts/
   setup_models.py         resumable Hugging Face model download into $COMFYUI_DIR + safetensors integrity check
   video_generator.py      keyframe -> Wan 2.2 TI2V-5B image-to-video (graph = official template + start_image);
                           frames returned as lossless PNGs into a folder (usable as a scene clip) + MP4 preview
+  lock_refs.py            copy picked reference takes -> series/<show>/refs/*.jpg + record seed/prompt
   contact_sheet.py        labeled grid of generated takes (rows per take group, '#n · seed') for picking
 series/arc_forge/         the show: bible.md (design lock), ep01_pilot.script.json (EN/JA), character_refs.json
 make_video.cmd            Windows one-command entry: orchestrator --generate-images
@@ -97,6 +98,9 @@ a visual change works without inspecting frames.
   LoadImage via /upload/image, Wan22ImageToVideoLatent). Video frames come back via SaveImage, NOT SaveVideo
   (its inputs change often). Validate checkpoint/sampler/scheduler names via `/object_info`
   before queueing. Never overwrite an image that has no `.png.json` sidecar (user-supplied) without --force.
+- Changing a character's tags in a storyboard changes the hash of EVERY take using that character, so the
+  next run regenerates (overwrites) them. When refining a design, add NEW take ids or put the change in the
+  new takes' prompts; lock picks (lock_refs.py) before regenerating.
 - Every module is runnable as a script (`python scripts/x.py`) and imports siblings by bare
   name (`from pipeline_utils import ...`). Don't convert to package-relative imports without
   updating every entry point.

@@ -1,0 +1,32 @@
+{
+  "_about": "Picked character reference takes. Run: python scripts/lock_refs.py series/arc_forge/locked_refs.json",
+  "source_dir": "../../assets/generated/arc_forge/refs",
+  "refs_dir": "refs",
+  "picks": {
+    "Kaito": {
+      "portrait": {
+        "take": "ref_kaito_portrait_2"
+      },
+      "fullbody": {
+        "take": "ref_kaito_fullbody_2"
+      }
+    },
+    "Rei": {
+      "portrait": {
+        "take": "ref_rei_portrait_2"
+      },
+      "fullbody": {
+        "take": "ref_rei_fullbody_2"
+      }
+    },
+    "Goda": {
+      "portrait": {
+        "take": "ref_goda_portrait_3"
+      },
+      "fullbody": {
+        "take": "ref_goda_fullbody_2",
+        "note": "Has an invented black/orange spiked object behind him and paler skin than portrait #3. Replace with a regenerated take (ref_goda_fix_*) once picked."
+      }
+    }
+  }
+}

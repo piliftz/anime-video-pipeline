@@ -243,6 +243,58 @@
         "width": 832,
         "height": 1216
       }
+    },
+    {
+      "id": "ref_goda_fix_fullbody_1",
+      "generate": {
+        "characters": [
+          "Goda"
+        ],
+        "seed": 8101,
+        "prompt": "1boy, solo, dark skin, dark-skinned male, black turtleneck, full body, standing, looking at viewer, frown, arms crossed, simple background, grey background",
+        "negative": "weapon, armor, wings, holding, object, background objects",
+        "width": 832,
+        "height": 1216
+      }
+    },
+    {
+      "id": "ref_goda_fix_fullbody_2",
+      "generate": {
+        "characters": [
+          "Goda"
+        ],
+        "seed": 8102,
+        "prompt": "1boy, solo, dark skin, dark-skinned male, black turtleneck, full body, standing, looking at viewer, frown, arms crossed, simple background, grey background",
+        "negative": "weapon, armor, wings, holding, object, background objects",
+        "width": 832,
+        "height": 1216
+      }
+    },
+    {
+      "id": "ref_goda_fix_fullbody_3",
+      "generate": {
+        "characters": [
+          "Goda"
+        ],
+        "seed": 8103,
+        "prompt": "1boy, solo, dark skin, dark-skinned male, black turtleneck, full body, standing, looking at viewer, frown, arms crossed, simple background, grey background",
+        "negative": "weapon, armor, wings, holding, object, background objects",
+        "width": 832,
+        "height": 1216
+      }
+    },
+    {
+      "id": "ref_goda_fix_fullbody_4",
+      "generate": {
+        "characters": [
+          "Goda"
+        ],
+        "seed": 8104,
+        "prompt": "1boy, solo, dark skin, dark-skinned male, black turtleneck, full body, standing, looking at viewer, frown, arms crossed, simple background, grey background",
+        "negative": "weapon, armor, wings, holding, object, background objects",
+        "width": 832,
+        "height": 1216
+      }
     }
   ]
 }
