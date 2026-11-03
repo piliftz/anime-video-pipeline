@@ -288,7 +288,8 @@ async def synthesize_line(
     if fallback != "silence":
         raise PipelineError(
             f"Voiceover for '{line.id}' ({line.engine}) failed after {retries} attempts: {last_error}\n"
-            + ("Start the VOICEVOX app or set VOICEVOX_RUN. " if line.engine == "voicevox" else
+            + ("Start the VOICEVOX app or set VOICEVOX_RUN. "
+               if line.engine == "voicevox" and "Cannot reach" in str(last_error) else "" if line.engine == "voicevox" else
                "edge-tts needs internet access to speech.platform.bing.com. ") +
             "Re-run with --tts-fallback silence (orchestrator) / --fallback silence to continue offline."
         )

@@ -32,8 +32,18 @@ log = get_logger("voicevox")
 
 DEFAULT_URL = os.environ.get("VOICEVOX_URL", "http://127.0.0.1:50021")
 # Query fields we let storyboards adjust (names as in VOICEVOX's AudioQuery).
+# Style types the engine itself treats as speech (voicevox_engine/metas/metas_store.py: _TALK_STYLE_TYPES).
+# VOICEVOX 0.26 marks many voices "streaming_talk"; filtering on "talk" alone found no styles at all.
+TALK_STYLE_TYPES = ("talk", "streaming_talk")
 QUERY_PARAMS = {"speed": "speedScale", "pitch": "pitchScale", "intonation": "intonationScale",
                 "volume": "volumeScale", "pre": "prePhonemeLength", "post": "postPhonemeLength"}
+
+
+def talk_styles(speaker: dict) -> list[dict]:
+    """Speech styles of a /speakers entry; falls back to all styles if the type labels are unfamiliar."""
+    styles = speaker.get("styles", [])
+    talk = [st for st in styles if st.get("type", "talk") in TALK_STYLE_TYPES]
+    return talk or styles
 
 
 class VoicevoxClient:
@@ -73,7 +83,10 @@ class VoicevoxClient:
         if found is None:
             names = ", ".join(s["name"] for s in self.speakers())
             raise PipelineError(f"VOICEVOX has no character '{speaker}'. Installed: {names}")
-        styles = [st for st in found["styles"] if st.get("type", "talk") == "talk"]
+        styles = talk_styles(found)
+        if not styles:
+            raise PipelineError(f"VOICEVOX character '{speaker}' has no speech styles "
+                                f"(types: {sorted({st.get('type') for st in found['styles']})}).")
         chosen = next((st for st in styles if st["name"] == style), None) if style else None
         if chosen is None:
             chosen = styles[0]
@@ -178,7 +191,7 @@ def main(argv: list[str] | None = None) -> int:
         with VoicevoxServer() as vv:
             if not args.say:
                 for s in vv.speakers():
-                    styles = ", ".join(st["name"] for st in s["styles"] if st.get("type", "talk") == "talk")
+                    styles = ", ".join(st["name"] for st in talk_styles(s))
                     print(f"{s['name']}: {styles}")
                 return 0
             if not args.speaker:
