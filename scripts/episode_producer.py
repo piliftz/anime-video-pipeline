@@ -216,6 +216,14 @@ def build_storyboard(ep: Episode, lang: str) -> tuple[dict, list[str]]:
             if not line.get(lang):
                 raise PipelineError(f"[{cut['id']}] dialogue has no '{lang}' text.")
             scene["narration"] = {"speaker": line["speaker"], "text": line[lang], "offset": 0.25, "tail": 0.45}
+            sub_lang = asm.get("subtitle_language", {}).get(lang, lang)
+            if sub_lang != lang:
+                if not line.get(sub_lang):
+                    raise PipelineError(f"[{cut['id']}] dialogue has no '{sub_lang}' text for the subtitles.")
+                scene["narration"]["subtitle_text"] = line[sub_lang]
+            style = line.get(f"{lang}_style")  # per-line emotion style, e.g. VOICEVOX "悲しみ"
+            if style and voices.get(line["speaker"], {}).get("engine") == "voicevox":
+                scene["narration"]["voicevox"] = {**voices[line["speaker"]].get("voicevox", {}), "style": style}
         scenes.append(scene)
     grade = asm.get("grade", {})
     title = ep.script["title"].get(lang) or ep.script["title"]["en"]
@@ -234,15 +242,45 @@ def build_storyboard(ep: Episode, lang: str) -> tuple[dict, list[str]]:
 def stage_assemble(ep: Episode, lang: str, passthrough: list[str]) -> int:
     from video_orchestrator import main as orchestrate
 
-    if lang != "en":
-        raise PipelineError("Only the English assembly is wired up so far. The Japanese dub needs proper "
-                            "Japanese voices (VOICEVOX), which come next.")
+    if not ep.prod.get("assembly", {}).get(f"voices_{lang}"):
+        raise PipelineError(f"No voices_{lang} cast in the script's production.assembly block.")
     storyboard, warnings = build_storyboard(ep, lang)
     for w in warnings:
         log.warning("%s", w)
     sb_path = save_json(TEMP_DIR / f"{ep.name}_{lang}.storyboard.json", storyboard)
     log.info("Storyboard: %s (%d cuts)", sb_path, len(storyboard["scenes"]))
-    return orchestrate([str(sb_path), *passthrough])
+    code = orchestrate([str(sb_path), *passthrough])
+    write_voicevox_credits(ep, lang, storyboard)
+    return code
+
+
+def write_voicevox_credits(ep: Episode, lang: str, storyboard: dict) -> None:
+    """VOICEVOX characters each have their own terms; most require a credit like 'VOICEVOX:Name'.
+    Write the credit lines for the video description, plus each character's terms to read."""
+    # Credit exactly the voices that speak in this render (not the whole cast list).
+    spoken = {sc["narration"]["speaker"] for sc in storyboard["scenes"] if sc.get("narration")}
+    names = sorted({v["voicevox"]["speaker"] for k, v in storyboard["speakers"].items()
+                    if k in spoken and v.get("engine") == "voicevox" and v.get("voicevox", {}).get("speaker")})
+    if not names:
+        return
+    out = ensure_dir(OUTPUT_DIR) / f"{ep.name}_{lang}_credits.txt"
+    lines = ["Voices (paste into the video description / end credits):"] + [f"VOICEVOX:{n}" for n in names]
+    terms_dir = OUTPUT_DIR / "voicevox_terms"
+    try:
+        from voicevox_client import VoicevoxServer
+
+        with VoicevoxServer() as vv:
+            for n in names:
+                _, uuid, _ = vv.resolve(n, None)
+                ensure_dir(terms_dir)
+                (terms_dir / f"{n}.md").write_text(vv.policy(uuid), encoding="utf-8")
+        lines += ["", f"Each character's terms of use were saved to {terms_dir}. READ THEM before publishing,",
+                  "especially for monetized videos: the terms differ per character."]
+    except PipelineError as exc:
+        lines += ["", f"(Could not fetch the terms automatically: {exc}) Check each character's terms on the "
+                  "VOICEVOX website before publishing."]
+    out.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    log.info("VOICEVOX credits: %s", out)
 
 
 # --------------------------------------------------------------------------- #
@@ -278,7 +316,7 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--segment", default="cold_open")
     p.add_argument("--cuts", help="Comma-separated cut ids to (re)process, e.g. c003,c006")
     p.add_argument("--force", action="store_true", help="Redo even if up to date.")
-    p.add_argument("--lang", default="en", help="Assembly language (en for now).")
+    p.add_argument("--lang", default="en", help="Assembly language: en or ja (needs voices_<lang> in the script).")
     p.add_argument("--comfy-url")
     p.add_argument("--comfy-dir")
     p.add_argument("-v", "--verbose", action="store_true")

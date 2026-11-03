@@ -21,7 +21,9 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import contextlib
 import hashlib
+import json
 import re
 import subprocess
 import sys
@@ -62,9 +64,13 @@ class VoiceLine:
     volume: str = "+0%"
     speaker: str | None = None
     extra: dict = field(default_factory=dict)
+    engine: str = "edge"                              # "edge" (edge-tts) or "voicevox"
+    vv: dict = field(default_factory=dict)            # voicevox: speaker, style, speed, pitch, intonation, ...
 
     def cache_key(self) -> str:
         raw = "|".join([self.text, self.voice, self.rate, self.pitch, self.volume])
+        if self.engine != "edge":
+            raw += "|" + self.engine + "|" + json.dumps(self.vv, sort_keys=True, ensure_ascii=False)
         return hashlib.sha1(raw.encode("utf-8")).hexdigest()[:10]
 
     def stem(self) -> str:
@@ -93,7 +99,13 @@ def make_line(entry: dict, defaults: dict, index: int) -> VoiceLine | None:
         pitch=_validate_prosody(entry.get("pitch") or defaults.get("pitch") or "+0Hz", "Hz", "pitch"),
         volume=_validate_prosody(entry.get("volume") or defaults.get("volume") or "+0%", "%", "volume"),
         speaker=entry.get("speaker"),
+        engine=entry.get("engine") or defaults.get("engine") or "edge",
+        vv={**(defaults.get("voicevox") or {}), **(entry.get("voicevox") or {})},
     )
+    if line.engine not in ("edge", "voicevox"):
+        raise PipelineError(f"[{line.id}] unknown TTS engine '{line.engine}' (use edge or voicevox).")
+    if line.engine == "voicevox" and not line.vv.get("speaker"):
+        raise PipelineError(f"[{line.id}] engine voicevox needs voicevox.speaker (a VOICEVOX character name).")
     return line
 
 
@@ -106,7 +118,7 @@ def lines_from_storyboard(storyboard: dict) -> list[VoiceLine]:
         if not narration.get("text"):
             continue
         speaker_cfg = speakers.get(narration.get("speaker") or "", {})
-        merged_defaults = {**defaults, **{k: v for k, v in speaker_cfg.items() if k in ("voice", "rate", "pitch", "volume")}}
+        merged_defaults = {**defaults, **{k: v for k, v in speaker_cfg.items() if k in ("voice", "rate", "pitch", "volume", "engine", "voicevox")}}
         entry = {**narration, "id": scene.get("id") or f"scene_{i:02d}"}
         line = make_line(entry, merged_defaults, i)
         if line:
@@ -209,6 +221,19 @@ async def _synthesize_edge(line: VoiceLine, mp3_path: Path, proxy: str | None) -
     return boundaries
 
 
+_VV_CLIENT = None  # set by synthesize_all while a VOICEVOX engine session is open
+
+
+def _synthesize_voicevox(line: VoiceLine, raw_wav: Path) -> list[dict]:
+    """Blocking VOICEVOX call (run in a worker thread). Records the resolved style in line.vv."""
+    if _VV_CLIENT is None:
+        raise PipelineError("VOICEVOX engine session is not open.")
+    style_id, uuid, used = _VV_CLIENT.resolve(line.vv["speaker"], line.vv.get("style"))
+    raw_wav.write_bytes(_VV_CLIENT.synthesize(line.text, style_id, line.vv))
+    line.vv = {**line.vv, "style_used": used, "style_id": style_id, "speaker_uuid": uuid}
+    return []  # sentence timings are spread proportionally (VOICEVOX gives per-mora data, not sentence events)
+
+
 async def synthesize_line(
     line: VoiceLine,
     out_dir: Path,
@@ -228,11 +253,14 @@ async def synthesize_line(
             log.info("cached   %-14s %.2fs  %s", line.id, meta["duration"], wav_path.name)
             return meta
 
-    mp3_path = out_dir / f"{line.stem()}.mp3"
+    mp3_path = out_dir / f"{line.stem()}.{'mp3' if line.engine == 'edge' else 'raw.wav'}"
     last_error: Exception | None = None
     for attempt in range(1, retries + 1):
         try:
-            boundaries = await _synthesize_edge(line, mp3_path, proxy)
+            if line.engine == "voicevox":
+                boundaries = await asyncio.to_thread(_synthesize_voicevox, line, mp3_path)
+            else:
+                boundaries = await _synthesize_edge(line, mp3_path, proxy)
             _mp3_to_wav(mp3_path, wav_path)
             mp3_path.unlink(missing_ok=True)
             duration = media_duration(wav_path)
@@ -242,24 +270,26 @@ async def synthesize_line(
                 "id": line.id, "text": line.text, "speaker": line.speaker, "voice": line.voice,
                 "rate": line.rate, "pitch": line.pitch, "volume": line.volume,
                 "audio": str(wav_path), "duration": round(duration, 3),
-                "boundaries": boundaries, "fallback": False,
+                "boundaries": boundaries, "fallback": False, "engine": line.engine, "voicevox": line.vv or None,
             }
             save_json(meta_path, meta)
-            log.info("voiced   %-14s %.2fs  %s (%s)", line.id, duration, wav_path.name, line.voice)
+            who = f"VOICEVOX {line.vv.get('speaker')}/{line.vv.get('style_used', '')}" if line.engine == "voicevox" else line.voice
+            log.info("voiced   %-14s %.2fs  %s (%s)", line.id, duration, wav_path.name, who)
             return meta
         except Exception as exc:  # network errors, service hiccups, bad voice names
             last_error = exc
             mp3_path.unlink(missing_ok=True)
             if attempt < retries:
                 wait = 2 ** attempt
-                log.warning("edge-tts failed for '%s' (attempt %d/%d): %s -- retrying in %ds",
-                            line.id, attempt, retries, exc, wait)
+                log.warning("%s failed for '%s' (attempt %d/%d): %s -- retrying in %ds",
+                            line.engine, line.id, attempt, retries, exc, wait)
                 await asyncio.sleep(wait)
 
     if fallback != "silence":
         raise PipelineError(
-            f"Voiceover for '{line.id}' failed after {retries} attempts: {last_error}\n"
-            "edge-tts needs internet access to speech.platform.bing.com. "
+            f"Voiceover for '{line.id}' ({line.engine}) failed after {retries} attempts: {last_error}\n"
+            + ("Start the VOICEVOX app or set VOICEVOX_RUN. " if line.engine == "voicevox" else
+               "edge-tts needs internet access to speech.platform.bing.com. ") +
             "Re-run with --tts-fallback silence (orchestrator) / --fallback silence to continue offline."
         )
     duration = estimate_speech_seconds(line.text, line.rate)
@@ -284,13 +314,33 @@ async def synthesize_all(
     concurrency: int = 4,
     proxy: str | None = None,
 ) -> dict[str, dict]:
+    global _VV_CLIENT
     sem = asyncio.Semaphore(max(1, concurrency))
 
     async def run(line: VoiceLine) -> tuple[str, dict]:
         async with sem:
             return line.id, await synthesize_line(line, out_dir, fallback, force, proxy=proxy)
 
-    results = await asyncio.gather(*(run(l) for l in lines))
+    def cached(line: VoiceLine) -> bool:
+        meta = out_dir / f"{line.stem()}.json"
+        return not force and meta.is_file() and not load_json(meta).get("fallback")
+
+    # Open the VOICEVOX engine only if some VOICEVOX line actually needs synthesis.
+    need_vv = any(l.engine == "voicevox" and not cached(l) for l in lines)
+    with contextlib.ExitStack() as stack:
+        if need_vv:
+            from voicevox_client import VoicevoxServer
+
+            try:
+                _VV_CLIENT = stack.enter_context(VoicevoxServer())
+            except PipelineError:
+                if fallback != "silence":
+                    raise
+                log.warning("VOICEVOX engine unavailable; Japanese lines will be silent placeholders.")
+        try:
+            results = await asyncio.gather(*(run(l) for l in lines))
+        finally:
+            _VV_CLIENT = None
     return dict(results)
 
 

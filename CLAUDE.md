@@ -24,6 +24,8 @@ scripts/
                           frames returned as lossless PNGs into a folder (usable as a scene clip) + MP4 preview
   episode_producer.py     episode script -> keyframes -> Wan motion (ONE ComfyUI session, resumable via job hash)
                           -> assembled storyboard -> orchestrator render. Stages: keyframes|motion|assemble|status
+  voicevox_client.py      VOICEVOX (local JA TTS) client: name->style-id resolve, audio_query+synthesis, terms;
+                          auto-starts run.exe (VOICEVOX_RUN). CLI lists voices / auditions a line
   lock_refs.py            copy picked reference takes -> series/<show>/refs/*.jpg + record seed/prompt
   contact_sheet.py        labeled grid of generated takes (rows per take group, '#n · seed') for picking
 series/arc_forge/         the show: bible.md, characters.json (canonical tags), ep01_pilot.script.json (EN/JA,
@@ -65,6 +67,8 @@ python scripts/image_generator.py my_story.json --scenes s02_hikari --force
 python scripts/setup_models.py --verify
 python scripts/episode_producer.py series/arc_forge/ep01_pilot.script.json keyframes|motion|status
 python scripts/episode_producer.py series/arc_forge/ep01_pilot.script.json assemble --draft --tts-fallback silence
+python scripts/episode_producer.py series/arc_forge/ep01_pilot.script.json assemble --lang ja --draft
+python scripts/voicevox_client.py                         # list VOICEVOX voices (engine/app must be installed)
 python scripts/setup_models.py --model wan2.2-ti2v-5b
 python scripts/video_generator.py assets/generated/s02_hikari.png --prompt "..." [--length 121 --size 1280x704]
 ```
@@ -109,6 +113,11 @@ a visual change works without inspecting frames.
 - Every module is runnable as a script (`python scripts/x.py`) and imports siblings by bare
   name (`from pipeline_utils import ...`). Don't convert to package-relative imports without
   updating every entry point.
+
+- TTS engines: speakers set `engine` edge|voicevox (+ `voicevox: {speaker, style, speed, ...}`); the voice
+  cache key includes engine settings. `narration.subtitle_text` shows different text than is spoken (JA dub,
+  EN subs). VOICEVOX credits must list only voices actually spoken in the render.
+- Planned work and its rationale lives in docs/ROADMAP.md (anime timing, impact frames, ControlNet, speed).
 
 ## Coding style
 - Python 3.10+, `from __future__ import annotations`, type hints on public functions.

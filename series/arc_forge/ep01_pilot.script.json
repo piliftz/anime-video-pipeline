@@ -18,7 +18,8 @@
     "keyframe_prompt: Animagine tag style; the named characters' tags from bible.md are prepended automatically.",
     "motion_prompt: plain English for Wan 2.2: describe what moves and how the camera moves.",
     "ja_review: a native speaker must check these lines before the Japanese dub is published.",
-    "motion: 'wan' = animated with Wan 2.2 (slow: minutes per clip); 'still' = keyframe + pipeline camera; 'clip' = pre-rendered frames (e.g. the Remotion title card, path relative to this file). 'fx' (any motion type) = pipeline effects such as ken_burns or speed_lines."
+    "motion: 'wan' = animated with Wan 2.2 (slow: minutes per clip); 'still' = keyframe + pipeline camera; 'clip' = pre-rendered frames (e.g. the Remotion title card, path relative to this file). 'fx' (any motion type) = pipeline effects such as ken_burns or speed_lines.",
+    "voices_ja: VOICEVOX characters by name (provisional casting). List installed voices with `python scripts/voicevox_client.py`; audition with `--say \"テキスト\" --speaker 名前 --style スタイル`. ja_style on a line picks that character's emotion style (unknown -> default style + warning). The JA dub shows EN subtitles."
   ],
   "segments": [
     {
@@ -118,7 +119,8 @@
               "delivery": "off-screen",
               "en": "Then explain this. A Class-A Wildfire Vein died the second you touched it.",
               "ja": "なら、これを説明しろ。クラスAのワイルドファイア・ベインが、お前が触れた瞬間に死んだ。",
-              "ja_review": true
+              "ja_review": true,
+              "ja_style": "不機嫌"
             }
           ],
           "motion": "still",
@@ -148,7 +150,8 @@
               "delivery": "soft",
               "en": "I don't know. I just... didn't want anyone to burn.",
               "ja": "……わかりません。ただ……誰にも、燃えてほしくなかった。",
-              "ja_review": true
+              "ja_review": true,
+              "ja_style": "悲しみ"
             }
           ],
           "motion": "wan",
@@ -197,7 +200,8 @@
               "delivery": "low",
               "en": "Then let's start from the beginning.",
               "ja": "なら……最初から話してもらおうか。",
-              "ja_review": true
+              "ja_review": true,
+              "ja_style": "しっとり"
             }
           ],
           "motion": "wan"
@@ -316,6 +320,34 @@
           "blur": 0.4,
           "margin_v": 54
         }
+      },
+      "voices_ja": {
+        "Kaito": {
+          "engine": "voicevox",
+          "voicevox": {
+            "speaker": "玄野武宏",
+            "style": "ノーマル"
+          }
+        },
+        "Goda": {
+          "engine": "voicevox",
+          "voicevox": {
+            "speaker": "青山龍星",
+            "style": "ノーマル",
+            "speed": 0.95
+          }
+        },
+        "Rei": {
+          "engine": "voicevox",
+          "voicevox": {
+            "speaker": "冥鳴ひまり",
+            "style": "ノーマル"
+          }
+        }
+      },
+      "subtitle_language": {
+        "en": "en",
+        "ja": "en"
       }
     }
   }

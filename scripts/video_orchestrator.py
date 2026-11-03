@@ -105,7 +105,8 @@ SCENE_DEFAULTS = {
     "transition_in": None,     # {"type": "crossfade"|"fade_black"|"cut", "duration": s}
     "generate": None,          # {"prompt", "characters", "negative", "seed", "width", "height", "rating"}
 }
-NARRATION_DEFAULTS = {"text": "", "speaker": None, "offset": 0.3, "tail": 0.6, "subtitle": True}
+NARRATION_DEFAULTS = {"text": "", "speaker": None, "offset": 0.3, "tail": 0.6, "subtitle": True,
+                      "subtitle_text": None}  # show different text than is spoken (e.g. JA dub, EN subs)
 OVERLAY_DEFAULTS = {
     "text": "",
     "start": 0.0,
@@ -257,6 +258,9 @@ def validate_storyboard(sb: dict, base_dir: Path, allow_missing: bool) -> list[s
                     raise PipelineError(f"speed_lines.style '{style}' invalid")
         except PipelineError as exc:
             errors.append(f"[{sid}] {exc}")
+        nar = sc["narration"] or {}
+        if nar.get("subtitle_text") is not None and not str(nar["subtitle_text"]).strip():
+            errors.append(f"[{sid}] narration.subtitle_text is empty (remove it to subtitle the spoken text).")
         for j, ov in enumerate(sc["text_overlays"]):
             if not str(ov["text"]).strip():
                 errors.append(f"[{sid}] text_overlays[{j}] has empty text.")
@@ -338,6 +342,13 @@ def timeline_dict(sb: dict, plans: list[ScenePlan], canvas: tuple[int, int], sto
                 "subtitle": p.cfg["narration"].get("subtitle", True),
                 "placeholder_audio": bool(p.voice.get("fallback")),
             }
+            sub_text = p.cfg["narration"].get("subtitle_text")
+            if sub_text:
+                from voiceover_generator import proportional_boundaries
+
+                entry["narration"]["spoken_text"] = entry["narration"]["text"]
+                entry["narration"]["text"] = sub_text
+                entry["narration"]["boundaries"] = proportional_boundaries(sub_text, float(p.voice["duration"]))
         scenes.append(entry)
     return {
         "title": sb["project"]["title"], "storyboard": str(storyboard_path.resolve()),

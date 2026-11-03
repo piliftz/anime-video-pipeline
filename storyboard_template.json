@@ -126,7 +126,8 @@
         "speaker": "Narrator",
         "text": "Every spring, the wind carries a promise across the hills of Hoshimachi.",
         "offset": 0.6,
-        "tail": 0.8
+        "tail": 0.8,
+        "subtitle_text": null
       },
       "fx": {
         "ken_burns": {
