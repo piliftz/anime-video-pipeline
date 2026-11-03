@@ -149,7 +149,7 @@ to the storyboard file**. Unspecified keys fall back to the defaults below.
 |---|---|
 | `project` | `title`, `output`, `resolution` [1920,1080], `fps` 24, `fit` (`cover`/`contain`/`stretch`), `background_color`, `crf` 16, `preset` `slow`, `tune` `animation`, `audio_bitrate` `192k` |
 | `voice_defaults` | `voice`, `rate`, `pitch`, `volume` for every narration line |
-| `speakers` | `{ "Name": { voice, rate, pitch, volume, subtitle_color } }`, used when a narration sets `speaker`. For Japanese voices: `{ "engine": "voicevox", "voicevox": { "speaker": "青山龍星", "style": "ノーマル", "speed": 0.95 } }` (needs the free VOICEVOX app/engine running locally; list voices with `python scripts/voicevox_client.py`) |
+| `speakers` | `{ "Name": { voice, rate, pitch, volume, subtitle_color } }`, used when a narration sets `speaker`. For Japanese voices: `{ "engine": "voicevox", "voicevox": { "speaker": "青山龍星", "style": "ノーマル", "speed": 0.95 } }` (install the engine with `python scripts/setup_voicevox.py`, which needs no desktop app; list voices with `python scripts/voicevox_client.py`) |
 | `audio` | `narration_volume`, `clip_audio_volume`, `bgm { path, volume, loop, duck_to, duck_fade, fade_in, fade_out }`. `duck_to` 0.35 means BGM drops to 35% while someone speaks. |
 | `transitions.default` | `{ "type": "cut" \| "fade_black" \| "crossfade", "duration": s }` |
 | `subtitles` | `enabled`, `burn_in`, `export_srt`, `soft_subtitles` (adds a selectable track), `show_speaker`, `max_chars_per_line`, `max_lines`, `min_cue_duration`, `style { font, font_size, bold, primary_color, outline_color, outline, shadow, shadow_alpha, blur, margin_v, margin_h, alignment, fade_in_ms, fade_out_ms }` |

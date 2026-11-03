@@ -20,6 +20,7 @@ import struct
 import sys
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 from pathlib import Path
 
@@ -102,7 +103,8 @@ def download(url: str, dest: Path, expected: int, retries: int = 8) -> None:
         if expected and have >= expected:
             break
         req = urllib.request.Request(url, headers={"User-Agent": "anime-video-pipeline"})
-        if os.environ.get("HF_TOKEN"):
+        # Only ever send the Hugging Face token to Hugging Face (this downloader is reused for GitHub).
+        if os.environ.get("HF_TOKEN") and urllib.parse.urlparse(url).hostname in ("huggingface.co", "hf.co"):
             req.add_header("Authorization", f"Bearer {os.environ['HF_TOKEN']}")
         if have:
             req.add_header("Range", f"bytes={have}-")

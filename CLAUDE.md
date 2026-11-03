@@ -26,6 +26,8 @@ scripts/
                           -> assembled storyboard -> orchestrator render. Stages: keyframes|motion|assemble|status
   voicevox_client.py      VOICEVOX (local JA TTS) client: name->style-id resolve, audio_query+synthesis, terms;
                           auto-starts run.exe (VOICEVOX_RUN). CLI lists voices / auditions a line
+  setup_voicevox.py       installs the VOICEVOX engine (Windows CPU .vvpp = ZIP, split parts listed in .vvpp.txt)
+                          from GitHub releases, sets VOICEVOX_RUN, verifies. No desktop app / Japanese UI needed
   lock_refs.py            copy picked reference takes -> series/<show>/refs/*.jpg + record seed/prompt
   contact_sheet.py        labeled grid of generated takes (rows per take group, '#n · seed') for picking
 series/arc_forge/         the show: bible.md, characters.json (canonical tags), ep01_pilot.script.json (EN/JA,
@@ -68,7 +70,8 @@ python scripts/setup_models.py --verify
 python scripts/episode_producer.py series/arc_forge/ep01_pilot.script.json keyframes|motion|status
 python scripts/episode_producer.py series/arc_forge/ep01_pilot.script.json assemble --draft --tts-fallback silence
 python scripts/episode_producer.py series/arc_forge/ep01_pilot.script.json assemble --lang ja --draft
-python scripts/voicevox_client.py                         # list VOICEVOX voices (engine/app must be installed)
+python scripts/setup_voicevox.py                          # install the VOICEVOX engine (no Japanese UI)
+python scripts/voicevox_client.py                         # list VOICEVOX voices
 python scripts/setup_models.py --model wan2.2-ti2v-5b
 python scripts/video_generator.py assets/generated/s02_hikari.png --prompt "..." [--length 121 --size 1280x704]
 ```

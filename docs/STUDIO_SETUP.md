@@ -26,7 +26,7 @@ C:\Users\<you>\
 | Promo | Remotion + Three.js + GSAP | ✅ | `promo/`, renders tested in the cloud sandbox |
 | Assembly | Python pipeline (moviepy + ffmpeg) | ✅ | lossless master, a single final encode |
 | English voices | edge-tts (current) → Kokoro-82M | ✅ / 📋 | Kokoro 0.9.4, Apache-2.0, **needs Python ≤ 3.12** |
-| Japanese voices | VOICEVOX (preferred) or Kokoro `j` | 📋 | Kokoro has few Japanese voices, and its Japanese extra is hard to install on Windows |
+| Japanese voices | VOICEVOX engine via `scripts/setup_voicevox.py` | 🧪 | Kokoro has few Japanese voices, and its Japanese extra is hard to install on Windows |
 | Subtitles | built from the known script + TTS timings | ✅ | No speech recognition needed: we already know every word and its timing |
 | Subtitle QA | faster-whisper 1.2.1 (MIT) | 📋 | Used to *catch mispronunciations* (transcribe the TTS, compare with the script) |
 | Voice conversion | Ultimate RVC | ⛔ deferred | See below |
