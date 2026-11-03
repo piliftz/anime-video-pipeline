@@ -48,6 +48,11 @@ batch was slower per frame than the single test. Combined with item 1's bonus, t
 episode length and how many cuts per episode can move.
 
 ## Done
+- 2026-11-03: **Anime timing** (`fx.anime_timing.on` 2/3; drawing steps, camera stays smooth; speed lines
+  follow the same beat) and **impact frames** (`fx.impact`: inverted B&W hit frame, flash, settling
+  shake). Verified frame-by-frame in the lossless master. Cold open: twos everywhere, threes + impact on
+  c007; Gōda's c003 line split across c003/c004 to remove a 5 s freeze.
+  Not yet tried: generating fewer Wan frames for on-threes cuts (the possible GPU saving in item 1).
 - 2026-11-03: VOICEVOX Japanese dub (`voicevox_client.py`, engine `voicevox` per speaker,
   per-line `ja_style`, EN subtitles under JA audio via `subtitle_text`, auto credits + terms).
 - 2026-11-03: Title card (c009) rendered from `promo/` as PNG frames and cut into the cold open.

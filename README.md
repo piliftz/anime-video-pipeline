@@ -189,6 +189,12 @@ to the storyboard file**. Unspecified keys fall back to the defaults below.
   "fade_out": 0.5
 }
 ```
+- `anime_timing: { "enabled": true, "on": 2 }` holds each frame of a video/frame-sequence clip for 2 ("on twos",
+  12 drawings/s) or 3 ("on threes", 8/s) frames for a drawn-anime cadence. It applies to the drawing only;
+  Ken Burns camera moves stay smooth.
+- `impact: { "enabled": true, "at": [0.0], "shake": 24, "settle": 0.5, "invert": true, "flash": true }`:
+  anime impact hit at each listed second. One inverted high-contrast B&W frame, a white flash, then a
+  camera shake that settles over `settle` seconds.
 - Ken Burns zoom must be ≥ 1.0, and panning only has an effect when zoom > 1 because there is
   nothing to pan across otherwise. Easings: `linear`, `ease_in`, `ease_out`, `ease_in_out`, `sine`.
 - Grade overrides: `saturation`, `contrast`, `brightness`, `gamma`, `black_lift`,

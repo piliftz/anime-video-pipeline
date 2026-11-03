@@ -83,6 +83,8 @@ FX_DEFAULTS = {
     "ken_burns": {"enabled": False},
     "color_grade": {"enabled": False},
     "speed_lines": {"enabled": False},
+    "anime_timing": {"enabled": False, "on": 2},   # hold each drawing 2 (twos) or 3 (threes) frames
+    "impact": {"enabled": False, "at": [0.0]},     # inverted frame + flash + shake at these seconds
     "fade_in": 0.0,
     "fade_out": 0.0,
 }
@@ -208,7 +210,7 @@ def load_storyboard(path: Path) -> tuple[dict, Path]:
 
 def validate_storyboard(sb: dict, base_dir: Path, allow_missing: bool) -> list[str]:
     """Return a list of human-readable problems. Empty list == valid."""
-    from cinematic_fx import resolve_grade, resolve_ken_burns
+    from cinematic_fx import resolve_grade, resolve_ken_burns, validate_timing_and_impact
 
     errors: list[str] = []
     proj = sb["project"]
@@ -256,6 +258,7 @@ def validate_storyboard(sb: dict, base_dir: Path, allow_missing: bool) -> list[s
                 style = fx["speed_lines"].get("style", "radial")
                 if style not in ("radial", "horizontal", "vertical"):
                     raise PipelineError(f"speed_lines.style '{style}' invalid")
+            validate_timing_and_impact(fx)
         except PipelineError as exc:
             errors.append(f"[{sid}] {exc}")
         nar = sc["narration"] or {}
@@ -574,7 +577,7 @@ def build_scene(plan: ScenePlan, sb: dict, canvas: tuple[int, int], next_plan: S
     bg = parse_color(proj["background_color"])
     clip = load_scene_source(plan, canvas)
     clip = fit_duration(clip, plan.duration, cfg["extend"])
-    clip = apply_scene_fx(clip, cfg["fx"], canvas, cfg["fit"] or proj["fit"], bg)
+    clip = apply_scene_fx(clip, cfg["fx"], canvas, cfg["fit"] or proj["fit"], bg, fps=float(proj["fps"]))
 
     overlays = [build_overlay(ov, canvas, plan.duration) for ov in cfg["text_overlays"]]
     if overlays:

@@ -424,17 +424,104 @@ def speed_lines(clip, cfg: dict | None):
 # --------------------------------------------------------------------------- #
 # Combined entry point
 # --------------------------------------------------------------------------- #
+ANIME_TIMING_DEFAULTS = {"enabled": False, "on": 2}
+IMPACT_DEFAULTS = {"enabled": False, "at": [0.0], "invert": True, "flash": True, "shake": 24.0, "settle": 0.5,
+                   "seed": 11}
+
+
+def validate_timing_and_impact(fx: dict) -> None:
+    timing = {**ANIME_TIMING_DEFAULTS, **(fx.get("anime_timing") or {})}
+    if timing["enabled"] and int(timing["on"]) not in (1, 2, 3, 4):
+        raise PipelineError(f"anime_timing.on must be 1-4 (2 = 'on twos', 3 = 'on threes'); got {timing['on']}")
+    impact = {**IMPACT_DEFAULTS, **(fx.get("impact") or {})}
+    if impact["enabled"]:
+        hits = impact["at"]
+        if not isinstance(hits, list) or not all(isinstance(h, (int, float)) and h >= 0 for h in hits):
+            raise PipelineError(f"impact.at must be a list of seconds >= 0; got {hits!r}")
+
+
+def anime_timing(clip, cfg: dict | None, fps: float):
+    """Hold each drawing for `on` frames (on twos = 12 drawings/s at 24 fps, on threes = 8).
+
+    Applied to the source drawing BEFORE the camera transform, so Ken Burns moves stay smooth while the
+    animation steps, the way TV anime composites limited animation under smooth camera work."""
+    cfg = {**ANIME_TIMING_DEFAULTS, **(cfg or {})}
+    on = int(cfg["on"])
+    if not cfg["enabled"] or on <= 1 or clip.duration is None:  # (harmless on stills: nothing to hold)
+        return clip
+    step = on / float(fps)
+
+    def remap(t):
+        held = np.floor(np.asarray(t, dtype=np.float64) / step + 1e-6) * step
+        return float(held) if np.ndim(held) == 0 else held
+
+    return clip.time_transform(remap, apply_to=["mask"])
+
+
+def impact_frames(clip, cfg: dict | None, fps: float):
+    """Anime impact hits: 1 inverted high-contrast B&W frame, a white flash, then a decaying shake.
+
+    Same look as promo/src/components/Fx.tsx `Impact`. Shake offsets are seeded per hit and frame, so renders
+    are deterministic. The shake re-samples only the ~settle-seconds after each hit."""
+    cfg = {**IMPACT_DEFAULTS, **(cfg or {})}
+    if not cfg["enabled"] or not cfg["at"]:
+        return clip
+    hits = sorted(float(h) for h in cfg["at"])
+    settle_frames = max(1, round(float(cfg["settle"]) * fps))
+    W, H = clip.size
+
+    def frame_fn(get_frame, t):
+        frame = _rgb(get_frame(t))
+        past = [h for h in hits if h <= t + 1e-6]
+        if not past:
+            return frame
+        hit = past[-1]
+        # Frames since the hit, rounded DOWN: cuts can start between video frames, and rounding to nearest
+        # skipped frame 0 (the inverted hit frame) entirely.
+        k = int(np.floor((t - hit) * fps + 1e-6))
+        if k >= settle_frames:
+            return frame
+        out = frame
+        decay = 1.0 - k / settle_frames
+        amp = float(cfg["shake"]) * (H / 1080.0) * decay
+        if amp > 0.5:
+            rng = np.random.default_rng([int(cfg["seed"]), int(round(hit * 1000)), k])
+            dx, dy = rng.uniform(-amp, amp, 2)
+            zoom = 1.0 + 0.04 * decay  # zoom in slightly so the shifted frame never shows an edge
+            bw, bh = W / zoom, H / zoom
+            x0 = min(max((W - bw) / 2 + dx, 0.0), W - bw)
+            y0 = min(max((H - bh) / 2 + dy, 0.0), H - bh)
+            out = np.asarray(Image.fromarray(out).resize((W, H), Image.Resampling.BICUBIC,
+                                                         box=(x0, y0, x0 + bw, y0 + bh)))
+        if k == 0 and cfg["invert"]:
+            gray = out.astype(np.float32) @ LUMA
+            gray = np.clip((255.0 - gray - 128.0) * 4.0 + 128.0, 0, 255).astype(np.uint8)  # invert, contrast x4
+            out = np.repeat(gray[..., None], 3, axis=2)
+        elif cfg["flash"] and k in (1, 2):
+            a = 0.85 if k == 1 else 0.35
+            out = (out.astype(np.float32) * (1 - a) + 255.0 * a + 0.5).astype(np.uint8)
+        return out
+
+    return clip.transform(frame_fn, apply_to=[])
+
+
 def apply_scene_fx(clip, fx: dict | None, canvas: tuple[int, int], fit: str = "cover",
-                   background=(0, 0, 0)):
-    """Apply camera -> grade -> speed lines according to a storyboard 'fx' block."""
+                   background=(0, 0, 0), fps: float = 24.0):
+    """Apply anime timing -> camera -> grade -> speed lines -> impact according to a storyboard 'fx' block."""
     fx = fx or {}
+    clip = anime_timing(clip, fx.get("anime_timing"), fps)
     clip = camera_transform(clip, canvas, fit, fx.get("ken_burns"), background)
     grade = fx.get("color_grade") or {}
     if grade.get("enabled"):
         clip = color_grade(clip, grade)
     lines = fx.get("speed_lines") or {}
     if lines.get("enabled"):
+        timing = {**ANIME_TIMING_DEFAULTS, **(fx.get("anime_timing") or {})}
+        if timing["enabled"] and int(timing["on"]) > 1 and "flicker_fps" not in lines:
+            # Effects animate on the same beat as the drawings (on threes -> 8 changes per second).
+            lines = {**lines, "flicker_fps": float(fps) / int(timing["on"])}
         clip = speed_lines(clip, lines)
+    clip = impact_frames(clip, fx.get("impact"), fps)
     return clip
 
 

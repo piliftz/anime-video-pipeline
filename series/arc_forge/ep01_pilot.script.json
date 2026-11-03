@@ -19,7 +19,8 @@
     "motion_prompt: plain English for Wan 2.2: describe what moves and how the camera moves.",
     "ja_review: a native speaker must check these lines before the Japanese dub is published.",
     "motion: 'wan' = animated with Wan 2.2 (slow: minutes per clip); 'still' = keyframe + pipeline camera; 'clip' = pre-rendered frames (e.g. the Remotion title card, path relative to this file). 'fx' (any motion type) = pipeline effects such as ken_burns or speed_lines.",
-    "voices_ja: VOICEVOX characters by name (provisional casting). List installed voices with `python scripts/voicevox_client.py`; audition with `--say \"テキスト\" --speaker 名前 --style スタイル`. ja_style on a line picks that character's emotion style (unknown -> default style + warning). The JA dub shows EN subtitles."
+    "voices_ja: VOICEVOX characters by name (provisional casting). List installed voices with `python scripts/voicevox_client.py`; audition with `--say \"テキスト\" --speaker 名前 --style スタイル`. ja_style on a line picks that character's emotion style (unknown -> default style + warning). The JA dub shows EN subtitles.",
+    "anime_timing (production.assembly default, per-cut fx override): hold each Wan frame 2 ('on twos') or 3 ('on threes') frames for a drawn-anime cadence; camera moves stay smooth. fx.impact: inverted B&W frame + white flash + settling shake at the given seconds."
   ],
   "segments": [
     {
@@ -80,8 +81,8 @@
               "speaker": "Goda",
               "emotion": "cold",
               "delivery": "measured",
-              "en": "Kaito Kurogane. Rank Zero. Catalyst output: zero. Every test since you were born.",
-              "ja": "黒鉄カイト。ランク・ゼロ。触媒出力……ゼロ。生まれてから、一度もだ。",
+              "en": "Kaito Kurogane. Rank Zero.",
+              "ja": "黒鉄カイト。ランク・ゼロ。",
               "ja_review": true
             }
           ],
@@ -98,8 +99,18 @@
           "keyframe_prompt": "1boy, solo, eyes focus, close-up, amber eyes, black hair, orange hair streak, dim light, reflection in eyes, serious",
           "motion_prompt": "the eyes slowly look up toward the camera, flickering light reflects in the pupils",
           "sfx": [],
-          "dialogue": [],
-          "motion": "wan"
+          "dialogue": [
+            {
+              "speaker": "Goda",
+              "emotion": "cold",
+              "delivery": "off-screen, over Kaito's eyes",
+              "en": "Catalyst output: zero. Every test since you were born.",
+              "ja": "触媒出力……ゼロ。生まれてから、一度もだ。",
+              "ja_review": true
+            }
+          ],
+          "motion": "wan",
+          "edit_note": "Gōda's line continues off-screen over this cut: the insult lands on Kaito's face."
         },
         {
           "id": "c005",
@@ -176,6 +187,16 @@
               "enabled": true,
               "style": "radial",
               "opacity": 0.5
+            },
+            "anime_timing": {
+              "enabled": true,
+              "on": 3
+            },
+            "impact": {
+              "enabled": true,
+              "at": [
+                0.0
+              ]
             }
           },
           "negative": "volcano, mountain, nature, sky"
@@ -348,6 +369,10 @@
       "subtitle_language": {
         "en": "en",
         "ja": "en"
+      },
+      "anime_timing": {
+        "enabled": true,
+        "on": 2
       }
     }
   }

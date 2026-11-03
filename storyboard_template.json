@@ -225,6 +225,18 @@
           "inner_radius": 0.42,
           "opacity": 0.5,
           "start": 1.2
+        },
+        "anime_timing": {
+          "enabled": true,
+          "on": 2
+        },
+        "impact": {
+          "enabled": true,
+          "at": [
+            1.2
+          ],
+          "shake": 24,
+          "settle": 0.5
         }
       },
       "transition_in": {

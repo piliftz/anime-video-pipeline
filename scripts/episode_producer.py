@@ -233,7 +233,8 @@ def build_storyboard(ep: Episode, lang: str) -> tuple[dict, list[str]]:
         "speakers": voices,
         "transitions": {"default": {"type": "cut", "duration": 0.0}},
         "subtitles": asm.get("subtitles", {}),
-        "fx_defaults": {"color_grade": {"enabled": bool(grade), **grade}},
+        "fx_defaults": {"color_grade": {"enabled": bool(grade), **grade},
+                        "anime_timing": asm.get("anime_timing", {"enabled": False})},
         "scenes": scenes,
     }
     return storyboard, warnings
