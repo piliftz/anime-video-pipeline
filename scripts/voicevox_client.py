@@ -99,6 +99,14 @@ def _find_engine() -> Path | None:
     env = os.environ.get("VOICEVOX_RUN")
     candidates = [Path(env)] if env else []
     local = os.environ.get("LOCALAPPDATA")
+    # Where scripts/setup_voicevox.py installs (newest version first), so it works even in the same
+    # terminal right after installing, before a new window picks up VOICEVOX_RUN.
+    root = Path(local) / "voicevox_engine" if local else Path.home() / "voicevox_engine"
+    if root.is_dir():
+        versions = sorted((d for d in root.iterdir() if d.is_dir() and not d.name.startswith("_")),
+                          key=lambda d: [int(x) if x.isdigit() else x for x in d.name.replace("-", ".").split(".")],
+                          reverse=True)
+        candidates += [d / "run.exe" for d in versions]
     if local:  # default per-user install of the VOICEVOX app on Windows
         candidates += [Path(local) / "Programs" / "VOICEVOX" / "vv-engine" / "run.exe",
                        Path(local) / "Programs" / "VOICEVOX" / "run.exe"]
