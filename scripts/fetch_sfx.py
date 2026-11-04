@@ -11,6 +11,8 @@ high-quality preview MP3s (about 128 kbps), fine for SFX; original files need a 
   python scripts/fetch_sfx.py search "chain clink" --name chain_clink      # downloads 3 candidates
   python scripts/fetch_sfx.py keep chain_clink 2                           # register candidate #2
   python scripts/fetch_sfx.py script series/arc_forge/ep01_pilot.script.json   # search every SFX the script needs
+  python scripts/fetch_sfx.py search "dark ambient drone" --name tension_drone --min-duration 30 --max-duration 180
+  python scripts/fetch_sfx.py keep tension_drone 1 --kind music              # CC0 music beds work the same way
 """
 
 from __future__ import annotations
@@ -64,10 +66,10 @@ def _get(url: str, timeout: int = 30) -> bytes:
         raise PipelineError(f"Cannot reach Freesound ({exc.reason}).") from exc
 
 
-def search(query: str, max_duration: float = 8.0, count: int = 3) -> list[dict]:
+def search(query: str, max_duration: float = 8.0, count: int = 3, min_duration: float = 0.1) -> list[dict]:
     params = {
         "query": query,
-        "filter": f'license:"Creative Commons 0" duration:[0.1 TO {max_duration}]',
+        "filter": f'license:"Creative Commons 0" duration:[{min_duration} TO {max_duration}]',
         "fields": "id,name,username,license,duration,previews,url",
         "sort": "score",
         "page_size": str(max(count * 3, 10)),
@@ -78,10 +80,12 @@ def search(query: str, max_duration: float = 8.0, count: int = 3) -> list[dict]:
     return results[:count]
 
 
-def stage_candidates(query: str, name: str, max_duration: float, count: int) -> list[dict]:
-    results = search(query, max_duration, count)
+def stage_candidates(query: str, name: str, max_duration: float, count: int,
+                     min_duration: float = 0.1) -> list[dict]:
+    results = search(query, max_duration, count, min_duration)
     if not results:
-        raise PipelineError(f"No CC0 results for '{query}' under {max_duration}s; try other words or --max-duration.")
+        raise PipelineError(f"No CC0 results for '{query}' between {min_duration}s and {max_duration}s; "
+                            "try other words or durations.")
     out_dir = ensure_dir(CANDIDATES)
     for old in out_dir.glob(f"{name}_*.mp3"):
         old.unlink()
@@ -108,7 +112,7 @@ def keep(name: str, n: int, kind: str = "sfx") -> Path:
         raise PipelineError(f"Candidate #{n} for '{name}' not found.")
     if CC0_URL_MARK not in cand["license_url"]:
         raise PipelineError(f"Candidate #{n} is not CC0 ({cand['license_url']}).")
-    dest = ensure_dir(SFX_DIR) / f"{name}.mp3"
+    dest = ensure_dir(ASSETS_DIR / "audio" / "music" if kind == "music" else SFX_DIR) / f"{name}.mp3"
     shutil.copyfile(cand["file"], dest)
     add(dest, name=name, kind=kind, source="freesound", license_="CC0", author=cand["author"], url=cand["url"],
         attribution=None, force=True)
@@ -131,11 +135,12 @@ def main(argv: list[str] | None = None) -> int:
     s.add_argument("query")
     s.add_argument("--name", required=True, help="Id used in scripts, e.g. chain_clink")
     s.add_argument("--max-duration", type=float, default=8.0)
+    s.add_argument("--min-duration", type=float, default=0.1, help="e.g. 30 for a music bed that should not loop")
     s.add_argument("--count", type=int, default=3)
     k = sub.add_parser("keep", help="Register candidate N as the sound for NAME.")
     k.add_argument("name")
     k.add_argument("n", type=int)
-    k.add_argument("--kind", default="sfx", choices=["sfx", "ambience"])
+    k.add_argument("--kind", default="sfx", choices=["sfx", "ambience", "music"])
     sc = sub.add_parser("script", help="Search candidates for every SFX an episode script needs.")
     sc.add_argument("script", type=Path)
     sc.add_argument("--auto-keep", action="store_true", help="Register candidate #1 for every name (no audition).")
@@ -143,7 +148,7 @@ def main(argv: list[str] | None = None) -> int:
     setup_logging()
     try:
         if args.cmd == "search":
-            stage_candidates(args.query, args.name, args.max_duration, args.count)
+            stage_candidates(args.query, args.name, args.max_duration, args.count, args.min_duration)
             print(f"Listen in {CANDIDATES}, then: python scripts/fetch_sfx.py keep {args.name} <n>")
         elif args.cmd == "keep":
             print(f"kept {keep(args.name, args.n, args.kind)}")

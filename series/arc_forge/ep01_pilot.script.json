@@ -467,14 +467,16 @@
       },
       "music_library": {
         "tension_drone": {
-          "where": "YouTube Studio > Audio Library",
-          "look_for": "Genre Cinematic or Ambient, Mood Dark; slow, no drums, at least 40 s",
-          "file": "assets/audio/music/tension_drone.mp3"
+          "freesound_search": "dark ambient drone",
+          "min_duration": 30,
+          "max_duration": 180,
+          "look_for": "low, slow, no drums or melody; at least 30 s so it doesn't loop"
         },
         "title_sting": {
-          "where": "YouTube Studio > Audio Library",
-          "look_for": "Mood Dramatic; a strong opening hit (only the first ~5 s are used)",
-          "file": "assets/audio/music/title_sting.mp3"
+          "freesound_search": "cinematic trailer hit",
+          "min_duration": 1,
+          "max_duration": 15,
+          "look_for": "one strong dramatic hit with a tail of a few seconds"
         }
       }
     }

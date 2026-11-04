@@ -304,7 +304,10 @@ setx FREESOUND_API_KEY "your-key"        # once, then open a new terminal
 .venv\Scripts\python scripts\fetch_sfx.py search "handcuffs chain clink" --name chain_clink   # 3 candidates to listen to
 .venv\Scripts\python scripts\fetch_sfx.py keep chain_clink 2
 .venv\Scripts\python scripts\fetch_sfx.py script series\arc_forge\ep01_pilot.script.json   # every SFX a script needs
-# Music you downloaded (e.g. YouTube Studio > Audio Library):
+# CC0 music beds from Freesound work the same way (no YouTube channel needed):
+.venv\Scripts\python scripts\fetch_sfx.py search "dark ambient drone" --name tension_drone --min-duration 30 --max-duration 180
+.venv\Scripts\python scripts\fetch_sfx.py keep tension_drone 1 --kind music
+# Music you downloaded elsewhere (e.g. YouTube Studio > Audio Library, which needs a YouTube channel):
 .venv\Scripts\python scripts\audio_manifest.py add assets\audio\music\tension_drone.mp3 --name tension_drone ^
     --kind music --source youtube_audio_library --license "YouTube Audio Library" --attribution "<if the library shows one>"
 .venv\Scripts\python scripts\audio_manifest.py check
