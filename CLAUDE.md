@@ -127,6 +127,10 @@ a visual change works without inspecting frames.
   cues. Every audio file must be in assets/audio/manifest.json (`audio.require_license`, default true); renders
   write <output>_credits.txt with required attributions. Episode scripts reference audio by manifest NAME;
   unregistered names are skipped with a warning. Audio files are gitignored (never redistribute licensed audio).
+- Action pacing: cut `fx` supports crash_zoom/slam_out/whip_* Ken Burns presets, `shake`, `impact.flash_color`;
+  segment `dialogue_timing: {offset, tail}` tightens dialogue padding. Prefer FX-driven stills for action and
+  spend Wan on 3-4 hero shots per minute (fast motion is Wan's weakest area and every cut costs GPU).
+- Final mix is loudness-normalized (`project.loudness_lufs`, default -14, -1 dBTP) in final_encode.
 - moviepy `time_transform` drops `.duration` unless keep_duration=True: always pass it for same-length remaps.
 - Planned work and its rationale lives in docs/ROADMAP.md (anime timing, impact frames, ControlNet, speed).
 

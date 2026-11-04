@@ -67,6 +67,7 @@ PROJECT_DEFAULTS = {
     "preset": "slow",
     "tune": "animation",
     "audio_bitrate": "192k",
+    "loudness_lufs": -14.0,    # final mix loudness target (EBU R128); null = leave the mix untouched
 }
 AUDIO_DEFAULTS = {
     "narration_volume": 1.0,
@@ -96,6 +97,7 @@ FX_DEFAULTS = {
     "color_grade": {"enabled": False},
     "speed_lines": {"enabled": False},
     "anime_timing": {"enabled": False, "on": 2},   # hold each drawing 2 (twos) or 3 (threes) frames
+    "shake": {"enabled": False, "amount": 10.0, "fps": 12},  # continuous energy rumble
     "impact": {"enabled": False, "at": [0.0]},     # inverted frame + flash + shake at these seconds
     "fade_in": 0.0,
     "fade_out": 0.0,
@@ -236,6 +238,9 @@ def validate_storyboard(sb: dict, base_dir: Path, allow_missing: bool) -> list[s
         errors.append("project.fps must be > 0.")
     if proj["fit"] not in ("cover", "contain", "stretch"):
         errors.append("project.fit must be cover, contain or stretch.")
+    lufs = proj.get("loudness_lufs")
+    if lufs is not None and not -30 <= float(lufs) <= -5:
+        errors.append(f"project.loudness_lufs must be between -30 and -5 (YouTube ~ -14), or null; got {lufs}.")
     seen: set[str] = set()
     for sc in sb["scenes"]:
         sid = sc["id"]
@@ -916,7 +921,7 @@ def render(args: argparse.Namespace) -> Path:
         fps=fps,
         crf=int(args.crf if args.crf is not None else (23 if args.draft else proj["crf"])),
         preset="veryfast" if args.draft else proj["preset"],
-        tune=proj["tune"], audio_bitrate=proj["audio_bitrate"],
+        tune=proj["tune"], audio_bitrate=proj["audio_bitrate"], loudness_lufs=proj.get("loudness_lufs"),
     )
 
     write_audio_credits(sb, base_dir, output)

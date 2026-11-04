@@ -58,6 +58,15 @@ KEN_BURNS_PRESETS: dict[str, dict] = {
     "pan_up":     {"zoom_start": 1.12, "zoom_end": 1.12, "pan_start": [0.50, 0.62], "pan_end": [0.50, 0.38]},
     "pan_down":   {"zoom_start": 1.12, "zoom_end": 1.12, "pan_start": [0.50, 0.38], "pan_end": [0.50, 0.62]},
     "drift":      {"zoom_start": 1.04, "zoom_end": 1.08, "pan_start": [0.48, 0.51], "pan_end": [0.53, 0.49]},
+    # Action presets: fast start, hard landing (ease_out). Best on short cuts (0.5-1.5 s).
+    "crash_zoom": {"zoom_start": 1.00, "zoom_end": 1.35, "pan_start": [0.50, 0.50], "pan_end": [0.50, 0.46],
+                   "easing": "ease_out"},
+    "slam_out":   {"zoom_start": 1.30, "zoom_end": 1.00, "pan_start": [0.50, 0.45], "pan_end": [0.50, 0.50],
+                   "easing": "ease_out"},
+    "whip_left":  {"zoom_start": 1.18, "zoom_end": 1.18, "pan_start": [0.80, 0.50], "pan_end": [0.25, 0.50],
+                   "easing": "ease_out"},
+    "whip_right": {"zoom_start": 1.18, "zoom_end": 1.18, "pan_start": [0.20, 0.50], "pan_end": [0.75, 0.50],
+                   "easing": "ease_out"},
 }
 KEN_BURNS_DEFAULTS = {"enabled": False, "preset": None, "easing": "ease_in_out", **KEN_BURNS_PRESETS["push_in"]}
 
@@ -426,15 +435,20 @@ def speed_lines(clip, cfg: dict | None):
 # --------------------------------------------------------------------------- #
 ANIME_TIMING_DEFAULTS = {"enabled": False, "on": 2}
 IMPACT_DEFAULTS = {"enabled": False, "at": [0.0], "invert": True, "flash": True, "shake": 24.0, "settle": 0.5,
-                   "seed": 11}
+                   "seed": 11, "flash_color": "#FFFFFF"}  # e.g. "#FF7A1A" ember / "#19E6FF" cyan catalyst flash
+SHAKE_DEFAULTS = {"enabled": False, "amount": 10.0, "fps": 12, "seed": 5}  # px at 1080p; offset changes `fps`/s
 
 
 def validate_timing_and_impact(fx: dict) -> None:
     timing = {**ANIME_TIMING_DEFAULTS, **(fx.get("anime_timing") or {})}
     if timing["enabled"] and int(timing["on"]) not in (1, 2, 3, 4):
         raise PipelineError(f"anime_timing.on must be 1-4 (2 = 'on twos', 3 = 'on threes'); got {timing['on']}")
+    shake = {**SHAKE_DEFAULTS, **(fx.get("shake") or {})}
+    if shake["enabled"] and (float(shake["amount"]) < 0 or float(shake["fps"]) <= 0):
+        raise PipelineError("shake.amount must be >= 0 and shake.fps > 0")
     impact = {**IMPACT_DEFAULTS, **(fx.get("impact") or {})}
     if impact["enabled"]:
+        parse_color(impact["flash_color"])
         hits = impact["at"]
         if not isinstance(hits, list) or not all(isinstance(h, (int, float)) and h >= 0 for h in hits):
             raise PipelineError(f"impact.at must be a list of seconds >= 0; got {hits!r}")
@@ -468,6 +482,7 @@ def impact_frames(clip, cfg: dict | None, fps: float):
         return clip
     hits = sorted(float(h) for h in cfg["at"])
     settle_frames = max(1, round(float(cfg["settle"]) * fps))
+    flash_rgb = np.asarray(parse_color(cfg["flash_color"]), np.float32)
     W, H = clip.size
 
     def frame_fn(get_frame, t):
@@ -499,18 +514,42 @@ def impact_frames(clip, cfg: dict | None, fps: float):
             out = np.repeat(gray[..., None], 3, axis=2)
         elif cfg["flash"] and k in (1, 2):
             a = 0.85 if k == 1 else 0.35
-            out = (out.astype(np.float32) * (1 - a) + 255.0 * a + 0.5).astype(np.uint8)
+            out = (out.astype(np.float32) * (1 - a) + flash_rgb * a + 0.5).astype(np.uint8)
         return out
+
+    return clip.transform(frame_fn, apply_to=[])
+
+
+def camera_shake(clip, cfg: dict | None):
+    """Continuous energy rumble: a seeded random offset that changes `fps` times per second (stepped like
+    anime camera shake), with a slight zoom so frame edges never show. Deterministic per (seed, step)."""
+    cfg = {**SHAKE_DEFAULTS, **(cfg or {})}
+    if not cfg["enabled"] or float(cfg["amount"]) <= 0:
+        return clip
+    W, H = clip.size
+    amp = float(cfg["amount"]) * H / 1080.0
+    zoom = 1.0 + 2.2 * amp / min(W, H)
+    bw, bh = W / zoom, H / zoom
+
+    def frame_fn(get_frame, t):
+        frame = _rgb(get_frame(t))
+        step = int(np.floor(t * float(cfg["fps"]) + 1e-6))
+        dx, dy = np.random.default_rng([int(cfg["seed"]), step]).uniform(-amp, amp, 2)
+        x0 = min(max((W - bw) / 2 + dx, 0.0), W - bw)
+        y0 = min(max((H - bh) / 2 + dy, 0.0), H - bh)
+        return np.asarray(Image.fromarray(frame).resize((W, H), Image.Resampling.BICUBIC,
+                                                        box=(x0, y0, x0 + bw, y0 + bh)))
 
     return clip.transform(frame_fn, apply_to=[])
 
 
 def apply_scene_fx(clip, fx: dict | None, canvas: tuple[int, int], fit: str = "cover",
                    background=(0, 0, 0), fps: float = 24.0):
-    """Apply anime timing -> camera -> grade -> speed lines -> impact according to a storyboard 'fx' block."""
+    """Apply anime timing -> camera -> shake -> grade -> speed lines -> impact per a storyboard 'fx' block."""
     fx = fx or {}
     clip = anime_timing(clip, fx.get("anime_timing"), fps)
     clip = camera_transform(clip, canvas, fit, fx.get("ken_burns"), background)
+    clip = camera_shake(clip, fx.get("shake"))  # under grade + speed lines: lines stay screen-steady
     grade = fx.get("color_grade") or {}
     if grade.get("enabled"):
         clip = color_grade(clip, grade)

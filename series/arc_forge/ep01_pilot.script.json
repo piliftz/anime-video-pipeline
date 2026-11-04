@@ -21,7 +21,8 @@
     "motion: 'wan' = animated with Wan 2.2 (slow: minutes per clip); 'still' = keyframe + pipeline camera; 'clip' = pre-rendered frames (e.g. the Remotion title card, path relative to this file). 'fx' (any motion type) = pipeline effects such as ken_burns or speed_lines.",
     "voices_ja: VOICEVOX characters by name (provisional casting). List installed voices with `python scripts/voicevox_client.py`; audition with `--say \"テキスト\" --speaker 名前 --style スタイル`. ja_style on a line picks that character's emotion style (unknown -> default style + warning). The JA dub shows EN subtitles.",
     "anime_timing (production.assembly default, per-cut fx override): hold each Wan frame 2 ('on twos') or 3 ('on threes') frames for a drawn-anime cadence; camera moves stay smooth. fx.impact: inverted B&W frame + white flash + settling shake at the given seconds.",
-    "Audio: cut 'sfx' cues and segment 'audio.music' cues reference names registered in assets/audio/manifest.json (scripts/audio_manifest.py, scripts/fetch_sfx.py). Unregistered names are skipped with a warning so renders keep working while sounds are collected."
+    "Audio: cut 'sfx' cues and segment 'audio.music' cues reference names registered in assets/audio/manifest.json (scripts/audio_manifest.py, scripts/fetch_sfx.py). Unregistered names are skipped with a warning so renders keep working while sounds are collected.",
+    "Shonen pacing (act_a_seq1 on): mostly 'still' cuts of 0.8-2 s driven by pipeline FX (crash_zoom/whip presets, shake, colored impact flashes, speed lines) + 3-4 Wan hero shots per minute. Fast action is what Wan does worst and every cut costs GPU, so motion is spent only where it sells the moment. Keep valleys (comedy, silence) so the hype beats land."
   ],
   "segments": [
     {
@@ -300,15 +301,672 @@
       "sound_design_note": "Drone under c001-c006, hard stop into the c007 impact, SILENCE under c008 so Gōda's last line lands alone (sound drop), title sting on c009."
     },
     {
-      "id": "act_a",
-      "time": "1:25-8:30",
+      "id": "act_a_seq1",
+      "time": "after the title card",
+      "status": "written",
+      "location": "Spark-Forge Academy, Hazard Trial arena",
+      "time_of_day": "night",
+      "sound_design_note": "battle_theme drives a1_01-a1_19 but DROPS to silence for the a1_10-a1_12 zero-reading gag, then slams back in on the a1_13 fire wall. Impacts on every ignition and hit.",
+      "audio": {
+        "music": [
+          {
+            "name": "battle_theme",
+            "start_cut": "a1_01",
+            "end_cut": "a1_19",
+            "volume": 0.5,
+            "fade_in": 0.0,
+            "fade_out": 0.05,
+            "duck_to": 0.6,
+            "duck_fade": 0.15,
+            "drops": [
+              {
+                "start_cut": "a1_10",
+                "end_cut": "a1_12"
+              }
+            ]
+          }
+        ]
+      },
+      "cuts": [
+        {
+          "id": "a1_01",
+          "duration": 0.9,
+          "motion": "still",
+          "shot": "Smash-in, extreme wide, low angle",
+          "characters": [],
+          "action": "Packed academy arena at dusk; cyan and orange catalyst flares streak across the sky.",
+          "keyframe_prompt": "no humans, scenery, giant futuristic stadium, arena, crowd, night sky, cyan and orange energy flares, light beams, low angle, wide shot, dramatic",
+          "fx": {
+            "ken_burns": {
+              "enabled": true,
+              "preset": "crash_zoom"
+            },
+            "impact": {
+              "enabled": true,
+              "at": [
+                0.0
+              ],
+              "flash_color": "#FF7A1A",
+              "shake": 18
+            },
+            "shake": {
+              "enabled": true,
+              "amount": 5
+            }
+          },
+          "sfx": [
+            {
+              "name": "crowd_roar",
+              "at": 0.0,
+              "volume": 0.9
+            }
+          ],
+          "dialogue": [
+            {
+              "speaker": "Announcer",
+              "en": "Hazard Trial, Block Seven!",
+              "ja": "ハザード試験、第七ブロック！",
+              "emotion": "hype, shouting",
+              "ja_review": true
+            }
+          ]
+        },
+        {
+          "id": "a1_02",
+          "duration": 1.1,
+          "motion": "still",
+          "shot": "Whip pan across the holo-ring",
+          "characters": [],
+          "action": "Holographic rings and cyan panels ignite around the arena floor.",
+          "keyframe_prompt": "no humans, scenery, arena floor, glowing holographic rings, cyan light panels, energy, dynamic angle",
+          "fx": {
+            "ken_burns": {
+              "enabled": true,
+              "preset": "whip_right"
+            },
+            "speed_lines": {
+              "enabled": true,
+              "style": "horizontal",
+              "opacity": 0.4
+            }
+          },
+          "sfx": [
+            {
+              "name": "whoosh",
+              "at": 0.0,
+              "volume": 0.8
+            }
+          ],
+          "dialogue": [
+            {
+              "speaker": "Announcer",
+              "en": "Contestants, ignite your catalysts!",
+              "ja": "受験者、触媒を点火せよ！",
+              "emotion": "hype, shouting",
+              "ja_review": true
+            }
+          ]
+        },
+        {
+          "id": "a1_03",
+          "duration": 0.8,
+          "motion": "still",
+          "shot": "Insert, fire ignition",
+          "characters": [],
+          "action": "A student's fists burst into flame.",
+          "keyframe_prompt": "1boy, solo, school uniform, clenched fists, fire, flames from hands, fire aura, close-up, dynamic angle",
+          "fx": {
+            "ken_burns": {
+              "enabled": true,
+              "preset": "crash_zoom"
+            },
+            "impact": {
+              "enabled": true,
+              "at": [
+                0.0
+              ],
+              "flash_color": "#FF7A1A",
+              "shake": 16
+            }
+          },
+          "sfx": [
+            {
+              "name": "energy_burst",
+              "at": 0.0,
+              "volume": 0.9
+            }
+          ],
+          "dialogue": []
+        },
+        {
+          "id": "a1_04",
+          "duration": 0.8,
+          "motion": "still",
+          "shot": "Insert, lightning ignition",
+          "characters": [],
+          "action": "A student crackles with lightning.",
+          "keyframe_prompt": "1girl, solo, school uniform, lightning, electricity, blue lightning aura, glowing eyes, dynamic angle, upper body",
+          "fx": {
+            "ken_burns": {
+              "enabled": true,
+              "preset": "crash_zoom"
+            },
+            "impact": {
+              "enabled": true,
+              "at": [
+                0.0
+              ],
+              "flash_color": "#19E6FF",
+              "shake": 16
+            }
+          },
+          "sfx": [
+            {
+              "name": "energy_burst",
+              "at": 0.0,
+              "volume": 0.9
+            }
+          ],
+          "dialogue": []
+        },
+        {
+          "id": "a1_05",
+          "duration": 0.8,
+          "motion": "still",
+          "shot": "Insert, stone ignition",
+          "characters": [],
+          "action": "A big student's arms harden into glowing rock.",
+          "keyframe_prompt": "1boy, solo, muscular, rock armor, stone fists, glowing cracks, orange glow, low angle, upper body",
+          "fx": {
+            "ken_burns": {
+              "enabled": true,
+              "preset": "slam_out"
+            },
+            "impact": {
+              "enabled": true,
+              "at": [
+                0.0
+              ],
+              "flash_color": "#FF7A1A",
+              "shake": 16
+            }
+          },
+          "sfx": [
+            {
+              "name": "energy_burst",
+              "at": 0.0,
+              "volume": 0.9
+            }
+          ],
+          "dialogue": []
+        },
+        {
+          "id": "a1_06",
+          "duration": 3.0,
+          "motion": "wan",
+          "shot": "HERO: Rei's S-rank ignition",
+          "characters": [
+            "Rei"
+          ],
+          "action": "Rei ignites: cyan energy sigils swirl around her, her white ponytail whips upward.",
+          "keyframe_prompt": "1girl, solo, cyan energy, glowing sigils, magic circle, energy aura, wind, hair flowing, arena, night, cowboy shot, dramatic lighting",
+          "motion_prompt": "cyan energy rings expand outward around her, her long white ponytail and coat whip violently in the rising wind, sparks rise, slow push-in",
+          "fx": {
+            "impact": {
+              "enabled": true,
+              "at": [
+                0.25
+              ],
+              "flash_color": "#19E6FF",
+              "shake": 10
+            },
+            "shake": {
+              "enabled": true,
+              "amount": 4
+            }
+          },
+          "sfx": [
+            {
+              "name": "energy_charge",
+              "at": 0.0,
+              "volume": 0.9
+            }
+          ],
+          "dialogue": []
+        },
+        {
+          "id": "a1_07",
+          "duration": 1.6,
+          "motion": "still",
+          "shot": "Extreme close-up, Rei's eyes",
+          "characters": [
+            "Rei"
+          ],
+          "action": "Rei's cold cyan eyes slide toward the gate.",
+          "keyframe_prompt": "1girl, solo, eyes focus, close-up, cyan eyes, cold stare, white hair, cyan glow",
+          "fx": {
+            "ken_burns": {
+              "enabled": true,
+              "preset": "push_in"
+            }
+          },
+          "sfx": [],
+          "dialogue": [
+            {
+              "speaker": "Rei",
+              "en": "Stay out of my way, Zero.",
+              "ja": "邪魔しないで、ゼロ。",
+              "emotion": "cold, dismissive",
+              "ja_review": true
+            }
+          ]
+        },
+        {
+          "id": "a1_08",
+          "duration": 2.0,
+          "motion": "still",
+          "shot": "Tracking, Kaito sprints in late",
+          "characters": [
+            "Kaito"
+          ],
+          "action": "Kaito sprints through the gate, panicked, one shoe untied.",
+          "keyframe_prompt": "1boy, solo, running, sprinting, panicking, sweat, arena gate, motion lines, dynamic angle, full body",
+          "fx": {
+            "ken_burns": {
+              "enabled": true,
+              "preset": "whip_left"
+            },
+            "speed_lines": {
+              "enabled": true,
+              "style": "horizontal",
+              "opacity": 0.5
+            }
+          },
+          "sfx": [
+            {
+              "name": "footsteps_run",
+              "at": 0.0,
+              "volume": 0.8
+            }
+          ],
+          "dialogue": [
+            {
+              "speaker": "Kaito",
+              "en": "Wait, wait, wait! I'm registered!",
+              "ja": "待って待って待って！登録してます！",
+              "emotion": "panicked, comedic",
+              "ja_review": true
+            }
+          ]
+        },
+        {
+          "id": "a1_09",
+          "duration": 1.5,
+          "motion": "still",
+          "shot": "Low angle, Gōda on the proctor balcony",
+          "characters": [
+            "Goda"
+          ],
+          "action": "Gōda looks down from the balcony, arms crossed.",
+          "keyframe_prompt": "1boy, solo, from below, standing, arms crossed, balcony, arena, night, stern, looking down",
+          "fx": {
+            "ken_burns": {
+              "enabled": true,
+              "preset": "push_in"
+            }
+          },
+          "sfx": [],
+          "dialogue": [
+            {
+              "speaker": "Goda",
+              "en": "You're late, Kurogane.",
+              "ja": "遅いぞ、黒鉄。",
+              "emotion": "flat, unimpressed",
+              "ja_review": true
+            }
+          ]
+        },
+        {
+          "id": "a1_10",
+          "duration": 1.2,
+          "motion": "still",
+          "shot": "Insert, dead wrist scanner",
+          "characters": [],
+          "action": "Kaito's wrist scanner: every light stays dark.",
+          "keyframe_prompt": "close-up, wrist, wristband device, dark screen, no light, bandaged hand, fingerless gloves",
+          "fx": {},
+          "sfx": [
+            {
+              "name": "scanner_beep",
+              "at": 0.2,
+              "volume": 0.8
+            }
+          ],
+          "dialogue": [
+            {
+              "speaker": "Announcer",
+              "en": "Catalyst reading... zero?",
+              "ja": "触媒反応……ゼロ？",
+              "emotion": "confused",
+              "ja_review": true
+            }
+          ]
+        },
+        {
+          "id": "a1_11",
+          "duration": 1.4,
+          "motion": "still",
+          "shot": "Crowd reaction",
+          "characters": [],
+          "action": "The stands erupt in laughter, students pointing.",
+          "keyframe_prompt": "crowd, audience, many people, laughing, pointing, stadium seats, night, comedic",
+          "fx": {
+            "ken_burns": {
+              "enabled": true,
+              "preset": "pan_right"
+            }
+          },
+          "sfx": [
+            {
+              "name": "crowd_laugh",
+              "at": 0.0,
+              "volume": 0.9
+            }
+          ],
+          "dialogue": []
+        },
+        {
+          "id": "a1_12",
+          "duration": 1.6,
+          "motion": "still",
+          "shot": "Comedy beat, Kaito deadpan",
+          "characters": [
+            "Kaito"
+          ],
+          "action": "Kaito, deadpan, sweatdrop, totally unbothered.",
+          "keyframe_prompt": "1boy, solo, annoyed, half-closed eyes, sweatdrop, comedic, upper body, arena, night",
+          "fx": {},
+          "sfx": [],
+          "dialogue": [
+            {
+              "speaker": "Kaito",
+              "en": "Yeah, yeah. Laugh it up.",
+              "ja": "はいはい、笑ってろ。",
+              "emotion": "deadpan",
+              "ja_review": true
+            }
+          ]
+        },
+        {
+          "id": "a1_13",
+          "duration": 3.0,
+          "motion": "wan",
+          "shot": "HERO: the fire wall erupts",
+          "characters": [],
+          "action": "A wall of orange fire erupts from cracks in the arena floor and races forward.",
+          "keyframe_prompt": "no humans, arena floor, giant wall of orange fire erupting from cracks, sparks, debris, explosion, dramatic, low angle",
+          "motion_prompt": "a wall of orange fire erupts from the cracks and races toward the camera, sparks and debris fly past, violent camera shake",
+          "fx": {
+            "impact": {
+              "enabled": true,
+              "at": [
+                0.0
+              ],
+              "flash_color": "#FF7A1A",
+              "shake": 26
+            },
+            "shake": {
+              "enabled": true,
+              "amount": 12
+            }
+          },
+          "sfx": [
+            {
+              "name": "fire_roar",
+              "at": 0.0,
+              "volume": 1.0
+            },
+            {
+              "name": "impact_boom",
+              "at": 0.0,
+              "volume": 1.0
+            }
+          ],
+          "dialogue": []
+        },
+        {
+          "id": "a1_14",
+          "duration": 0.9,
+          "motion": "still",
+          "shot": "Kaito dive-rolls",
+          "characters": [
+            "Kaito"
+          ],
+          "action": "Kaito dive-rolls under a fire burst.",
+          "keyframe_prompt": "1boy, solo, rolling, dodging, fire, sparks, dynamic angle, motion lines, full body",
+          "fx": {
+            "speed_lines": {
+              "enabled": true,
+              "style": "radial",
+              "opacity": 0.5
+            },
+            "impact": {
+              "enabled": true,
+              "at": [
+                0.0
+              ],
+              "flash_color": "#FF7A1A",
+              "shake": 20
+            },
+            "shake": {
+              "enabled": true,
+              "amount": 10
+            }
+          },
+          "sfx": [
+            {
+              "name": "whoosh",
+              "at": 0.0,
+              "volume": 0.9
+            }
+          ],
+          "dialogue": []
+        },
+        {
+          "id": "a1_15",
+          "duration": 0.9,
+          "motion": "still",
+          "shot": "Low slide under the flames",
+          "characters": [
+            "Kaito"
+          ],
+          "action": "Kaito slides on his knees under a sheet of flame.",
+          "keyframe_prompt": "1boy, solo, sliding, knee slide, low angle, flames above, sparks, dynamic angle, motion lines",
+          "fx": {
+            "ken_burns": {
+              "enabled": true,
+              "preset": "whip_right"
+            },
+            "speed_lines": {
+              "enabled": true,
+              "style": "horizontal",
+              "opacity": 0.5
+            }
+          },
+          "sfx": [
+            {
+              "name": "whoosh",
+              "at": 0.0,
+              "volume": 0.8
+            }
+          ],
+          "dialogue": []
+        },
+        {
+          "id": "a1_16",
+          "duration": 1.4,
+          "motion": "still",
+          "shot": "Control room, red alarms",
+          "characters": [],
+          "action": "Red alarm lights; a technician's silhouette at a console.",
+          "keyframe_prompt": "control room, red alarm lights, warning lights, silhouette, computer monitors, dark, dramatic",
+          "fx": {
+            "shake": {
+              "enabled": true,
+              "amount": 6
+            }
+          },
+          "sfx": [
+            {
+              "name": "alarm_klaxon",
+              "at": 0.0,
+              "volume": 0.8
+            }
+          ],
+          "dialogue": [
+            {
+              "speaker": "Technician",
+              "en": "Readings are spiking. This isn't the simulation!",
+              "ja": "数値が急上昇……これはシミュレーションじゃない！",
+              "emotion": "panicked",
+              "ja_review": true
+            }
+          ]
+        },
+        {
+          "id": "a1_17",
+          "duration": 3.0,
+          "motion": "wan",
+          "shot": "HERO: a real Wildfire Vein breaks through",
+          "characters": [],
+          "action": "The floor splits; a real Wildfire Vein bursts up in jagged orange crystal.",
+          "keyframe_prompt": "no humans, arena floor splitting open, giant glowing orange crystal fissure, jagged crystals bursting upward, fire, explosion, dramatic, wide shot",
+          "motion_prompt": "glowing orange crystals burst upward from the fissure, the ground cracks and splits apart, debris flies, camera shakes and pushes in",
+          "fx": {
+            "anime_timing": {
+              "enabled": true,
+              "on": 3
+            },
+            "impact": {
+              "enabled": true,
+              "at": [
+                0.0
+              ],
+              "flash_color": "#FF7A1A",
+              "shake": 30
+            },
+            "shake": {
+              "enabled": true,
+              "amount": 16
+            }
+          },
+          "sfx": [
+            {
+              "name": "impact_boom",
+              "at": 0.0,
+              "volume": 1.0
+            },
+            {
+              "name": "glass_shatter",
+              "at": 0.1,
+              "volume": 0.8
+            },
+            {
+              "name": "fire_roar",
+              "at": 0.2,
+              "volume": 0.9
+            }
+          ],
+          "dialogue": []
+        },
+        {
+          "id": "a1_18",
+          "duration": 2.0,
+          "motion": "still",
+          "shot": "Rei's barrier cracking (from behind)",
+          "characters": [
+            "Rei"
+          ],
+          "action": "Rei, from behind, holds a cracking cyan barrier between the Vein and terrified students.",
+          "keyframe_prompt": "1girl, solo focus, from behind, energy barrier, cyan barrier, cracks in barrier, outstretched arm, fire, crystals, dramatic",
+          "fx": {
+            "impact": {
+              "enabled": true,
+              "at": [
+                1.2
+              ],
+              "flash_color": "#19E6FF",
+              "shake": 18
+            },
+            "shake": {
+              "enabled": true,
+              "amount": 8
+            }
+          },
+          "sfx": [
+            {
+              "name": "construct_crack",
+              "at": 1.2,
+              "volume": 1.0
+            }
+          ],
+          "dialogue": [
+            {
+              "speaker": "Rei",
+              "en": "It's not stopping!",
+              "ja": "……止まらない！",
+              "emotion": "strained",
+              "ja_review": true
+            }
+          ]
+        },
+        {
+          "id": "a1_19",
+          "duration": 1.2,
+          "motion": "still",
+          "shot": "Hook: Kaito's eyes reflect the fire",
+          "characters": [
+            "Kaito"
+          ],
+          "action": "Kaito's amber eyes, the fire reflected in them. He's already moving.",
+          "keyframe_prompt": "1boy, solo, eyes focus, close-up, amber eyes, fire reflection in eyes, determined, orange glow",
+          "fx": {
+            "ken_burns": {
+              "enabled": true,
+              "preset": "crash_zoom"
+            },
+            "impact": {
+              "enabled": true,
+              "at": [
+                0.9
+              ],
+              "flash_color": "#FF7A1A",
+              "shake": 12
+            }
+          },
+          "sfx": [
+            {
+              "name": "energy_charge",
+              "at": 0.3,
+              "volume": 0.8
+            }
+          ],
+          "dialogue": []
+        }
+      ],
+      "dialogue_timing": {
+        "offset": 0.05,
+        "tail": 0.15
+      }
+    },
+    {
+      "id": "act_a_rest",
       "status": "outline",
       "beats": [
-        "Morning of the ranking exam. Kaito's run to the academy (comedy: late, catalyst gate refuses to open for a Zero).",
-        "Catalyst reading ceremony: every scanner reads 0. Laughter. Gōda doesn't laugh.",
-        "Rei Shinonome's S-rank demonstration: flawless cyan constructs. Her eyes catch Kaito once.",
-        "Hazard-simulation exam briefing: teams must stabilize simulated Wildfire Veins.",
-        "Kaito teamed with no one ('Zeroes don't get teams'). He enters anyway."
+        "Kaito charges INTO the Vein while everyone runs out (hype: speed lines, ember flashes, battle theme peak).",
+        "He grabs the Vein bare-handed. Gray frost-cracks climb his arm; the Vein goes dark (the Zero-Catalyst reveal).",
+        "Every catalyst within ten meters flickers off, Rei's barrier included. Total silence.",
+        "Security drones lock on: 'Unregistered catalyst anomaly.' He's taken down (smash cut to the cold-open room)."
       ]
     },
     {
@@ -316,12 +974,8 @@
       "time": "8:30-16:30",
       "status": "outline",
       "beats": [
-        "Simulation glitch: the training vein turns real. Readings spike, alarms. (Plant: a technician quietly removes a device.)",
-        "Students trapped behind fire. Rei shields them but her construct is cracking.",
-        "Kaito runs IN while everyone runs out (impact frames, speed lines).",
-        "He grabs the vein bare-handed. Gray frost-cracks climb his arm. The vein goes dark.",
-        "Every catalyst within ten meters flickers off, including Rei's. Silence.",
-        "Security drones surround him. 'Unregistered catalyst anomaly.' He's taken down."
+        "(Folded into act_a_rest: the Vein, the grab and the arrest now happen early, shonen pacing.)",
+        "Aftermath and the Director thread: see resolution + stinger."
       ]
     },
     {
@@ -388,6 +1042,14 @@
         },
         "Rei": {
           "voice": "en-US-AriaNeural"
+        },
+        "Announcer": {
+          "voice": "en-US-EricNeural",
+          "rate": "+12%"
+        },
+        "Technician": {
+          "voice": "en-US-AriaNeural",
+          "rate": "+10%"
         }
       },
       "subtitles": {
@@ -423,6 +1085,22 @@
           "voicevox": {
             "speaker": "冥鳴ひまり",
             "style": "ノーマル"
+          }
+        },
+        "Announcer": {
+          "engine": "voicevox",
+          "voicevox": {
+            "speaker": "青山龍星",
+            "style": "熱血",
+            "speed": 1.15
+          }
+        },
+        "Technician": {
+          "engine": "voicevox",
+          "voicevox": {
+            "speaker": "冥鳴ひまり",
+            "style": "ノーマル",
+            "speed": 1.15
           }
         }
       },
@@ -463,6 +1141,33 @@
         },
         "chair_creak": {
           "search": "chair creak"
+        },
+        "crowd_roar": {
+          "search": "stadium crowd roar cheer"
+        },
+        "crowd_laugh": {
+          "search": "crowd laughing audience"
+        },
+        "whoosh": {
+          "search": "fast whoosh swoosh"
+        },
+        "energy_burst": {
+          "search": "energy blast burst magic"
+        },
+        "energy_charge": {
+          "search": "energy charge power up"
+        },
+        "footsteps_run": {
+          "search": "running footsteps fast"
+        },
+        "scanner_beep": {
+          "search": "error beep low"
+        },
+        "alarm_klaxon": {
+          "search": "alarm klaxon siren"
+        },
+        "construct_crack": {
+          "search": "glass crack ice crack"
         }
       },
       "music_library": {
@@ -477,6 +1182,12 @@
           "min_duration": 1,
           "max_duration": 15,
           "look_for": "one strong dramatic hit with a tail of a few seconds"
+        },
+        "battle_theme": {
+          "freesound_search": "industrial drum loop",
+          "min_duration": 30,
+          "max_duration": 240,
+          "look_for": "driving, high BPM (140+), heavy drums or industrial percussion; at least 30 s. Also try 'action drum loop', 'aggressive rock loop', 'epic battle percussion'."
         }
       }
     }

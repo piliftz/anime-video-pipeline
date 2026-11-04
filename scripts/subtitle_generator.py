@@ -301,6 +301,7 @@ def final_encode(
     audio_bitrate: str = "192k",
     fonts_dir: Path | None = FONTS_DIR,
     overwrite: bool = True,
+    loudness_lufs: float | None = -14.0,
 ) -> Path:
     """Single final H.264 encode: [burn ASS] -> BT.709 yuv420p -> MP4 (+optional soft SRT)."""
     import ffmpeg  # ffmpeg-python handles filter-argument escaping for us
@@ -336,8 +337,13 @@ def final_encode(
     if tune:
         out_kwargs["tune"] = tune
     if has_audio_stream(src):
-        streams.append(inp.audio)
-        out_kwargs.update({"acodec": "aac", "audio_bitrate": audio_bitrate})
+        audio = inp.audio
+        if loudness_lufs is not None:
+            # EBU R128 normalisation to the platform target (YouTube plays back at about -14 LUFS), with a
+            # -1 dBTP ceiling: impacts can be mixed hot without clipping, and quiet scenes aren't buried.
+            audio = audio.filter("loudnorm", I=float(loudness_lufs), TP=-1.0, LRA=11)
+        streams.append(audio)
+        out_kwargs.update({"acodec": "aac", "audio_bitrate": audio_bitrate, "ar": 48000})
     if srt_path is not None:
         streams.append(ffmpeg.input(str(srt_path)))
         out_kwargs.update({"scodec": "mov_text"})

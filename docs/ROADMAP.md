@@ -48,6 +48,10 @@ batch was slower per frame than the single test. Combined with item 1's bonus, t
 episode length and how many cuts per episode can move.
 
 ## Done
+- 2026-11-04: **Shonen pacing toolkit**: crash_zoom/slam_out/whip presets, continuous shake, colored impact
+  flashes, per-sequence dialogue padding, loudness normalization (-14 LUFS, -1 dBTP). Act A sequence 1
+  written: 19 cuts, ~35 s, avg 1.8 s/cut, 3 Wan hero shots + 16 FX-driven stills (limited animation),
+  battle theme with a comedy drop.
 - 2026-11-04: **Soundtrack + SFX layer**: license manifest with allow-list and auto credits; Freesound CC0
   fetcher with audition step; multi-cue music (scene-placed, fades, ducking, silence drops) and timed SFX in
   the orchestrator; cold-open sound design (drone c001-c006, hard stop into the c007 hit, silence under c008,

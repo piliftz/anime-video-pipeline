@@ -147,7 +147,7 @@ to the storyboard file**. Unspecified keys fall back to the defaults below.
 ### Top level
 | Key | Purpose |
 |---|---|
-| `project` | `title`, `output`, `resolution` [1920,1080], `fps` 24, `fit` (`cover`/`contain`/`stretch`), `background_color`, `crf` 16, `preset` `slow`, `tune` `animation`, `audio_bitrate` `192k` |
+| `project` | `title`, `output`, `resolution` [1920,1080], `fps` 24, `fit` (`cover`/`contain`/`stretch`), `background_color`, `crf` 16, `preset` `slow`, `tune` `animation`, `audio_bitrate` `192k`, `loudness_lufs` −14 (final mix normalized to YouTube's playback loudness with a −1 dBTP ceiling; `null` disables) |
 | `voice_defaults` | `voice`, `rate`, `pitch`, `volume` for every narration line |
 | `speakers` | `{ "Name": { voice, rate, pitch, volume, subtitle_color } }`, used when a narration sets `speaker`. For Japanese voices: `{ "engine": "voicevox", "voicevox": { "speaker": "青山龍星", "style": "ノーマル", "speed": 0.95 } }` (install the engine with `python scripts/setup_voicevox.py`, which needs no desktop app; list voices with `python scripts/voicevox_client.py`) |
 | `audio` | `narration_volume`, `clip_audio_volume`, `bgm { path, volume, loop, duck_to, duck_fade, fade_in, fade_out }`. `duck_to` 0.35 means BGM drops to 35% while someone speaks. |
@@ -195,6 +195,11 @@ to the storyboard file**. Unspecified keys fall back to the defaults below.
 - `impact: { "enabled": true, "at": [0.0], "shake": 24, "settle": 0.5, "invert": true, "flash": true }`:
   anime impact hit at each listed second. One inverted high-contrast B&W frame, a white flash, then a
   camera shake that settles over `settle` seconds.
+- Action camera presets: `crash_zoom`, `slam_out`, `whip_left`, `whip_right`. They start fast and land hard
+  (ease_out), and are made for short 0.5–1.5 s cuts.
+- `shake: { "enabled": true, "amount": 10, "fps": 12 }` adds a continuous energy rumble (pixels at 1080p,
+  changing `fps` times per second like anime camera shake). Speed lines stay steady on top of it.
+- `impact.flash_color`: the flash after the hit frame, e.g. `"#FF7A1A"` (ember) or `"#19E6FF"` (cyan).
 - Ken Burns zoom must be ≥ 1.0, and panning only has an effect when zoom > 1 because there is
   nothing to pan across otherwise. Easings: `linear`, `ease_in`, `ease_out`, `ease_in_out`, `sine`.
 - Grade overrides: `saturation`, `contrast`, `brightness`, `gamma`, `black_lift`,

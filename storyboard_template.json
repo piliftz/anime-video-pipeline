@@ -12,7 +12,8 @@
     "crf": 16,
     "preset": "slow",
     "tune": "animation",
-    "audio_bitrate": "192k"
+    "audio_bitrate": "192k",
+    "loudness_lufs": -14.0
   },
   "voice_defaults": {
     "voice": "en-US-AnaNeural",
@@ -256,7 +257,13 @@
             1.2
           ],
           "shake": 24,
-          "settle": 0.5
+          "settle": 0.5,
+          "flash_color": "#19E6FF"
+        },
+        "shake": {
+          "enabled": true,
+          "amount": 8,
+          "fps": 12
         }
       },
       "transition_in": {

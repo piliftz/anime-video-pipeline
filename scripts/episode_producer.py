@@ -218,7 +218,9 @@ def build_storyboard(ep: Episode, lang: str) -> tuple[dict, list[str]]:
             line = lines[0]
             if not line.get(lang):
                 raise PipelineError(f"[{cut['id']}] dialogue has no '{lang}' text.")
-            scene["narration"] = {"speaker": line["speaker"], "text": line[lang], "offset": 0.25, "tail": 0.45}
+            pad = {"offset": 0.25, "tail": 0.45, **ep.segment.get("dialogue_timing", {})}  # tight for action
+            scene["narration"] = {"speaker": line["speaker"], "text": line[lang], "offset": float(pad["offset"]),
+                                  "tail": float(pad["tail"])}
             sub_lang = asm.get("subtitle_language", {}).get(lang, lang)
             if sub_lang != lang:
                 if not line.get(sub_lang):
