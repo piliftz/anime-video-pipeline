@@ -633,7 +633,7 @@
           "shot": "Insert, dead wrist scanner",
           "characters": [],
           "action": "Kaito's wrist scanner: every light stays dark.",
-          "keyframe_prompt": "close-up, wrist, wristband device, dark screen, no light, bandaged hand, fingerless gloves",
+          "keyframe_prompt": "close-up, hand focus, wrist, black wristband, smartwatch, black screen, screen off, gray sleeve, bandaged hand, fingerless gloves, dim lighting, arena floor, simple background",
           "fx": {},
           "sfx": [
             {
@@ -650,7 +650,9 @@
               "emotion": "confused",
               "ja_review": true
             }
-          ]
+          ],
+          "negative": "glowing, glowing screen, light particles, neon, cyan light, holographic",
+          "seed": 7210
         },
         {
           "id": "a1_11",
@@ -695,7 +697,9 @@
               "emotion": "deadpan",
               "ja_review": true
             }
-          ]
+          ],
+          "seed": 7212,
+          "negative": "white hair, two-tone hair, multicolored hair"
         },
         {
           "id": "a1_13",
@@ -770,7 +774,9 @@
               "volume": 0.9
             }
           ],
-          "dialogue": []
+          "dialogue": [],
+          "seed": 7214,
+          "negative": "white hair, grey hair, brown hair, necktie, red necktie"
         },
         {
           "id": "a1_15",
@@ -800,7 +806,9 @@
               "volume": 0.8
             }
           ],
-          "dialogue": []
+          "dialogue": [],
+          "seed": 7215,
+          "negative": "white gloves, brown hair"
         },
         {
           "id": "a1_16",
