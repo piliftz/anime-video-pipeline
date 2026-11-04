@@ -295,6 +295,26 @@ the motion/camera**. `--length` must be 4n+1 (49 ≈ 2 s, 121 = 5 s); `--size 96
 faster. Model weights load as fp8 by default to fit 8 GB of VRAM and 16 GB of RAM. Speed and quality
 on an 8 GB laptop GPU are still being measured.
 
+### Music and sound effects (license-checked)
+Every audio file must be registered in `assets/audio/manifest.json` with its source and license.
+Renders refuse unregistered files and licenses that are unsafe for monetized videos (NC, ND, SA, unknown).
+```powershell
+# Sound effects from Freesound, CC0 only. Free API key: https://freesound.org/apiv2/apply
+setx FREESOUND_API_KEY "your-key"        # once, then open a new terminal
+.venv\Scripts\python scripts\fetch_sfx.py search "handcuffs chain clink" --name chain_clink   # 3 candidates to listen to
+.venv\Scripts\python scripts\fetch_sfx.py keep chain_clink 2
+.venv\Scripts\python scripts\fetch_sfx.py script series\arc_forge\ep01_pilot.script.json   # every SFX a script needs
+# Music you downloaded (e.g. YouTube Studio > Audio Library):
+.venv\Scripts\python scripts\audio_manifest.py add assets\audio\music\tension_drone.mp3 --name tension_drone ^
+    --kind music --source youtube_audio_library --license "YouTube Audio Library" --attribution "<if the library shows one>"
+.venv\Scripts\python scripts\audio_manifest.py check
+```
+Storyboard keys: `audio.music: [{ file, start_scene, end_scene (or start/end seconds), volume, loop, fade_in,
+fade_out, duck_to, duck_fade, drops: [{start_scene, end_scene}] }]`, where `drops` cut the music to silence
+for a dramatic beat; scene `sfx: [{ file, at, volume }]`; `audio.require_license` (default true). Each render
+writes `output/<name>_credits.txt` with the attribution lines your audio requires. Audio files are gitignored,
+so licensed tracks are never pushed to your repository; only the manifest is.
+
 ## 5. Using Stable Diffusion and AnimateDiff output
 
 The pipeline doesn't care which tool generated your media. It only needs files on disk.

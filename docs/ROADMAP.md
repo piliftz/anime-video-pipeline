@@ -48,6 +48,10 @@ batch was slower per frame than the single test. Combined with item 1's bonus, t
 episode length and how many cuts per episode can move.
 
 ## Done
+- 2026-11-04: **Soundtrack + SFX layer**: license manifest with allow-list and auto credits; Freesound CC0
+  fetcher with audition step; multi-cue music (scene-placed, fades, ducking, silence drops) and timed SFX in
+  the orchestrator; cold-open sound design (drone c001-c006, hard stop into the c007 hit, silence under c008,
+  title sting c009). Mix verified per cut on test tones.
 - 2026-11-03: **Anime timing** (`fx.anime_timing.on` 2/3; drawing steps, camera stays smooth; speed lines
   follow the same beat) and **impact frames** (`fx.impact`: inverted B&W hit frame, flash, settling
   shake). Verified frame-by-frame in the lossless master. Cold open: twos everywhere, threes + impact on

@@ -455,7 +455,7 @@ def anime_timing(clip, cfg: dict | None, fps: float):
         held = np.floor(np.asarray(t, dtype=np.float64) / step + 1e-6) * step
         return float(held) if np.ndim(held) == 0 else held
 
-    return clip.time_transform(remap, apply_to=["mask"])
+    return clip.time_transform(remap, apply_to=["mask"], keep_duration=True)  # default drops .duration
 
 
 def impact_frames(clip, cfg: dict | None, fps: float):

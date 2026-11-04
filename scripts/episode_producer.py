@@ -186,8 +186,11 @@ def stage_motion(ep: Episode, cut_ids: list[str] | None, force: bool, comfy_url,
 # Stage 3: assemble
 # --------------------------------------------------------------------------- #
 def build_storyboard(ep: Episode, lang: str) -> tuple[dict, list[str]]:
+    from audio_manifest import load_manifest, path_for_name
+
     asm = ep.prod.get("assembly", {})
     voices = asm.get(f"voices_{lang}", {})
+    manifest = load_manifest()
     warnings: list[str] = []
     scenes = []
     for cut in ep.cuts:
@@ -224,13 +227,41 @@ def build_storyboard(ep: Episode, lang: str) -> tuple[dict, list[str]]:
             style = line.get(f"{lang}_style")  # per-line emotion style, e.g. VOICEVOX "悲しみ"
             if style and voices.get(line["speaker"], {}).get("engine") == "voicevox":
                 scene["narration"]["voicevox"] = {**voices[line["speaker"]].get("voicevox", {}), "style": style}
+        sfx = []
+        for cue in cut.get("sfx", []):
+            path = path_for_name(cue["name"], manifest)
+            if path is None or not path.is_file():
+                warnings.append(f"{cut['id']}: sfx '{cue['name']}' not registered yet, skipped "
+                                f"(python scripts/fetch_sfx.py script {ep.path.name})")
+                continue
+            sfx.append({"file": str(path), "at": float(cue.get("at", 0.0)), "volume": float(cue.get("volume", 1.0))})
+        if sfx:
+            scene["sfx"] = sfx
         scenes.append(scene)
+    present = {sc["id"] for sc in scenes}
+    music = []
+    for cue in (ep.segment.get("audio") or {}).get("music", []):
+        path = path_for_name(cue["name"], manifest)
+        if path is None or not path.is_file():
+            warnings.append(f"music '{cue['name']}' not registered yet, skipped "
+                            "(download it, then python scripts/audio_manifest.py add ...)")
+            continue
+        if cue.get("start_cut") not in present or cue.get("end_cut") not in present:
+            warnings.append(f"music '{cue['name']}': cut range {cue.get('start_cut')}..{cue.get('end_cut')} "
+                            "not in this render, skipped")
+            continue
+        out = {k: v for k, v in cue.items() if k in ("volume", "loop", "fade_in", "fade_out", "duck_to", "duck_fade")}
+        out.update({"file": str(path), "start_scene": cue["start_cut"], "end_scene": cue["end_cut"],
+                    "drops": [{"start_scene": d["start_cut"], "end_scene": d["end_cut"]} for d in cue.get("drops", [])
+                              if d["start_cut"] in present and d["end_cut"] in present]})
+        music.append(out)
     grade = asm.get("grade", {})
     title = ep.script["title"].get(lang) or ep.script["title"]["en"]
     storyboard = {
         "project": {"title": f"{ep.script['series'].get(lang, '')} - {title}",
                     "output": str(OUTPUT_DIR / f"{ep.name}_{lang}.mp4"), "fps": ep.fps, "fit": "cover"},
         "speakers": voices,
+        "audio": {"music": music, "require_license": True},
         "transitions": {"default": {"type": "cut", "duration": 0.0}},
         "subtitles": asm.get("subtitles", {}),
         "fx_defaults": {"color_grade": {"enabled": bool(grade), **grade},
@@ -280,7 +311,8 @@ def write_voicevox_credits(ep: Episode, lang: str, storyboard: dict) -> None:
     except PipelineError as exc:
         lines += ["", f"(Could not fetch the terms automatically: {exc}) Check each character's terms on the "
                   "VOICEVOX website before publishing."]
-    out.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    existing = out.read_text(encoding="utf-8") + "\n" if out.is_file() else ""  # audio credits from the render
+    out.write_text(existing + "\n".join(lines) + "\n", encoding="utf-8")
     log.info("VOICEVOX credits: %s", out)
 
 

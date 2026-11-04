@@ -1,0 +1,22 @@
+{
+  "files": {
+    "assets/audio/bgm/theme.wav": {
+      "name": "demo_theme",
+      "kind": "music",
+      "source": "generated",
+      "url": null,
+      "author": "make_demo_assets.py",
+      "license": "generated",
+      "attribution": null
+    },
+    "assets/audio/sfx/demo_impact.wav": {
+      "name": "demo_impact",
+      "kind": "sfx",
+      "source": "generated",
+      "url": null,
+      "author": "make_demo_assets.py",
+      "license": "generated",
+      "attribution": null
+    }
+  }
+}

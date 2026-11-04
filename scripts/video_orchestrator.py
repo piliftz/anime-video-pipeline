@@ -77,7 +77,19 @@ AUDIO_DEFAULTS = {
         "duck_fade": 0.4,      # seconds to ramp down/up around narration
         "fade_in": 1.0, "fade_out": 2.0,
     },
+    "music": [],                # list of MUSIC_CUE_DEFAULTS-shaped cues, placed by scene id or seconds
+    "require_license": True,    # every audio file must be registered in assets/audio/manifest.json
 }
+MUSIC_CUE_DEFAULTS = {
+    "file": None,
+    "start_scene": None, "end_scene": None,   # place by scene ids (end_scene inclusive)...
+    "start": 0.0, "end": None,                # ...or by absolute seconds
+    "volume": 0.3, "loop": True,
+    "fade_in": 1.0, "fade_out": 1.0,
+    "duck_to": 0.4, "duck_fade": 0.3,         # gain while someone speaks
+    "drops": [],                              # [{"start_scene"/"end_scene" or "start"/"end"}]: music cut to silence
+}
+SFX_CUE_DEFAULTS = {"file": None, "at": 0.0, "volume": 1.0}
 TRANSITION_DEFAULTS = {"type": "cut", "duration": 0.5}
 FX_DEFAULTS = {
     "ken_burns": {"enabled": False},
@@ -106,6 +118,7 @@ SCENE_DEFAULTS = {
     "text_overlays": [],
     "transition_in": None,     # {"type": "crossfade"|"fade_black"|"cut", "duration": s}
     "generate": None,          # {"prompt", "characters", "negative", "seed", "width", "height", "rating"}
+    "sfx": [],                 # [{"file", "at": seconds into the scene, "volume"}]
 }
 NARRATION_DEFAULTS = {"text": "", "speaker": None, "offset": 0.3, "tail": 0.6, "subtitle": True,
                       "subtitle_text": None}  # show different text than is spoken (e.g. JA dub, EN subs)
@@ -178,7 +191,7 @@ def load_storyboard(path: Path) -> tuple[dict, Path]:
         "project": deep_merge(PROJECT_DEFAULTS, raw.get("project")),
         "voice_defaults": raw.get("voice_defaults", {}),
         "speakers": raw.get("speakers", {}),
-        "audio": deep_merge(AUDIO_DEFAULTS, raw.get("audio")),
+        "audio": deep_merge(AUDIO_DEFAULTS, raw.get("audio")),  # music cues merged with defaults below
         "transitions": deep_merge({"default": TRANSITION_DEFAULTS}, raw.get("transitions")),
         "subtitles": deep_merge(SUBTITLE_DEFAULTS, raw.get("subtitles")),
         "fx_defaults": deep_merge(FX_DEFAULTS, raw.get("fx_defaults")),
@@ -186,6 +199,7 @@ def load_storyboard(path: Path) -> tuple[dict, Path]:
         "image_generation": image_gen_config(raw),
         "scenes": [],
     }
+    sb["audio"]["music"] = [deep_merge(MUSIC_CUE_DEFAULTS, c) for c in (sb["audio"].get("music") or [])]
     scenes = raw.get("scenes")
     if not isinstance(scenes, list) or not scenes:
         raise PipelineError("Storyboard needs a non-empty 'scenes' list.")
@@ -203,6 +217,7 @@ def load_storyboard(path: Path) -> tuple[dict, Path]:
             nar = {"text": nar}
         scene["narration"] = deep_merge(NARRATION_DEFAULTS, nar) if nar and (nar.get("text") or "").strip() else None
         scene["text_overlays"] = [deep_merge(OVERLAY_DEFAULTS, o) for o in (s.get("text_overlays") or [])]
+        scene["sfx"] = [deep_merge(SFX_CUE_DEFAULTS, c) for c in (s.get("sfx") or [])]
         sb["scenes"].append(scene)
     sb["scenes"].sort(key=lambda sc: (sc["order"] if sc["order"] is not None else sc["_file_index"], sc["_file_index"]))
     return sb, path.resolve().parent
@@ -267,9 +282,7 @@ def validate_storyboard(sb: dict, base_dir: Path, allow_missing: bool) -> list[s
         for j, ov in enumerate(sc["text_overlays"]):
             if not str(ov["text"]).strip():
                 errors.append(f"[{sid}] text_overlays[{j}] has empty text.")
-    bgm = resolve_path(base_dir, sb["audio"]["bgm"].get("path"))
-    if bgm is not None and not bgm.is_file():
-        errors.append(f"audio.bgm.path not found: {bgm}")
+    errors += validate_audio(sb, base_dir)
     return errors
 
 
@@ -619,6 +632,114 @@ def duck_envelope(intervals: list[tuple[float, float]], fade: float):
     return env
 
 
+def audio_files(sb: dict, base_dir: Path) -> list[tuple[str, Path | None]]:
+    """(label, resolved path) for every audio asset the storyboard uses (not voices)."""
+    out = []
+    bgm = sb["audio"]["bgm"].get("path")
+    if bgm:
+        out.append(("audio.bgm", resolve_path(base_dir, bgm)))
+    for i, cue in enumerate(sb["audio"]["music"]):
+        out.append((f"audio.music[{i}]", resolve_path(base_dir, cue["file"])))
+    for sc in sb["scenes"]:
+        for j, cue in enumerate(sc["sfx"]):
+            out.append((f"[{sc['id']}] sfx[{j}]", resolve_path(base_dir, cue["file"])))
+    return out
+
+
+def validate_audio(sb: dict, base_dir: Path) -> list[str]:
+    errors: list[str] = []
+    ids = {sc["id"] for sc in sb["scenes"]}
+    for i, cue in enumerate(sb["audio"]["music"]):
+        for key in ("start_scene", "end_scene"):
+            if cue[key] is not None and cue[key] not in ids:
+                errors.append(f"audio.music[{i}].{key} '{cue[key]}' is not a scene id "
+                              "(or that scene was filtered out).")
+        for d in cue["drops"]:
+            for key in ("start_scene", "end_scene"):
+                if d.get(key) is not None and d[key] not in ids:
+                    errors.append(f"audio.music[{i}].drops {key} '{d[key]}' is not a scene id.")
+    manifest = None
+    for label, path in audio_files(sb, base_dir):
+        if path is None:
+            errors.append(f"{label}: no file given.")
+            continue
+        if not path.is_file():
+            errors.append(f"{label}: file not found: {path}")
+            continue
+        if sb["audio"]["require_license"]:
+            from audio_manifest import entry_for, load_manifest
+
+            manifest = manifest or load_manifest()
+            try:
+                entry_for(path, manifest)
+            except PipelineError as exc:
+                errors.append(f"{label}: {exc}")
+    return errors
+
+
+def _scene_window(plans: list[ScenePlan], start_scene, end_scene, start, end, total: float) -> tuple[float, float]:
+    by_id = {p.id: p for p in plans}
+    a = by_id[start_scene].start if start_scene else float(start or 0.0)
+    b = by_id[end_scene].end if end_scene else (float(end) if end is not None else total)
+    return max(0.0, a), min(total, b)
+
+
+def build_music_cue(cue: dict, plans: list[ScenePlan], base_dir: Path, total: float,
+                    narration_intervals: list[tuple[float, float]]):
+    from moviepy import AudioFileClip, afx
+
+    t0, t1 = _scene_window(plans, cue["start_scene"], cue["end_scene"], cue["start"], cue["end"], total)
+    if t1 - t0 < 0.05:
+        return None
+    clip = AudioFileClip(str(resolve_path(base_dir, cue["file"])))
+    length = t1 - t0
+    if clip.duration < length and cue["loop"]:
+        clip = clip.with_effects([afx.AudioLoop(duration=length)])
+    else:
+        clip = clip.subclipped(0, min(length, clip.duration))
+    duck = float(cue["duck_to"])
+    env = duck_envelope(narration_intervals, float(cue["duck_fade"])) if narration_intervals and duck < 1 else None
+    drops = [_scene_window(plans, d.get("start_scene"), d.get("end_scene"), d.get("start"), d.get("end"), total)
+             for d in cue["drops"]]
+    drop_env = duck_envelope(drops, 0.06) if drops else None  # near-hard cut in and out of silence
+    vol = float(cue["volume"])
+
+    def gain_fn(get_frame, t):
+        frame = get_frame(t)
+        ta = np.asarray(t, dtype=np.float64) + t0  # absolute timeline time
+        g = np.full_like(ta, vol, dtype=np.float64)
+        if env is not None:
+            g = g * (1.0 - (1.0 - duck) * env(ta))
+        if drop_env is not None:
+            g = g * (1.0 - drop_env(ta))
+        return frame * (g[:, None] if np.ndim(frame) == 2 else g)
+
+    clip = clip.transform(gain_fn)
+    fx = []
+    if cue["fade_in"]:
+        fx.append(afx.AudioFadeIn(min(float(cue["fade_in"]), clip.duration / 2)))
+    if cue["fade_out"]:
+        fx.append(afx.AudioFadeOut(min(float(cue["fade_out"]), clip.duration / 2)))
+    return (clip.with_effects(fx) if fx else clip).with_start(t0)
+
+
+def write_audio_credits(sb: dict, base_dir: Path, output: Path) -> Path | None:
+    """<output stem>_credits.txt with the attribution lines the used audio requires (fresh each render)."""
+    credits = output.with_name(f"{output.stem}_credits.txt")
+    credits.unlink(missing_ok=True)
+    paths = [p for _, p in audio_files(sb, base_dir) if p is not None and p.is_file()]
+    if not paths or not sb["audio"]["require_license"]:
+        return None
+    from audio_manifest import credit_lines
+
+    lines = credit_lines(paths)
+    if not lines:
+        return None
+    credits.write_text("Audio (paste into the video description):\n" + "\n".join(lines) + "\n", encoding="utf-8")
+    log.info("Audio credits: %s", credits)
+    return credits
+
+
 def build_audio(sb: dict, plans: list[ScenePlan], scene_clips: list, base_dir: Path, total: float):
     from moviepy import AudioFileClip, CompositeAudioClip, afx
 
@@ -660,6 +781,20 @@ def build_audio(sb: dict, plans: list[ScenePlan], scene_clips: list, base_dir: P
         if bgm_cfg["fade_out"]:
             fx.append(afx.AudioFadeOut(float(bgm_cfg["fade_out"])))
         layers.append(bgm.with_effects(fx) if fx else bgm)
+
+    for cue in audio_cfg["music"]:
+        layer = build_music_cue(cue, plans, base_dir, total, narration_intervals)
+        if layer is not None:
+            layers.append(layer)
+    for plan in plans:
+        for cue in plan.cfg["sfx"]:
+            at = plan.start + float(cue["at"])
+            if at >= total:
+                continue
+            sfx = AudioFileClip(str(resolve_path(base_dir, cue["file"])))
+            sfx = sfx.subclipped(0, min(sfx.duration, total - at))
+            vol = float(cue["volume"])
+            layers.append((sfx.with_volume_scaled(vol) if vol != 1.0 else sfx).with_start(at))
 
     if not layers:
         return None
@@ -784,6 +919,7 @@ def render(args: argparse.Namespace) -> Path:
         tune=proj["tune"], audio_bitrate=proj["audio_bitrate"],
     )
 
+    write_audio_credits(sb, base_dir, output)
     for c in scene_clips:
         c.close()
     video.close()

@@ -69,14 +69,34 @@
     "narration_volume": 1.0,
     "clip_audio_volume": 0.6,
     "bgm": {
-      "path": "assets/audio/bgm/theme.wav",
+      "path": null,
       "volume": 0.3,
       "loop": true,
       "duck_to": 0.35,
       "duck_fade": 0.4,
       "fade_in": 1.5,
       "fade_out": 2.5
-    }
+    },
+    "music": [
+      {
+        "file": "assets/audio/bgm/theme.wav",
+        "start_scene": "scene_01",
+        "end_scene": "scene_04",
+        "volume": 0.3,
+        "loop": true,
+        "fade_in": 1.5,
+        "fade_out": 2.5,
+        "duck_to": 0.35,
+        "duck_fade": 0.4,
+        "drops": [
+          {
+            "start_scene": "scene_03",
+            "end_scene": "scene_03"
+          }
+        ]
+      }
+    ],
+    "require_license": true
   },
   "transitions": {
     "default": {
@@ -241,7 +261,14 @@
       },
       "transition_in": {
         "type": "cut"
-      }
+      },
+      "sfx": [
+        {
+          "file": "assets/audio/sfx/demo_impact.wav",
+          "at": 1.2,
+          "volume": 0.9
+        }
+      ]
     },
     {
       "id": "scene_04",

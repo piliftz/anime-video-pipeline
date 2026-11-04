@@ -155,6 +155,41 @@ def theme(path: Path, seconds: float = 24.0, sr: int = 48_000) -> None:
         wf.writeframes(stereo.tobytes())
 
 
+def impact_sfx(path: Path, sr: int = 48_000) -> None:
+    """Synthesized hit: low sine drop + noise burst with a fast decay (about 1.2 s)."""
+    n = int(1.2 * sr)
+    t = np.arange(n) / sr
+    rng = np.random.default_rng(7)
+    boom = np.sin(2 * np.pi * (90 - 50 * t) * t) * np.exp(-t * 4)
+    crack = rng.standard_normal(n) * np.exp(-t * 25) * 0.6
+    out = boom + crack
+    out = out / np.abs(out).max() * 0.85
+    stereo = (np.stack([out, out], axis=1) * 32767).astype(np.int16)
+    with wave.open(str(path), "wb") as wf:
+        wf.setnchannels(2)
+        wf.setsampwidth(2)
+        wf.setframerate(sr)
+        wf.writeframes(stereo.tobytes())
+
+
+DEMO_AUDIO = {  # registered in the audio license manifest as project-generated
+    "theme.wav": ("demo_theme", "music"),
+    "demo_impact.wav": ("demo_impact", "sfx"),
+}
+
+
+def register_demo_audio(paths: list[Path]) -> None:
+    from audio_manifest import add, load_manifest, rel_key
+
+    files = load_manifest()["files"]
+    for path in paths:
+        if path.is_file() and rel_key(path) not in files:
+            name, kind = DEMO_AUDIO[path.name]
+            add(path, name=name, kind=kind, source="generated", license_="generated", author="make_demo_assets.py",
+                url=None, attribution=None)
+            log.info("registered %s in the audio manifest", path.relative_to(ASSETS_DIR.parent))
+
+
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--force", action="store_true", help="Overwrite existing demo assets.")
@@ -166,6 +201,7 @@ def main(argv: list[str] | None = None) -> int:
         (ASSETS_DIR / "clips" / "scene_03", scene_03),
         (ASSETS_DIR / "images" / "scene_04.png", scene_04),
         (ASSETS_DIR / "audio" / "bgm" / "theme.wav", theme),
+        (ASSETS_DIR / "audio" / "sfx" / "demo_impact.wav", impact_sfx),
     ]
     for target, fn in jobs:
         exists = target.is_dir() and any(target.glob("*.png")) if fn is scene_03 else target.exists()
@@ -175,6 +211,7 @@ def main(argv: list[str] | None = None) -> int:
         ensure_dir(target.parent)
         fn(target)
         log.info("created  %s", target.relative_to(ASSETS_DIR.parent))
+    register_demo_audio([ASSETS_DIR / "audio" / "bgm" / "theme.wav", ASSETS_DIR / "audio" / "sfx" / "demo_impact.wav"])
     return 0
 
 

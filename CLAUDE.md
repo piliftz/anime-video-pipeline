@@ -28,6 +28,9 @@ scripts/
                           auto-starts run.exe (VOICEVOX_RUN). CLI lists voices / auditions a line
   setup_voicevox.py       installs the VOICEVOX engine (Windows CPU .vvpp = ZIP, split parts listed in .vvpp.txt)
                           from GitHub releases, sets VOICEVOX_RUN, verifies. No desktop app / Japanese UI needed
+  audio_manifest.py       audio license manifest (assets/audio/manifest.json): add/list/check; allow-list of licenses
+                          safe for monetized video (CC0, YouTube Audio Library, CC-BY + attribution, own, generated)
+  fetch_sfx.py            Freesound CC0-only SFX: search -> temp/sfx_candidates (audition) -> keep -> manifest
   lock_refs.py            copy picked reference takes -> series/<show>/refs/*.jpg + record seed/prompt
   contact_sheet.py        labeled grid of generated takes (rows per take group, '#n · seed') for picking
 series/arc_forge/         the show: bible.md, characters.json (canonical tags), ep01_pilot.script.json (EN/JA,
@@ -120,6 +123,11 @@ a visual change works without inspecting frames.
 - TTS engines: speakers set `engine` edge|voicevox (+ `voicevox: {speaker, style, speed, ...}`); the voice
   cache key includes engine settings. `narration.subtitle_text` shows different text than is spoken (JA dub,
   EN subs). VOICEVOX credits must list only voices actually spoken in the render.
+- Audio: storyboard `audio.music` cues (by scene id or seconds; fades, ducking, `drops` = silence) and scene `sfx`
+  cues. Every audio file must be in assets/audio/manifest.json (`audio.require_license`, default true); renders
+  write <output>_credits.txt with required attributions. Episode scripts reference audio by manifest NAME;
+  unregistered names are skipped with a warning. Audio files are gitignored (never redistribute licensed audio).
+- moviepy `time_transform` drops `.duration` unless keep_duration=True: always pass it for same-length remaps.
 - Planned work and its rationale lives in docs/ROADMAP.md (anime timing, impact frames, ControlNet, speed).
 
 ## Coding style

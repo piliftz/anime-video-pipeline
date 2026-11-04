@@ -20,7 +20,8 @@
     "ja_review: a native speaker must check these lines before the Japanese dub is published.",
     "motion: 'wan' = animated with Wan 2.2 (slow: minutes per clip); 'still' = keyframe + pipeline camera; 'clip' = pre-rendered frames (e.g. the Remotion title card, path relative to this file). 'fx' (any motion type) = pipeline effects such as ken_burns or speed_lines.",
     "voices_ja: VOICEVOX characters by name (provisional casting). List installed voices with `python scripts/voicevox_client.py`; audition with `--say \"テキスト\" --speaker 名前 --style スタイル`. ja_style on a line picks that character's emotion style (unknown -> default style + warning). The JA dub shows EN subtitles.",
-    "anime_timing (production.assembly default, per-cut fx override): hold each Wan frame 2 ('on twos') or 3 ('on threes') frames for a drawn-anime cadence; camera moves stay smooth. fx.impact: inverted B&W frame + white flash + settling shake at the given seconds."
+    "anime_timing (production.assembly default, per-cut fx override): hold each Wan frame 2 ('on twos') or 3 ('on threes') frames for a drawn-anime cadence; camera moves stay smooth. fx.impact: inverted B&W frame + white flash + settling shake at the given seconds.",
+    "Audio: cut 'sfx' cues and segment 'audio.music' cues reference names registered in assets/audio/manifest.json (scripts/audio_manifest.py, scripts/fetch_sfx.py). Unregistered names are skipped with a warning so renders keep working while sounds are collected."
   ],
   "segments": [
     {
@@ -40,12 +41,20 @@
           "characters": [],
           "keyframe_prompt": "no humans, scenery, interrogation room, steel table, two chairs, fluorescent light, dark, concrete wall, one-way mirror, cinematic lighting, wide shot",
           "motion_prompt": "the ceiling light flickers on and off, dust floats in the light beam, very slow camera push-in",
-          "sfx": [
-            "fluorescent buzz",
-            "distant water drip"
-          ],
           "dialogue": [],
-          "motion": "wan"
+          "motion": "wan",
+          "sfx": [
+            {
+              "name": "fluorescent_buzz",
+              "at": 0.0,
+              "volume": 0.5
+            },
+            {
+              "name": "water_drip",
+              "at": 1.2,
+              "volume": 0.4
+            }
+          ]
         },
         {
           "id": "c002",
@@ -55,13 +64,17 @@
           "characters": [],
           "keyframe_prompt": "close-up, two hands, handcuffs, handcuffed wrists, bandaged hand, fingerless gloves, steel table, glowing cracks in the table, orange glow, dark, from above, solo focus",
           "motion_prompt": "the fingers twitch slightly, the orange glow in the cracks slowly fades out, no camera movement",
-          "sfx": [
-            "metal chain clink"
-          ],
           "dialogue": [],
           "motion": "wan",
           "seed": 4242,
-          "negative": "extra hands, multiple hands, extra arms, extra fingers, third hand"
+          "negative": "extra hands, multiple hands, extra arms, extra fingers, third hand",
+          "sfx": [
+            {
+              "name": "chain_clink",
+              "at": 0.6,
+              "volume": 0.8
+            }
+          ]
         },
         {
           "id": "c003",
@@ -73,9 +86,6 @@
           ],
           "keyframe_prompt": "1boy, from behind, back view, interrogation room, steel table, file folder, dim lighting, over the shoulder shot, depth of field",
           "motion_prompt": "the man drops a file folder onto the table, papers slide, the camera holds still",
-          "sfx": [
-            "file slap on steel"
-          ],
           "dialogue": [
             {
               "speaker": "Goda",
@@ -86,7 +96,14 @@
               "ja_review": true
             }
           ],
-          "motion": "wan"
+          "motion": "wan",
+          "sfx": [
+            {
+              "name": "file_slap",
+              "at": 0.8,
+              "volume": 0.9
+            }
+          ]
         },
         {
           "id": "c004",
@@ -98,7 +115,6 @@
           ],
           "keyframe_prompt": "1boy, solo, eyes focus, close-up, amber eyes, black hair, orange hair streak, dim light, reflection in eyes, serious",
           "motion_prompt": "the eyes slowly look up toward the camera, flickering light reflects in the pupils",
-          "sfx": [],
           "dialogue": [
             {
               "speaker": "Goda",
@@ -120,9 +136,6 @@
           "characters": [],
           "keyframe_prompt": "no humans, scenery, glowing orange crystal fissure in cracked concrete floor, jagged crystals, half of the crystals gray and dead, ash, smoke, ruined arena floor, close-up, dramatic lighting",
           "motion_prompt": "a photograph slides across the table into the center of the frame and stops",
-          "sfx": [
-            "paper slide"
-          ],
           "dialogue": [
             {
               "speaker": "Goda",
@@ -141,7 +154,14 @@
               "preset": "push_in"
             }
           },
-          "negative": "egg, sphere, gems, jewelry, candy, photograph frame"
+          "negative": "egg, sphere, gems, jewelry, candy, photograph frame",
+          "sfx": [
+            {
+              "name": "paper_slide",
+              "at": 0.1,
+              "volume": 0.7
+            }
+          ]
         },
         {
           "id": "c006",
@@ -153,7 +173,6 @@
           ],
           "keyframe_prompt": "1boy, solo, from behind, back view, sitting, head down, (black hair:1.3), handcuffs, gray blazer, interrogation room, dim lighting, lonely",
           "motion_prompt": "the boy's shoulders rise and fall with a slow breath, the light flickers once, static camera",
-          "sfx": [],
           "dialogue": [
             {
               "speaker": "Kaito",
@@ -176,10 +195,6 @@
           "characters": [],
           "keyframe_prompt": "no humans, indoor arena, stadium floor, giant orange fire pillar erupting from a cracked crystal fissure in the arena floor, glowing crystals, sparks, explosion, dramatic, high contrast, wide shot",
           "motion_prompt": "fire bursts upward violently, sparks fly toward the camera, fast camera shake",
-          "sfx": [
-            "fire roar",
-            "glass shatter"
-          ],
           "dialogue": [],
           "motion": "wan",
           "fx": {
@@ -199,7 +214,24 @@
               ]
             }
           },
-          "negative": "volcano, mountain, nature, sky"
+          "negative": "volcano, mountain, nature, sky",
+          "sfx": [
+            {
+              "name": "impact_boom",
+              "at": 0.0,
+              "volume": 1.0
+            },
+            {
+              "name": "fire_roar",
+              "at": 0.05,
+              "volume": 0.7
+            },
+            {
+              "name": "glass_shatter",
+              "at": 0.1,
+              "volume": 0.5
+            }
+          ]
         },
         {
           "id": "c008",
@@ -211,9 +243,6 @@
           ],
           "keyframe_prompt": "1boy, solo, sitting, leaning back, hand over mouth, half of face in shadow, interrogation room, steel table, dim lighting, looking at viewer",
           "motion_prompt": "the man slowly leans back in the chair, the shadow moves across his face, slow push-in",
-          "sfx": [
-            "chair creak"
-          ],
           "dialogue": [
             {
               "speaker": "Goda",
@@ -225,7 +254,14 @@
               "ja_style": "しっとり"
             }
           ],
-          "motion": "wan"
+          "motion": "wan",
+          "sfx": [
+            {
+              "name": "chair_creak",
+              "at": 0.4,
+              "volume": 0.6
+            }
+          ]
         },
         {
           "id": "c009",
@@ -237,7 +273,31 @@
           "dialogue": [],
           "motion": "clip"
         }
-      ]
+      ],
+      "audio": {
+        "music": [
+          {
+            "name": "tension_drone",
+            "start_cut": "c001",
+            "end_cut": "c006",
+            "volume": 0.35,
+            "fade_in": 2.0,
+            "fade_out": 0.1,
+            "duck_to": 0.5
+          },
+          {
+            "name": "title_sting",
+            "start_cut": "c009",
+            "end_cut": "c009",
+            "volume": 0.6,
+            "loop": false,
+            "fade_in": 0.0,
+            "fade_out": 1.0,
+            "duck_to": 1.0
+          }
+        ]
+      },
+      "sound_design_note": "Drone under c001-c006, hard stop into the c007 impact, SILENCE under c008 so Gōda's last line lands alone (sound drop), title sting on c009."
     },
     {
       "id": "act_a",
@@ -373,6 +433,49 @@
       "anime_timing": {
         "enabled": true,
         "on": 2
+      }
+    },
+    "audio": {
+      "sfx_library": {
+        "fluorescent_buzz": {
+          "search": "fluorescent light hum buzz"
+        },
+        "water_drip": {
+          "search": "water drip single drop"
+        },
+        "chain_clink": {
+          "search": "handcuffs chain clink"
+        },
+        "file_slap": {
+          "search": "folder slap table"
+        },
+        "paper_slide": {
+          "search": "paper slide table"
+        },
+        "impact_boom": {
+          "search": "cinematic impact boom hit"
+        },
+        "fire_roar": {
+          "search": "fire burst whoosh"
+        },
+        "glass_shatter": {
+          "search": "glass shatter"
+        },
+        "chair_creak": {
+          "search": "chair creak"
+        }
+      },
+      "music_library": {
+        "tension_drone": {
+          "where": "YouTube Studio > Audio Library",
+          "look_for": "Genre Cinematic or Ambient, Mood Dark; slow, no drums, at least 40 s",
+          "file": "assets/audio/music/tension_drone.mp3"
+        },
+        "title_sting": {
+          "where": "YouTube Studio > Audio Library",
+          "look_for": "Mood Dramatic; a strong opening hit (only the first ~5 s are used)",
+          "file": "assets/audio/music/title_sting.mp3"
+        }
       }
     }
   }
