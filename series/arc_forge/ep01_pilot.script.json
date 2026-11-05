@@ -1075,8 +1075,8 @@
           "dialogue": [
             {
               "speaker": "Rei",
-              "en": "Zero! What are you doing?!",
-              "ja": "ゼロ！何してるの！？",
+              "en": "Zero! Get back!",
+              "ja": "ゼロ！下がって！",
               "emotion": "alarmed",
               "ja_review": true,
               "delivery": "off-screen"
@@ -1565,8 +1565,8 @@
           "dialogue": [
             {
               "speaker": "Drone",
-              "en": "Unregistered catalyst anomaly. Subdue.",
-              "ja": "未登録の触媒異常を確認。制圧します。",
+              "en": "Anomaly confirmed. Subdue.",
+              "ja": "異常確認。制圧する。",
               "emotion": "flat, robotic",
               "ja_review": true
             }
