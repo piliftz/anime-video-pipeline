@@ -10,7 +10,7 @@
     "ja": "ゼロ・カタリスト・ドロップ"
   },
   "status": "cold open written; acts A/B outlined",
-  "target_runtime_sec": 1200,
+  "target_runtime_sec": 540,
   "notes": [
     "Every dialogue line carries both languages. Timing per cut is set by the LONGER of the two dubs.",
     "No lip-sync: speaking characters are framed from behind, off-screen, in silhouette, or as an eyes/hands close-up.",
@@ -1176,25 +1176,30 @@
         },
         {
           "id": "a2_06",
-          "duration": 3.0,
-          "motion": "wan",
-          "shot": "HERO: the grab (Zero-Catalyst reveal)",
-          "characters": [],
-          "action": "His hand clamps onto the Vein. Gray frost bursts out from his fingers across the crystal. Music cuts dead.",
-          "keyframe_prompt": "close-up, hand focus, hand pressed flat against giant glowing orange crystal, huge crystal wall, bandaged hand, fingerless gloves, gray frost spreading from fingers across the crystal, frost pattern, ice cracks, sparks, fire, dramatic lighting",
-          "motion_prompt": "the hand clamps around the glowing crystal, gray frost spreads outward from the fingers across the crystal, sparks burst and then fade, camera pushes in slowly",
+          "duration": 2.0,
+          "motion": "still",
+          "shot": "The grab (Zero-Catalyst reveal), medium shot from behind",
+          "characters": [
+            "Kaito"
+          ],
+          "action": "Kaito, from behind, slams his hand onto the towering Vein. Gray frost bursts out across the crystal. Music cuts dead.",
+          "keyframe_prompt": "1boy, solo, from behind, medium shot, hand pressed against giant glowing orange crystal, huge crystal towering over him, gray frost spreading from his hand across the crystal, ice cracks, sparks, fire, dramatic lighting, dynamic angle",
           "fx": {
-            "anime_timing": {
+            "ken_burns": {
               "enabled": true,
-              "on": 2
+              "preset": "crash_zoom"
             },
             "impact": {
               "enabled": true,
               "at": [
                 0.0
               ],
-              "flash_color": "#FF7A1A",
-              "shake": 24
+              "flash_color": "#FFFFFF",
+              "shake": 26
+            },
+            "shake": {
+              "enabled": true,
+              "amount": 6
             }
           },
           "sfx": [
@@ -1210,7 +1215,7 @@
             }
           ],
           "dialogue": [],
-          "seed": 7306,
+          "seed": 7406,
           "negative": "small gem, holding gem, jewel, palm up"
         },
         {

@@ -1,6 +1,6 @@
 # Arc-Forge: Ignition — Series Bible (v0.1)
 
-*Battle shonen / urban sci-fi fantasy / academy action. 12 episodes (1 cour). Pilot: Ep 1.*
+*Battle shonen / urban sci-fi fantasy / academy action. 12 episodes (1 cour). Pilot: Ep 1 (~9 min).*
 Names, places and lore below are first-draft proposals: change anything, then keep this file the
 single source of truth (character tags here are what the image prompts use).
 

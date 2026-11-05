@@ -47,13 +47,16 @@ CUDA 13 PyTorch build ComfyUI asked for; fewer steps; whether thermal throttling
 batch was slower per frame than the single test. Combined with item 1's bonus, this decides
 episode length and how many cuts per episode can move.
 
-## 5. Runtime gap (blocks the 20-minute pilot)
-Written so far: cold open 1:20 + title 0:05 + Act A seq 1 ~0:35 + seq 2 ~0:45 = **~2:45**. The remaining outline
-(resolution + stinger) adds ~3 min, so the pilot's story is **~6 min**, against a `target_runtime_sec` of 1200.
-At ~1.8 s/cut, 14 more minutes is ~450 cuts, which needs real story: scenes, characters, stakes. It can't be
-stretched by slowing the pacing. Options: (a) ship the pilot at ~8–10 min with a short added scene or two;
-(b) write new Act B material (Kaito's life as a Zero, Rei's view, the Director's motive, the squad);
-(c) both. Decide before writing more cuts.
+## 5. Runtime gap: decided 2026-11-05, pilot ~9 min
+Written: ~2:50 (cold open, title, Act A seq 1+2). Resolution + stinger as outlined: ~3 min. So ~3 min of NEW story is
+needed, not padding. `target_runtime_sec` is now 540. Proposed fill: (1) a longer interrogation where Gōda *tests*
+Kaito (a catalyst device dies in his hand), cheap one-location dialogue; (2) a ~60–75 s Rei scene after the arrest
+(she replays the footage; sets up the Ep 5 match). Episodes 2+ need real Act B material (option b).
+
+## 6. Wan timing anomaly
+a1_06 25.3 s/frame, a1_13 26.2, **a1_17 108.0** (same 73 frames, same settings). A 4× outlier is probably VRAM
+spilling into shared system memory, or the GPU dropping clocks (battery, power mode, sleep). That's a guess:
+it needs a GPU log (`nvidia-smi ... -l 10`) during the next motion run before anything is changed.
 
 ## Done
 - 2026-11-05: **Act A seq 2** (`act_a_seq2`, 19 cuts): the charge, the grab (Zero-Catalyst reveal), the blackout
