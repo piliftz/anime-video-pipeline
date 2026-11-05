@@ -1689,7 +1689,7 @@
         },
         "Drone": {
           "voice": "en-US-ChristopherNeural",
-          "rate": "-5%",
+          "rate": "+8%",
           "pitch": "-12Hz"
         }
       },

@@ -161,6 +161,46 @@ def _mp3_to_wav(src: Path, dst: Path) -> None:
         raise PipelineError(f"ffmpeg failed converting {src} -> {dst}: {proc.stderr.strip()}")
 
 
+TRIM_THRESHOLD_DBFS = -45.0
+TRIM_PAD_SECONDS = 0.04
+
+
+def trim_silence(wav_path: Path) -> tuple[float, float]:
+    """Cut leading/trailing silence from a mono 16-bit WAV in place (keeps a 40 ms pad).
+
+    TTS engines pad lines with silence; on 1-2 s action cuts that padding alone stretches the cut.
+    Returns (seconds removed at the start, seconds removed at the end).
+    """
+    import numpy as np
+
+    with wave.open(str(wav_path), "rb") as wf:
+        params = wf.getparams()
+        data = np.frombuffer(wf.readframes(wf.getnframes()), dtype=np.int16)
+    if params.nchannels != 1 or params.sampwidth != 2 or data.size == 0:
+        return 0.0, 0.0
+    threshold = 32768 * 10 ** (TRIM_THRESHOLD_DBFS / 20)
+    loud = np.flatnonzero(np.abs(data.astype(np.int32)) > threshold)
+    if loud.size == 0:
+        return 0.0, 0.0
+    pad = int(TRIM_PAD_SECONDS * params.framerate)
+    start, end = max(0, int(loud[0]) - pad), min(data.size, int(loud[-1]) + 1 + pad)
+    if start == 0 and end == data.size:
+        return 0.0, 0.0
+    with wave.open(str(wav_path), "wb") as wf:
+        wf.setparams(params)
+        wf.writeframes(data[start:end].tobytes())
+    return start / params.framerate, (data.size - end) / params.framerate
+
+
+def _shift_boundaries(boundaries: list[dict], lead: float, duration: float) -> list[dict]:
+    out = []
+    for b in boundaries:
+        s = min(duration, max(0.0, b["start"] - lead))
+        e = min(duration, max(s, b["end"] - lead))
+        out.append({**b, "start": round(s, 3), "end": round(e, 3)})
+    return out
+
+
 def _write_silence(dst: Path, seconds: float) -> None:
     frames = int(round(seconds * SAMPLE_RATE))
     with wave.open(str(dst), "wb") as wf:
@@ -250,6 +290,13 @@ async def synthesize_line(
         meta = load_json(meta_path)
         # Re-synthesize cached silent placeholders once a real voice is possible.
         if not meta.get("fallback") or fallback == "silence":
+            if not meta.get("fallback") and not meta.get("trimmed"):  # cached before trimming existed
+                lead, tail = trim_silence(wav_path)
+                duration = media_duration(wav_path)
+                meta.update(duration=round(duration, 3), trimmed=True,
+                            boundaries=_shift_boundaries(meta.get("boundaries", []), lead, duration))
+                save_json(meta_path, meta)
+                log.info("trimmed  %-14s -%.2fs lead, -%.2fs tail (cached line)", line.id, lead, tail)
             log.info("cached   %-14s %.2fs  %s", line.id, meta["duration"], wav_path.name)
             return meta
 
@@ -263,18 +310,21 @@ async def synthesize_line(
                 boundaries = await _synthesize_edge(line, mp3_path, proxy)
             _mp3_to_wav(mp3_path, wav_path)
             mp3_path.unlink(missing_ok=True)
+            lead, tail = trim_silence(wav_path)
             duration = media_duration(wav_path)
-            if not boundaries:
-                boundaries = proportional_boundaries(line.text, duration)
+            boundaries = _shift_boundaries(boundaries, lead, duration) if boundaries else \
+                proportional_boundaries(line.text, duration)
             meta = {
                 "id": line.id, "text": line.text, "speaker": line.speaker, "voice": line.voice,
                 "rate": line.rate, "pitch": line.pitch, "volume": line.volume,
                 "audio": str(wav_path), "duration": round(duration, 3),
                 "boundaries": boundaries, "fallback": False, "engine": line.engine, "voicevox": line.vv or None,
+                "trimmed": True, "trimmed_seconds": [round(lead, 3), round(tail, 3)],
             }
             save_json(meta_path, meta)
             who = f"VOICEVOX {line.vv.get('speaker')}/{line.vv.get('style_used', '')}" if line.engine == "voicevox" else line.voice
-            log.info("voiced   %-14s %.2fs  %s (%s)", line.id, duration, wav_path.name, who)
+            log.info("voiced   %-14s %.2fs  %s (%s; trimmed %.2fs)",
+                     line.id, duration, wav_path.name, who, lead + tail)
             return meta
         except Exception as exc:  # network errors, service hiccups, bad voice names
             last_error = exc

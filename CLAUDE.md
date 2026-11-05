@@ -130,6 +130,8 @@ a visual change works without inspecting frames.
 - Action pacing: cut `fx` supports crash_zoom/slam_out/whip_* Ken Burns presets, `shake`, `impact.flash_color`;
   segment `dialogue_timing: {offset, tail}` tightens dialogue padding. Prefer FX-driven stills for action and
   spend Wan on 3-4 hero shots per minute (fast motion is Wan's weakest area and every cut costs GPU).
+- Voice lines are trimmed of leading/trailing silence (-45 dBFS, 40 ms pad) after synthesis; sidecars carry
+  `trimmed`, and older cached lines are trimmed in place on next use (boundaries shifted to match).
 - Final mix is loudness-normalized (`project.loudness_lufs`, default -14, -1 dBTP) in final_encode.
 - moviepy `time_transform` drops `.duration` unless keep_duration=True: always pass it for same-length remaps.
 - Planned work and its rationale lives in docs/ROADMAP.md (anime timing, impact frames, ControlNet, speed).
