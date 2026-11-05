@@ -1101,7 +1101,9 @@
               "emotion": "commanding",
               "ja_review": true
             }
-          ]
+          ],
+          "seed": 7303,
+          "negative": "pale skin, light skin, white skin"
         },
         {
           "id": "a2_04",
@@ -1179,7 +1181,7 @@
           "shot": "HERO: the grab (Zero-Catalyst reveal)",
           "characters": [],
           "action": "His hand clamps onto the Vein. Gray frost bursts out from his fingers across the crystal. Music cuts dead.",
-          "keyframe_prompt": "close-up, hand focus, grabbing, glowing orange crystal, bandaged hand, fingerless gloves, gray frost spreading from fingers, ice cracks, sparks, fire, dramatic lighting",
+          "keyframe_prompt": "close-up, hand focus, hand pressed flat against giant glowing orange crystal, huge crystal wall, bandaged hand, fingerless gloves, gray frost spreading from fingers across the crystal, frost pattern, ice cracks, sparks, fire, dramatic lighting",
           "motion_prompt": "the hand clamps around the glowing crystal, gray frost spreads outward from the fingers across the crystal, sparks burst and then fade, camera pushes in slowly",
           "fx": {
             "anime_timing": {
@@ -1207,7 +1209,9 @@
               "volume": 0.9
             }
           ],
-          "dialogue": []
+          "dialogue": [],
+          "seed": 7306,
+          "negative": "small gem, holding gem, jewel, palm up"
         },
         {
           "id": "a2_07",
@@ -1216,7 +1220,7 @@
           "shot": "Insert, frost-cracks climb his forearm",
           "characters": [],
           "action": "Gray frost-like cracks crawl from his wrist toward the elbow. He holds on anyway.",
-          "keyframe_prompt": "close-up, forearm focus, gray cracks on skin, frost, ice cracks, rolled up sleeves, gray blazer, bandaged hand, dim lighting, orange glow",
+          "keyframe_prompt": "close-up, forearm focus, gray cracks on skin, cracked skin, frost on arm, ice crystals on skin, rolled up sleeves, gray blazer sleeve, bandaged hand, dim lighting, orange glow",
           "fx": {
             "ken_burns": {
               "enabled": true,
@@ -1243,7 +1247,9 @@
               "ja_review": true,
               "delivery": "through gritted teeth, off-screen"
             }
-          ]
+          ],
+          "seed": 7307,
+          "negative": "rock, stone, cracked ground"
         },
         {
           "id": "a2_08",
@@ -1315,7 +1321,9 @@
               "volume": 0.5
             }
           ],
-          "dialogue": []
+          "dialogue": [],
+          "seed": 7310,
+          "negative": "black jacket, black uniform, dark clothes"
         },
         {
           "id": "a2_11",
@@ -1352,7 +1360,7 @@
           "shot": "HERO: the arena lights die",
           "characters": [],
           "action": "The stadium floodlights shut off bank by bank. Thousands of people, total silence.",
-          "keyframe_prompt": "no humans, stadium, night, floodlights, crowd silhouettes, darkness spreading, wide shot, scenery",
+          "keyframe_prompt": "no humans, futuristic arena, night, metal arena floor, cracked floor, glowing crystal fissure, floodlights, crowd silhouettes in stands, darkness spreading, wide shot, scenery, sci-fi",
           "motion_prompt": "the stadium floodlights shut off one bank at a time from left to right, the arena falls into darkness, faint embers drift, static camera",
           "fx": {
             "anime_timing": {
@@ -1367,7 +1375,9 @@
               "volume": 0.8
             }
           ],
-          "dialogue": []
+          "dialogue": [],
+          "seed": 7312,
+          "negative": "grass, soccer field, football field, green field, sports field"
         },
         {
           "id": "a2_13",
@@ -1454,7 +1464,7 @@
           "shot": "Insert, red laser dots on his chest",
           "characters": [],
           "action": "Red targeting dots slide onto his blazer. An alarm wails.",
-          "keyframe_prompt": "close-up, chest focus, red laser sight dots, gray blazer, school uniform, orange piping, dark, red light",
+          "keyframe_prompt": "close-up, chest focus, male focus, red laser sight dots on chest, targeting laser, gray blazer, orange piping, school uniform, white shirt, dark, red light",
           "fx": {
             "ken_burns": {
               "enabled": true,
@@ -1476,7 +1486,9 @@
               "volume": 0.8
             }
           ],
-          "dialogue": []
+          "dialogue": [],
+          "seed": 7316,
+          "negative": "bowtie, bow, ribbon, breasts, female, face, mouth, chin"
         },
         {
           "id": "a2_17",
