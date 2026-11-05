@@ -1107,8 +1107,8 @@
           "dialogue": [
             {
               "speaker": "Goda",
-              "en": "Kurogane! Stand down!",
-              "ja": "黒鉄！下がれ！",
+              "en": "Kurogane, stand down!",
+              "ja": "黒鉄、下がれ！",
               "emotion": "commanding",
               "ja_review": true
             }
@@ -1177,8 +1177,8 @@
           "dialogue": [
             {
               "speaker": "Kaito",
-              "en": "Okay. Okay. This is gonna hurt.",
-              "ja": "よし……よし。これ、絶対痛いやつだ。",
+              "en": "Okay, okay, this is gonna hurt.",
+              "ja": "よし、よし、これ絶対痛いやつだ。",
               "emotion": "scared, joking",
               "ja_review": true,
               "delivery": "over the hand"
@@ -1407,19 +1407,24 @@
           },
           "sfx": [
             {
-              "name": "power_down",
+              "name": "breaker_clunk",
               "at": 1.07,
-              "volume": 0.7
+              "volume": 0.9
             },
             {
-              "name": "power_down",
+              "name": "breaker_clunk",
               "at": 1.73,
-              "volume": 0.8
+              "volume": 0.95
+            },
+            {
+              "name": "breaker_clunk",
+              "at": 2.4,
+              "volume": 1.0
             },
             {
               "name": "power_down",
               "at": 2.4,
-              "volume": 1.0
+              "volume": 0.6
             }
           ],
           "dialogue": [],
@@ -1565,8 +1570,8 @@
           "dialogue": [
             {
               "speaker": "Drone",
-              "en": "Anomaly confirmed. Subdue.",
-              "ja": "異常確認。制圧する。",
+              "en": "Anomaly confirmed, subdue.",
+              "ja": "異常確認、制圧する。",
               "emotion": "flat, robotic",
               "ja_review": true
             }
@@ -1872,6 +1877,9 @@
         },
         "heartbeat": {
           "search": "heartbeat single thump"
+        },
+        "breaker_clunk": {
+          "search": "heavy switch clunk"
         }
       },
       "music_library": {
