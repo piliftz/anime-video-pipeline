@@ -2290,10 +2290,10 @@
           "id": "r_22",
           "duration": 3.0,
           "motion": "still",
-          "shot": "Insert: he pockets the dead cell, not the evidence bag",
+          "shot": "Insert: the evidence bag, empty",
           "characters": [],
-          "action": "An open evidence bag waits on the table. Gōda's hand slips the dead cell into his own coat instead.",
-          "keyframe_prompt": "close-up, hand focus, dark skin, dark-skinned male, dark-skinned hand, gray trench coat sleeve, slipping a small dull gray metal cylinder into a coat pocket, unlit, open plastic evidence bag on steel table, dim lighting",
+          "action": "The evidence bag lies on the table, sealed and EMPTY. The dead cell isn't in it (it's in Gōda's coat; paid off in r_29).",
+          "keyframe_prompt": "no humans, close-up, empty clear plastic evidence bag lying flat on a steel table, white label, zip seal, dim lighting, interrogation room, long shadow of a man across the table",
           "fx": {
             "ken_burns": {
               "enabled": true,
@@ -2308,8 +2308,8 @@
             }
           ],
           "dialogue": [],
-          "seed": 7522,
-          "negative": "pale skin, light skin, white skin, phone, smartphone, tablet, glowing"
+          "seed": 7622,
+          "negative": "hands, hand, cylinder, device, object inside bag"
         },
         {
           "id": "r_23",
