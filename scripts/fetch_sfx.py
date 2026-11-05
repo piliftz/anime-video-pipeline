@@ -10,7 +10,8 @@ high-quality preview MP3s (about 128 kbps), fine for SFX; original files need a 
 
   python scripts/fetch_sfx.py search "chain clink" --name chain_clink      # downloads 3 candidates
   python scripts/fetch_sfx.py keep chain_clink 2                           # register candidate #2
-  python scripts/fetch_sfx.py script series/arc_forge/ep01_pilot.script.json   # search every SFX the script needs
+  python scripts/fetch_sfx.py script series/arc_forge/ep01_pilot.script.json   # every SFX + music/ambience bed
+  python scripts/fetch_sfx.py script series/arc_forge/ep01_pilot.script.json --auto-keep   # ...and keep #1 of each
   python scripts/fetch_sfx.py search "dark ambient drone" --name tension_drone --min-duration 30 --max-duration 180
   python scripts/fetch_sfx.py keep tension_drone 1 --kind music              # CC0 music beds work the same way
 """
@@ -119,13 +120,20 @@ def keep(name: str, n: int, kind: str = "sfx") -> Path:
     return dest
 
 
-def script_queries(script_path: Path) -> dict[str, str]:
-    """name -> search query for every SFX cue in an episode script (production.audio.sfx_library)."""
+def script_queries(script_path: Path) -> list[dict]:
+    """Every sound an episode script needs: production.audio.sfx_library (short SFX, <= 8 s) and
+    music_library (music beds and ambience, with their own min/max durations), as search specs."""
     script = load_json(script_path)
-    lib = (script.get("production", {}).get("audio", {}) or {}).get("sfx_library", {})
-    if not lib:
-        raise PipelineError("The script has no production.audio.sfx_library (name -> search words).")
-    return {name: spec["search"] for name, spec in lib.items() if spec.get("search")}
+    audio = script.get("production", {}).get("audio", {}) or {}
+    specs = [{"name": name, "query": spec["search"], "min": 0.1, "max": 8.0, "kind": "sfx"}
+             for name, spec in (audio.get("sfx_library") or {}).items() if spec.get("search")]
+    for name, spec in (audio.get("music_library") or {}).items():
+        if spec.get("freesound_search"):
+            specs.append({"name": name, "query": spec["freesound_search"], "min": float(spec.get("min_duration", 20)),
+                          "max": float(spec.get("max_duration", 240)), "kind": spec.get("kind", "music")})
+    if not specs:
+        raise PipelineError("The script has no production.audio.sfx_library / music_library (name -> search words).")
+    return specs
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -141,7 +149,7 @@ def main(argv: list[str] | None = None) -> int:
     k.add_argument("name")
     k.add_argument("n", type=int)
     k.add_argument("--kind", default="sfx", choices=["sfx", "ambience", "music"])
-    sc = sub.add_parser("script", help="Search candidates for every SFX an episode script needs.")
+    sc = sub.add_parser("script", help="Search candidates for every SFX and music bed an episode script needs.")
     sc.add_argument("script", type=Path)
     sc.add_argument("--auto-keep", action="store_true", help="Register candidate #1 for every name (no audition).")
     args = p.parse_args(argv)
@@ -155,15 +163,16 @@ def main(argv: list[str] | None = None) -> int:
         else:
             from audio_manifest import path_for_name
 
-            for name, query in script_queries(args.script).items():
+            for spec in script_queries(args.script):
+                name = spec["name"]
                 if path_for_name(name):
                     print(f"have    {name}")
                     continue
-                print(f"search  {name}: '{query}'")
+                print(f"search  {name} ({spec['kind']}): '{spec['query']}'")
                 try:
-                    stage_candidates(query, name, 8.0, 3)
+                    stage_candidates(spec["query"], name, spec["max"], 3, spec["min"])
                     if args.auto_keep:
-                        print(f"  kept #1 -> {keep(name, 1)}")
+                        print(f"  kept #1 -> {keep(name, 1, spec['kind'])}")
                 except PipelineError as exc:
                     log.warning("%s: %s", name, exc)
         return 0

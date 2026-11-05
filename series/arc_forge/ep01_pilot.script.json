@@ -973,7 +973,7 @@
       "status": "written",
       "location": "Spark-Forge Academy, Hazard Trial arena",
       "time_of_day": "night",
-      "sound_design_note": "battle_theme drives the charge (a2_01-a2_05) and CUTS DEAD on the grab impact (a2_06). a2_06-a2_15 have no music at all: only crackle, power-downs and a heartbeat. The silence is the reveal; don't fill it. tension_drone creeps in with the red lasers (a2_16) and the handcuff clink on a2_19 bridges back to the interrogation room.",
+      "sound_design_note": "battle_theme drives the charge (a2_01-a2_05) and CUTS DEAD on the grab impact (a2_06). a2_06-a2_15 have no music at all: only crackle, power-downs and a heartbeat. The silence is the reveal; don't fill it. tension_drone creeps in with the red lasers (a2_16) and the handcuff clink on a2_19 bridges back to the interrogation room. arena_ambience (wind, very low) runs under a2_06-a2_15: no music there, but never dead digital silence.",
       "audio": {
         "music": [
           {
@@ -985,6 +985,17 @@
             "fade_out": 0.0,
             "duck_to": 0.6,
             "duck_fade": 0.15
+          },
+          {
+            "name": "arena_ambience",
+            "start_cut": "a2_06",
+            "end_cut": "a2_15",
+            "volume": 0.3,
+            "loop": true,
+            "fade_in": 0.3,
+            "fade_out": 0.4,
+            "duck_to": 0.8,
+            "duck_fade": 0.2
           },
           {
             "name": "tension_drone",
@@ -1881,6 +1892,13 @@
           "min_duration": 30,
           "max_duration": 240,
           "look_for": "driving, high BPM (140+), heavy drums or industrial percussion; at least 30 s. Also try 'action drum loop', 'aggressive rock loop', 'epic battle percussion'."
+        },
+        "arena_ambience": {
+          "freesound_search": "night wind ambience",
+          "min_duration": 20,
+          "max_duration": 180,
+          "kind": "ambience",
+          "look_for": "low, steady wind or distant hum, no voices or music; sits under 'silent' beats so they never go to dead digital silence"
         }
       }
     }
