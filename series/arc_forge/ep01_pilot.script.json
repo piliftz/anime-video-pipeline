@@ -1663,12 +1663,925 @@
     },
     {
       "id": "resolution",
-      "time": "16:30-19:30",
-      "status": "outline",
-      "beats": [
-        "Back in the interrogation room. Gōda believes him and isn't allowed to say so.",
-        "The Director on a monitor (face unseen): 'Find out what he is. Quietly.'",
-        "Kaito alone, flexing his numb hand. The frost-cracks haven't fully faded."
+      "time": "after act_a_seq2 (Rei scene planned between)",
+      "status": "written",
+      "location": "Interrogation room -> Director's office (monitor) -> holding cell",
+      "time_of_day": "night",
+      "sound_design_note": "A valley after the action: slow cuts, real pauses. room_tone under the whole interrogation (never dead silence). tension_drone for the cell test (r_09-r_15), then NO music while the recorder is off (r_16-r_22): the intimacy is the point. Drone returns for the Director (r_24-r_29). Night wind (arena_ambience) under Kaito alone.",
+      "audio": {
+        "music": [
+          {
+            "name": "room_tone",
+            "start_cut": "r_01",
+            "end_cut": "r_23",
+            "volume": 0.35,
+            "loop": true,
+            "fade_in": 0.3,
+            "fade_out": 0.3,
+            "duck_to": 0.8,
+            "duck_fade": 0.2
+          },
+          {
+            "name": "tension_drone",
+            "start_cut": "r_09",
+            "end_cut": "r_15",
+            "volume": 0.35,
+            "fade_in": 1.0,
+            "fade_out": 0.05,
+            "duck_to": 0.5
+          },
+          {
+            "name": "tension_drone",
+            "start_cut": "r_24",
+            "end_cut": "r_29",
+            "volume": 0.4,
+            "fade_in": 0.5,
+            "fade_out": 0.1,
+            "duck_to": 0.5
+          },
+          {
+            "name": "arena_ambience",
+            "start_cut": "r_30",
+            "end_cut": "r_33",
+            "volume": 0.3,
+            "loop": true,
+            "fade_in": 0.5,
+            "fade_out": 0.8
+          }
+        ]
+      },
+      "dialogue_timing": {
+        "offset": 0.25,
+        "tail": 0.6
+      },
+      "cuts": [
+        {
+          "id": "r_01",
+          "duration": 3.0,
+          "motion": "clip",
+          "shot": "Back in the room (reuses c001)",
+          "characters": [],
+          "action": "The interrogation room again. Fluorescent buzz.",
+          "clip": "../../assets/generated/arc_forge/ep01/cold_open/clips/c001",
+          "fx": {},
+          "sfx": [
+            {
+              "name": "fluorescent_buzz",
+              "at": 0.0,
+              "volume": 0.5
+            },
+            {
+              "name": "water_drip",
+              "at": 1.6,
+              "volume": 0.5
+            }
+          ],
+          "dialogue": []
+        },
+        {
+          "id": "r_02",
+          "duration": 2.5,
+          "motion": "clip",
+          "shot": "Handcuffs (reuses c002)",
+          "characters": [],
+          "action": "Kaito's cuffed hands on the steel table.",
+          "clip": "../../assets/generated/arc_forge/ep01/cold_open/clips/c002",
+          "fx": {},
+          "sfx": [
+            {
+              "name": "chain_clink",
+              "at": 0.3,
+              "volume": 0.7
+            }
+          ],
+          "dialogue": []
+        },
+        {
+          "id": "r_03",
+          "duration": 2.6,
+          "motion": "still",
+          "shot": "Gōda closes the file (from behind)",
+          "characters": [
+            "Goda"
+          ],
+          "action": "Gōda shuts the folder.",
+          "keyframe_prompt": "1boy, from behind, back view, sitting, closing file folder, steel table, interrogation room, dim lighting, over the shoulder shot, depth of field",
+          "fx": {
+            "ken_burns": {
+              "enabled": true,
+              "preset": "push_in"
+            }
+          },
+          "sfx": [
+            {
+              "name": "file_slap",
+              "at": 0.3,
+              "volume": 0.6
+            }
+          ],
+          "dialogue": [
+            {
+              "speaker": "Goda",
+              "en": "That's your story.",
+              "ja": "……それが、お前の話か。",
+              "emotion": "flat",
+              "ja_review": true
+            }
+          ]
+        },
+        {
+          "id": "r_04",
+          "duration": 2.0,
+          "motion": "still",
+          "shot": "Kaito's eyes",
+          "characters": [
+            "Kaito"
+          ],
+          "action": "Kaito holds his gaze.",
+          "keyframe_prompt": "1boy, solo, eyes focus, close-up, amber eyes, determined, tired, dim lighting, interrogation room",
+          "fx": {
+            "ken_burns": {
+              "enabled": true,
+              "preset": "push_in"
+            }
+          },
+          "sfx": [],
+          "dialogue": [
+            {
+              "speaker": "Kaito",
+              "en": "It's the truth.",
+              "ja": "本当のことです。",
+              "emotion": "steady",
+              "ja_review": true
+            }
+          ]
+        },
+        {
+          "id": "r_05",
+          "duration": 3.4,
+          "motion": "still",
+          "shot": "Insert: the arena footage on a tablet",
+          "characters": [],
+          "action": "A tablet on the table plays the footage: a small figure running INTO the fire.",
+          "keyframe_prompt": "close-up, tablet screen on steel table, video footage on screen, small figure running toward fire, orange glow, dark room, reflection",
+          "fx": {
+            "ken_burns": {
+              "enabled": true,
+              "preset": "push_in"
+            }
+          },
+          "sfx": [],
+          "dialogue": [
+            {
+              "speaker": "Goda",
+              "en": "The footage says you ran at a Class-A Vein, bare-handed.",
+              "ja": "映像では、お前はクラスAのベインに素手で突っ込んでいる。",
+              "emotion": "pressing",
+              "ja_review": true,
+              "delivery": "off-screen"
+            }
+          ]
+        },
+        {
+          "id": "r_06",
+          "duration": 2.2,
+          "motion": "still",
+          "shot": "Kaito, head down (from behind)",
+          "characters": [
+            "Kaito"
+          ],
+          "action": "Kaito shrugs, not looking up.",
+          "keyframe_prompt": "1boy, solo, from behind, back view, sitting, head down, handcuffs, gray blazer, interrogation room, dim lighting",
+          "fx": {},
+          "sfx": [],
+          "dialogue": [
+            {
+              "speaker": "Kaito",
+              "en": "Somebody had to.",
+              "ja": "誰かが、やらなきゃいけなかった。",
+              "emotion": "quiet",
+              "ja_review": true
+            }
+          ]
+        },
+        {
+          "id": "r_07",
+          "duration": 2.4,
+          "motion": "still",
+          "shot": "Gōda's eyes, scar in the light",
+          "characters": [
+            "Goda"
+          ],
+          "action": "Gōda, unimpressed.",
+          "keyframe_prompt": "1boy, solo, close-up, eyes focus, scar on face, half of face in shadow, stern, dim lighting",
+          "fx": {
+            "ken_burns": {
+              "enabled": true,
+              "preset": "push_in"
+            }
+          },
+          "sfx": [],
+          "dialogue": [
+            {
+              "speaker": "Goda",
+              "en": "Somebody with a catalyst.",
+              "ja": "触媒を持っている誰かが、な。",
+              "emotion": "dry",
+              "ja_review": true
+            }
+          ]
+        },
+        {
+          "id": "r_08",
+          "duration": 2.6,
+          "motion": "still",
+          "shot": "Kaito's crooked half-smile",
+          "characters": [
+            "Kaito"
+          ],
+          "action": "The shonen bite back.",
+          "keyframe_prompt": "1boy, solo, upper body, half smile, looking to the side, sweat, handcuffs, dim lighting, interrogation room",
+          "fx": {},
+          "sfx": [],
+          "dialogue": [
+            {
+              "speaker": "Kaito",
+              "en": "Yeah, well, nobody with one showed up.",
+              "ja": "……その誰かは、来ませんでしたけど。",
+              "emotion": "dry, defiant",
+              "ja_review": true
+            }
+          ]
+        },
+        {
+          "id": "r_09",
+          "duration": 2.4,
+          "motion": "still",
+          "shot": "Insert: Gōda slides a catalyst cell across the table",
+          "characters": [],
+          "action": "A palm-sized cell glowing cyan slides across the steel table.",
+          "keyframe_prompt": "close-up, hand focus, dark-skinned hand, gray trench coat sleeve, sliding a small glowing cyan cylinder device across a steel table, energy cell, cyan glow, dim lighting",
+          "fx": {
+            "ken_burns": {
+              "enabled": true,
+              "preset": "whip_right"
+            }
+          },
+          "sfx": [
+            {
+              "name": "metal_slide",
+              "at": 0.1,
+              "volume": 0.8
+            }
+          ],
+          "dialogue": [
+            {
+              "speaker": "Goda",
+              "en": "Hold it.",
+              "ja": "持ってみろ。",
+              "emotion": "command",
+              "ja_review": true,
+              "delivery": "off-screen"
+            }
+          ]
+        },
+        {
+          "id": "r_10",
+          "duration": 2.6,
+          "motion": "still",
+          "shot": "Kaito eyes the cell, wary",
+          "characters": [
+            "Kaito"
+          ],
+          "action": "Kaito looks at it like it might bite.",
+          "keyframe_prompt": "1boy, solo, close-up, looking down, wary, sweatdrop, cyan light on face, dim lighting",
+          "fx": {},
+          "sfx": [],
+          "dialogue": [
+            {
+              "speaker": "Kaito",
+              "en": "If it breaks, I'm not paying for it.",
+              "ja": "壊れても、弁償しませんからね。",
+              "emotion": "nervous joke",
+              "ja_review": true
+            }
+          ]
+        },
+        {
+          "id": "r_11",
+          "duration": 2.8,
+          "motion": "still",
+          "shot": "Insert: the cell dies in his hand",
+          "characters": [],
+          "action": "His bandaged hand closes around the cell. The cyan drains to dead gray.",
+          "keyframe_prompt": "close-up, hand focus, bandaged hand, fingerless gloves, holding a small glowing cyan cylinder device, cyan glow, steel table, dark",
+          "fx": {
+            "ken_burns": {
+              "enabled": true,
+              "preset": "push_in"
+            },
+            "blackout": {
+              "enabled": true,
+              "start": 0.7,
+              "end": 1.7,
+              "brightness": 0.6,
+              "saturation": 0.0,
+              "steps": 0,
+              "easing": "ease_in"
+            }
+          },
+          "sfx": [
+            {
+              "name": "power_down",
+              "at": 0.7,
+              "volume": 0.9
+            }
+          ],
+          "dialogue": []
+        },
+        {
+          "id": "r_12",
+          "duration": 1.8,
+          "motion": "still",
+          "shot": "Gōda's eyes narrow (silence)",
+          "characters": [
+            "Goda"
+          ],
+          "action": "Gōda, very still.",
+          "keyframe_prompt": "1boy, solo, eyes focus, close-up, narrowed eyes, scar on face, dim lighting, gray light",
+          "fx": {
+            "ken_burns": {
+              "enabled": true,
+              "preset": "push_in"
+            }
+          },
+          "sfx": [],
+          "dialogue": []
+        },
+        {
+          "id": "r_13",
+          "duration": 1.6,
+          "motion": "still",
+          "shot": "Insert: second cell, dies faster",
+          "characters": [],
+          "action": "A second cell. It dies the instant he touches it.",
+          "keyframe_prompt": "close-up, hand focus, bandaged hand, grabbing a small glowing cyan cylinder device, cyan glow, steel table, dark, dynamic angle",
+          "fx": {
+            "blackout": {
+              "enabled": true,
+              "start": 0.35,
+              "end": 0.55,
+              "brightness": 0.55,
+              "saturation": 0.0,
+              "steps": 0,
+              "easing": "linear"
+            },
+            "impact": {
+              "enabled": true,
+              "at": [
+                0.35
+              ],
+              "flash_color": "#9AA1AC",
+              "shake": 6,
+              "invert": false
+            }
+          },
+          "sfx": [
+            {
+              "name": "metal_slide",
+              "at": 0.0,
+              "volume": 0.6
+            },
+            {
+              "name": "power_down",
+              "at": 0.35,
+              "volume": 1.0
+            }
+          ],
+          "dialogue": [
+            {
+              "speaker": "Goda",
+              "en": "Again.",
+              "ja": "もう一度だ。",
+              "emotion": "cold",
+              "ja_review": true,
+              "delivery": "off-screen"
+            }
+          ]
+        },
+        {
+          "id": "r_14",
+          "duration": 3.0,
+          "motion": "still",
+          "shot": "Insert: frost-cracks on his knuckles",
+          "characters": [],
+          "action": "Gray frost-cracks creep across his knuckles. He flexes the hand.",
+          "keyframe_prompt": "close-up, hand focus, knuckles, gray cracks on skin, frost, ice crystals on skin, bandaged hand, fingerless gloves, dim lighting, cold",
+          "fx": {
+            "ken_burns": {
+              "enabled": true,
+              "preset": "push_in"
+            }
+          },
+          "sfx": [
+            {
+              "name": "construct_crack",
+              "at": 0.3,
+              "volume": 0.5
+            }
+          ],
+          "dialogue": [
+            {
+              "speaker": "Kaito",
+              "en": "It gets colder every time.",
+              "ja": "……触るたびに、冷たくなるんです。",
+              "emotion": "quiet, uneasy",
+              "ja_review": true,
+              "delivery": "over the hand"
+            }
+          ]
+        },
+        {
+          "id": "r_15",
+          "duration": 2.8,
+          "motion": "still",
+          "shot": "Gōda at the one-way mirror (from behind)",
+          "characters": [
+            "Goda"
+          ],
+          "action": "Gōda stands, walks to the mirror, speaks to whoever is behind it.",
+          "keyframe_prompt": "1boy, from behind, back view, standing, facing a large dark mirror, reflection, interrogation room, fluorescent light, dim lighting",
+          "fx": {
+            "ken_burns": {
+              "enabled": true,
+              "preset": "drift"
+            }
+          },
+          "sfx": [
+            {
+              "name": "chair_creak",
+              "at": 0.0,
+              "volume": 0.6
+            }
+          ],
+          "dialogue": [
+            {
+              "speaker": "Goda",
+              "en": "Turn the recorder off.",
+              "ja": "記録を止めろ。",
+              "emotion": "low, firm",
+              "ja_review": true
+            }
+          ]
+        },
+        {
+          "id": "r_16",
+          "duration": 1.6,
+          "motion": "still",
+          "shot": "Insert: the red REC light goes dark",
+          "characters": [],
+          "action": "The camera's red recording light clicks off.",
+          "keyframe_prompt": "close-up, security camera mounted on concrete wall, red recording light, dark, ceiling corner",
+          "fx": {
+            "blackout": {
+              "enabled": true,
+              "start": 0.8,
+              "end": 0.84,
+              "brightness": 0.35,
+              "saturation": 0.3,
+              "steps": 1,
+              "easing": "linear"
+            }
+          },
+          "sfx": [
+            {
+              "name": "switch_click",
+              "at": 0.8,
+              "volume": 0.8
+            }
+          ],
+          "dialogue": []
+        },
+        {
+          "id": "r_17",
+          "duration": 4.0,
+          "motion": "still",
+          "shot": "Gōda turns back, silhouette against the mirror",
+          "characters": [
+            "Goda"
+          ],
+          "action": "Off the record. His voice drops.",
+          "keyframe_prompt": "1boy, silhouette, standing, backlighting, dark mirror behind, interrogation room, fluorescent light, dramatic shadow",
+          "fx": {},
+          "sfx": [],
+          "dialogue": [
+            {
+              "speaker": "Goda",
+              "en": "Off the record, you saved forty-one students today.",
+              "ja": "ここからは記録外だ。……今日、お前は四十一人の生徒を救った。",
+              "emotion": "quiet, sincere",
+              "ja_review": true
+            }
+          ]
+        },
+        {
+          "id": "r_18",
+          "duration": 1.8,
+          "motion": "still",
+          "shot": "Kaito looks up",
+          "characters": [
+            "Kaito"
+          ],
+          "action": "Nobody has ever said that to him.",
+          "keyframe_prompt": "1boy, solo, close-up, looking up, surprised, amber eyes, dim lighting",
+          "fx": {
+            "ken_burns": {
+              "enabled": true,
+              "preset": "push_in"
+            }
+          },
+          "sfx": [],
+          "dialogue": []
+        },
+        {
+          "id": "r_19",
+          "duration": 4.2,
+          "motion": "still",
+          "shot": "Gōda leans in, elbows on the table",
+          "characters": [
+            "Goda"
+          ],
+          "action": "Gōda sits again, close, low.",
+          "keyframe_prompt": "1boy, solo, sitting, leaning forward, elbows on table, hands clasped, half of face in shadow, steel table, dim lighting",
+          "fx": {
+            "ken_burns": {
+              "enabled": true,
+              "preset": "push_in"
+            }
+          },
+          "sfx": [],
+          "dialogue": [
+            {
+              "speaker": "Goda",
+              "en": "In an hour, this academy decides what that was. An accident, or a weapon.",
+              "ja": "一時間後には、学園がそれを決める。事故か……兵器か。",
+              "emotion": "grave",
+              "ja_review": true
+            }
+          ]
+        },
+        {
+          "id": "r_20",
+          "duration": 2.2,
+          "motion": "still",
+          "shot": "Kaito, small, from behind",
+          "characters": [
+            "Kaito"
+          ],
+          "action": "The question he's been afraid of.",
+          "keyframe_prompt": "1boy, solo, from behind, back view, sitting, shoulders tense, handcuffs, interrogation room, dim lighting, wide shot",
+          "fx": {},
+          "sfx": [],
+          "dialogue": [
+            {
+              "speaker": "Kaito",
+              "en": "Which one am I?",
+              "ja": "……俺は、どっちなんですか。",
+              "emotion": "afraid, quiet",
+              "ja_review": true
+            }
+          ]
+        },
+        {
+          "id": "r_21",
+          "duration": 5.0,
+          "motion": "clip",
+          "shot": "Gōda leans back, hand over mouth (reuses c008)",
+          "characters": [
+            "Goda"
+          ],
+          "action": "A long beat. Then the only honest answer he has.",
+          "clip": "../../assets/generated/arc_forge/ep01/cold_open/clips/c008",
+          "fx": {},
+          "sfx": [
+            {
+              "name": "chair_creak",
+              "at": 0.4,
+              "volume": 0.4
+            }
+          ],
+          "dialogue": [
+            {
+              "speaker": "Goda",
+              "en": "I don't know yet. That's the only reason you're in this room, and not in a lab.",
+              "ja": "まだわからん。だからお前は、研究所じゃなくこの部屋にいる。",
+              "emotion": "honest, heavy",
+              "ja_review": true
+            }
+          ]
+        },
+        {
+          "id": "r_22",
+          "duration": 3.0,
+          "motion": "still",
+          "shot": "Insert: he pockets the dead cell, not the evidence bag",
+          "characters": [],
+          "action": "An open evidence bag waits on the table. Gōda's hand slips the dead cell into his own coat instead.",
+          "keyframe_prompt": "close-up, hand focus, dark-skinned hand, gray trench coat sleeve, putting a small gray cylinder device into coat pocket, open evidence bag on steel table, dim lighting",
+          "fx": {
+            "ken_burns": {
+              "enabled": true,
+              "preset": "push_in"
+            }
+          },
+          "sfx": [
+            {
+              "name": "bag_rustle",
+              "at": 0.4,
+              "volume": 0.6
+            }
+          ],
+          "dialogue": []
+        },
+        {
+          "id": "r_23",
+          "duration": 3.2,
+          "motion": "still",
+          "shot": "Insert: REC light back on",
+          "characters": [],
+          "action": "The red light snaps back on. Gōda, loud and formal, for the record.",
+          "keyframe_prompt": "close-up, security camera mounted on concrete wall, bright red recording light, glowing red, dark, ceiling corner",
+          "fx": {},
+          "sfx": [
+            {
+              "name": "switch_click",
+              "at": 0.1,
+              "volume": 0.8
+            }
+          ],
+          "dialogue": [
+            {
+              "speaker": "Goda",
+              "en": "Interview concluded. Subject remains in custody.",
+              "ja": "聴取終了。対象は引き続き拘留とする。",
+              "emotion": "formal, loud",
+              "ja_review": true,
+              "delivery": "off-screen"
+            }
+          ]
+        },
+        {
+          "id": "r_24",
+          "duration": 2.8,
+          "motion": "still",
+          "shot": "Gōda before the Director's monitor (from behind)",
+          "characters": [
+            "Goda"
+          ],
+          "action": "A dark office. A large monitor; on it, a seated silhouette with no face.",
+          "keyframe_prompt": "1boy, from behind, back view, standing, dark office, large monitor screen, faceless silhouette on screen, backlighting, blue light",
+          "fx": {
+            "ken_burns": {
+              "enabled": true,
+              "preset": "push_in"
+            }
+          },
+          "sfx": [
+            {
+              "name": "monitor_static",
+              "at": 0.0,
+              "volume": 0.4
+            }
+          ],
+          "dialogue": [
+            {
+              "speaker": "Director",
+              "en": "Your report, Instructor.",
+              "ja": "報告を、教官。",
+              "emotion": "calm, cold",
+              "ja_review": true
+            }
+          ]
+        },
+        {
+          "id": "r_25",
+          "duration": 3.4,
+          "motion": "still",
+          "shot": "The monitor: a faceless silhouette",
+          "characters": [],
+          "action": "The Director: a silhouette against a city of lights. Gōda answers off-screen.",
+          "keyframe_prompt": "no humans, computer monitor, faceless silhouette of a seated person on screen, high-backed chair, city lights behind, blue screen glow, dark office",
+          "fx": {
+            "ken_burns": {
+              "enabled": true,
+              "preset": "push_in"
+            }
+          },
+          "sfx": [],
+          "dialogue": [
+            {
+              "speaker": "Goda",
+              "en": "Unregistered catalyst anomaly. Cause unknown.",
+              "ja": "未登録の触媒異常。原因は不明です。",
+              "emotion": "formal",
+              "ja_review": true,
+              "delivery": "off-screen"
+            }
+          ]
+        },
+        {
+          "id": "r_26",
+          "duration": 3.8,
+          "motion": "still",
+          "shot": "The monitor, closer",
+          "characters": [],
+          "action": "The silhouette doesn't move.",
+          "keyframe_prompt": "no humans, close-up, computer monitor, faceless silhouette on screen, blue screen glow, scan lines, dark",
+          "fx": {
+            "ken_burns": {
+              "enabled": true,
+              "preset": "push_in"
+            }
+          },
+          "sfx": [],
+          "dialogue": [
+            {
+              "speaker": "Director",
+              "en": "Unknown. Find out what he is, quietly.",
+              "ja": "不明、ね。……彼が何者か、調べなさい。静かに。",
+              "emotion": "calm",
+              "ja_review": true
+            }
+          ]
+        },
+        {
+          "id": "r_27",
+          "duration": 2.0,
+          "motion": "still",
+          "shot": "Gōda's eyes in the blue light",
+          "characters": [
+            "Goda"
+          ],
+          "action": "The one question he shouldn't ask.",
+          "keyframe_prompt": "1boy, solo, eyes focus, close-up, scar on face, blue light on face, dark, stern",
+          "fx": {},
+          "sfx": [],
+          "dialogue": [
+            {
+              "speaker": "Goda",
+              "en": "And if he's dangerous?",
+              "ja": "危険だった場合は？",
+              "emotion": "careful",
+              "ja_review": true
+            }
+          ]
+        },
+        {
+          "id": "r_28",
+          "duration": 2.4,
+          "motion": "still",
+          "shot": "The monitor cuts out",
+          "characters": [],
+          "action": "The answer, then static and black.",
+          "keyframe_prompt": "no humans, computer monitor, faceless silhouette on screen, blue screen glow, static noise, dark office",
+          "fx": {
+            "blackout": {
+              "enabled": true,
+              "start": 1.9,
+              "end": 2.0,
+              "brightness": 0.08,
+              "saturation": 0.2,
+              "steps": 1,
+              "easing": "linear"
+            }
+          },
+          "sfx": [
+            {
+              "name": "monitor_static",
+              "at": 1.9,
+              "volume": 0.7
+            }
+          ],
+          "dialogue": [
+            {
+              "speaker": "Director",
+              "en": "Then he's ours.",
+              "ja": "なら、彼は私たちのものよ。",
+              "emotion": "calm, final",
+              "ja_review": true
+            }
+          ]
+        },
+        {
+          "id": "r_29",
+          "duration": 2.2,
+          "motion": "still",
+          "shot": "Insert: Gōda's fist around the dead cell",
+          "characters": [],
+          "action": "In the dark, Gōda closes his fist around the gray cell.",
+          "keyframe_prompt": "close-up, hand focus, dark-skinned hand, gray trench coat sleeve, clenched fist, holding a small gray cylinder device, dark, blue light",
+          "fx": {
+            "ken_burns": {
+              "enabled": true,
+              "preset": "push_in"
+            },
+            "shake": {
+              "enabled": true,
+              "amount": 2
+            }
+          },
+          "sfx": [],
+          "dialogue": []
+        },
+        {
+          "id": "r_30",
+          "duration": 4.0,
+          "motion": "wan",
+          "shot": "Holding cell, moonlight (wide, from behind)",
+          "characters": [
+            "Kaito"
+          ],
+          "action": "Kaito alone on a bench in a holding cell. Moonlight through a barred window.",
+          "keyframe_prompt": "1boy, from behind, back view, sitting on a bench, holding cell, barred window, moonlight beam, dust particles, night, dark, wide shot, small figure, lonely",
+          "motion_prompt": "dust drifts slowly through the moonlight beam, the boy's shoulders rise and fall as he breathes, static camera",
+          "fx": {},
+          "sfx": [
+            {
+              "name": "water_drip",
+              "at": 1.0,
+              "volume": 0.4
+            }
+          ],
+          "dialogue": []
+        },
+        {
+          "id": "r_31",
+          "duration": 2.8,
+          "motion": "still",
+          "shot": "Insert: the cracks haven't faded",
+          "characters": [],
+          "action": "He opens and closes his hand. The gray cracks are still there.",
+          "keyframe_prompt": "close-up, hand focus, open hand, palm up, gray cracks on skin, frost, bandaged hand, moonlight, night, dark",
+          "fx": {
+            "ken_burns": {
+              "enabled": true,
+              "preset": "push_in"
+            }
+          },
+          "sfx": [
+            {
+              "name": "construct_crack",
+              "at": 0.5,
+              "volume": 0.35
+            }
+          ],
+          "dialogue": []
+        },
+        {
+          "id": "r_32",
+          "duration": 2.8,
+          "motion": "still",
+          "shot": "Kaito's tired half-smile in the moonlight",
+          "characters": [
+            "Kaito"
+          ],
+          "action": "Callback to Gōda's first line.",
+          "keyframe_prompt": "1boy, solo, profile, close-up, tired smile, moonlight, night, dark, amber eyes",
+          "fx": {},
+          "sfx": [],
+          "dialogue": [
+            {
+              "speaker": "Kaito",
+              "en": "Rank Zero, huh.",
+              "ja": "ランク・ゼロ、か。",
+              "emotion": "wry, tired, to himself",
+              "ja_review": true
+            }
+          ]
+        },
+        {
+          "id": "r_33",
+          "duration": 2.2,
+          "motion": "still",
+          "shot": "Insert: a crack on his wrist glows faintly",
+          "characters": [],
+          "action": "One gray crack on his wrist glows, faintly, by itself. Cut to black.",
+          "keyframe_prompt": "close-up, wrist focus, gray crack on skin glowing faintly, white glow, frost, moonlight, dark",
+          "fx": {
+            "ken_burns": {
+              "enabled": true,
+              "preset": "push_in"
+            }
+          },
+          "sfx": [
+            {
+              "name": "energy_charge",
+              "at": 0.6,
+              "volume": 0.3
+            }
+          ],
+          "dialogue": []
+        }
       ]
     },
     {
@@ -1738,6 +2651,10 @@
           "voice": "en-US-ChristopherNeural",
           "rate": "+8%",
           "pitch": "-12Hz"
+        },
+        "Director": {
+          "voice": "en-GB-SoniaNeural",
+          "rate": "-6%"
         }
       },
       "subtitles": {
@@ -1798,6 +2715,14 @@
             "style": "ノーマル",
             "speed": 1.05,
             "intonation": 0.0
+          }
+        },
+        "Director": {
+          "engine": "voicevox",
+          "voicevox": {
+            "speaker": "No.7",
+            "style": "ノーマル",
+            "speed": 0.95
           }
         }
       },
@@ -1880,6 +2805,18 @@
         },
         "breaker_clunk": {
           "search": "heavy switch clunk"
+        },
+        "metal_slide": {
+          "search": "metal object slide on table"
+        },
+        "switch_click": {
+          "search": "switch click button"
+        },
+        "bag_rustle": {
+          "search": "plastic bag rustle"
+        },
+        "monitor_static": {
+          "search": "tv static short"
         }
       },
       "music_library": {
@@ -1907,6 +2844,13 @@
           "max_duration": 180,
           "kind": "ambience",
           "look_for": "low, steady wind or distant hum, no voices or music; sits under 'silent' beats so they never go to dead digital silence"
+        },
+        "room_tone": {
+          "freesound_search": "room tone interior hum",
+          "min_duration": 20,
+          "max_duration": 180,
+          "kind": "ambience",
+          "look_for": "quiet indoor hum or air conditioning, no voices; sits under the interrogation so pauses never go dead"
         }
       }
     }

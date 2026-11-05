@@ -68,9 +68,9 @@ viewers decide in the first 30–60 s). Script: `ep01_pilot.script.json`.
 | 1:20–1:25 | Title card | Remotion `TitleCard` (5 s) |
 | 1:25–2:00 | Act A, seq 1 (written) | Hazard Trial arena: ignitions, Rei's S-rank, Kaito's zero reading (comedy drop), the fire wall, the real Vein breaks through. Shonen pacing, ~1.8 s/cut. |
 | 2:00–2:45 | Act A, seq 2 (written) | Kaito charges in and grabs the Vein (Zero-Catalyst reveal), every catalyst in the arena blacks out (music-free silence), security drones take him down. |
-| 2:45–16:30 | **Unwritten: no story yet** | The outline's beats now end at 2:45. Filling ~14 min needs new story (see the runtime gap note in ROADMAP), not slower pacing. |
-| 16:30–19:30 | Resolution | Back to interrogation. Gōda believes him and isn't allowed to say so. The academy Director, on a monitor: "Find out what he is. Quietly." |
-| 19:30–20:00 | Stinger | Slums. A hooded figure holds a vial of glowing Vein crystal: "So the zero finally woke up." (Sets up Ep 4.) |
+| 2:45–~3:45 | Rei scene (planned) | Rei replays the arena footage frame by frame and stops on Kaito's grin (sets up the Ep 5 match). |
+| ~3:45–~5:30 | Resolution (written) | Back in the room. Gōda tests Kaito with catalyst cells (they die in his hand), turns the recorder off: "You saved forty-one students." Accident or weapon? Gōda pockets the evidence. The Director, a faceless silhouette on a monitor: "Find out what he is, quietly." / "And if he's dangerous?" / "Then he's ours." Kaito alone in a holding cell: "Rank Zero, huh." A crack on his wrist glows. |
+| ~5:30–~6:00 | Stinger (outline) | Slums. A hooded figure holds a vial of glowing Vein crystal: "So the zero finally woke up." (Sets up Ep 4.) |
 
 ## 5. Voice casting (to audition; none are final)
 No lip-sync is possible, so direction favors off-screen lines, backs, eyes and hands, and wide shots.

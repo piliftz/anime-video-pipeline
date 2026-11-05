@@ -47,11 +47,12 @@ CUDA 13 PyTorch build ComfyUI asked for; fewer steps; whether thermal throttling
 batch was slower per frame than the single test. Combined with item 1's bonus, this decides
 episode length and how many cuts per episode can move.
 
-## 5. Runtime gap: decided 2026-11-05, pilot ~9 min
-Written: ~2:50 (cold open, title, Act A seq 1+2). Resolution + stinger as outlined: ~3 min. So ~3 min of NEW story is
-needed, not padding. `target_runtime_sec` is now 540. Proposed fill: (1) a longer interrogation where Gōda *tests*
-Kaito (a catalyst device dies in his hand), cheap one-location dialogue; (2) a ~60–75 s Rei scene after the arrest
-(she replays the footage; sets up the Ep 5 match). Episodes 2+ need real Act B material (option b).
+## 5. Runtime: the pilot is ~6 min of story, not 9 (updated 2026-11-05)
+Measured/estimated: cold open 1:20 + title 0:05 + seq 1 0:34 + seq 2 0:39 + resolution ~1:45 (mock, placeholder
+voices) + stinger ~0:30 = **~4:55**; with the planned Rei scene ~6:00. The 3 min "expanded interrogation" came out at
+~1:45 once written as real cuts. To reach ~9 min, add story, not padding. Candidate that earns its place: a ~1:30
+**pre-trial morning** (Kaito's life as a Zero: mocked at the gate, late, a small act that shows WHY he can't let
+anyone get hurt). Without it his charge into the Vein is under-motivated. Decide: ship ~6 min, or add the morning.
 
 ## 6. Wan timing anomaly
 a1_06 25.3 s/frame, a1_13 26.2, **a1_17 108.0** (same 73 frames, same settings). A 4× outlier is probably VRAM
