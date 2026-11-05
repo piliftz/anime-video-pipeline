@@ -33,8 +33,9 @@ scripts/
   fetch_sfx.py            Freesound CC0-only SFX: search -> temp/sfx_candidates (audition) -> keep -> manifest
   lock_refs.py            copy picked reference takes -> series/<show>/refs/*.jpg + record seed/prompt
   contact_sheet.py        labeled grid of generated takes (rows per take group, '#n · seed') for picking
-  tidy_output.py          sort output/ into per-segment folders + review/; --clean deletes review/, *_small.mp4 and
-                          drafts superseded by a newer full render (dry run unless --apply)
+  tidy_output.py          sort output/ into per-segment folders; --clean deletes ONLY known throwaway patterns (review/),
+                          older duplicates and drafts superseded by a newer full render; unknown files go to other/
+                          (kept). episode_producer runs it (move + clean) after every successful stage (--no-tidy)
 series/arc_forge/         the show: bible.md, characters.json (canonical tags), ep01_pilot.script.json (EN/JA,
                           'production' block + per-cut motion wan|still|clip), character_refs.json, locked_refs.json
 make_video.cmd            Windows one-command entry: orchestrator --generate-images

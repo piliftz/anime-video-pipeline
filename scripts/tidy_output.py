@@ -8,10 +8,14 @@ Layout after tidying (the same layout episode_producer.py writes to from now on)
       wan_previews/        c001.mp4, c002.mp4, ...  (Wan motion previews)
     ep01_act_a_seq1/ ...
     voicevox_terms/        each VOICEVOX character's terms (shared)
-    review/                everything else: contact sheets, frame strips, test stills, small copies, logs
+    review/                known throwaway files: frame strips, contact/review sheets, frame grabs, small copies,
+                           GPU logs (deleted by --clean)
+    other/                 anything unrecognized (never deleted: you decide)
 
 With --clean it also DELETES files that are safe to lose (permanently: they don't go to the Recycle Bin):
-  - everything in output/review/ (contact sheets, strips, test frames, small copies, logs)
+  - everything in output/review/ (known throwaway patterns only: *_strip.png, *_sheet.png, *_review.png,
+    *_frames.png, en_N.png / ja_N.png, gpu_log*.csv, *_small.mp4)
+  - on a name clash (an old render at the top of output/ vs. one in its segment folder), the OLDER copy
   - *_small.mp4 copies anywhere
   - a draft render (_draft.mp4 + its .srt and _credits.txt) once the full render of the same segment and
     language exists and is newer
@@ -40,7 +44,11 @@ from pipeline_utils import OUTPUT_DIR, PROJECT_ROOT, PipelineError, get_logger, 
 log = get_logger("tidy")
 
 KEEP_AT_ROOT = {".gitkeep"}
-SHARED_DIRS = {"voicevox_terms", "review"}
+SHARED_DIRS = {"voicevox_terms", "review", "other"}
+# Known throwaway review artifacts (frame strips, contact/review sheets, frame grabs, small copies, GPU logs).
+# Only these go to review/ and get deleted by --clean; anything unrecognized goes to other/ and is KEPT.
+THROWAWAY_RE = re.compile(r"(_small\.mp4|_strip\.png|_sheet\.png|_review\.png|_frames\.png)$"
+                          r"|^(en|ja)_\d+\.png$|^gpu_log.*\.csv$", re.IGNORECASE)
 PREVIEW_RE = re.compile(r"^[a-z]+\d*_?\d+\.mp4$", re.IGNORECASE)  # c001.mp4, a1_06.mp4: per-cut Wan previews
 
 
@@ -59,6 +67,10 @@ def segment_names(series_dir: Path = PROJECT_ROOT / "series") -> list[str]:
 def plan_moves(out_dir: Path, segments: list[str]) -> list[tuple[Path, Path]]:
     moves: list[tuple[Path, Path]] = []
     for item in sorted(out_dir.iterdir()):
+        if item.name == "review" and item.is_dir():  # rescue anything not on the throwaway list
+            moves += [(f, out_dir / "other" / f.name) for f in sorted(item.iterdir())
+                      if not THROWAWAY_RE.search(f.name)]
+            continue
         if item.name in KEEP_AT_ROOT or item.name in SHARED_DIRS:
             continue
         if item.is_dir():
@@ -67,10 +79,11 @@ def plan_moves(out_dir: Path, segments: list[str]) -> list[tuple[Path, Path]]:
                     if f.is_file() and PREVIEW_RE.match(f.name):
                         moves.append((f, item / "wan_previews" / f.name))
             else:
-                moves.append((item, out_dir / "review" / item.name))
+                moves.append((item, out_dir / "other" / item.name))
             continue
         seg = next((s for s in segments if item.name.startswith(s + "_") or item.stem == s), None)
-        moves.append((item, out_dir / (seg or "review") / item.name))
+        folder = seg or ("review" if THROWAWAY_RE.search(item.name) else "other")
+        moves.append((item, out_dir / folder / item.name))
     return moves
 
 
@@ -97,7 +110,7 @@ def plan_deletions(out_dir: Path, moves: list[tuple[Path, Path]], segments: list
     review = out_dir / "review"
     doomed: list[Path] = []
     for dst, src in final.items():
-        if review in dst.parents or dst.name.endswith("_small.mp4"):
+        if (review in dst.parents and THROWAWAY_RE.search(dst.name)) or dst.name.endswith("_small.mp4"):
             doomed.append(src)
             continue
         m = re.match(r"^(.*)_draft(\.mp4|\.srt|_credits\.txt)$", dst.name)
@@ -122,6 +135,7 @@ def delete_files(paths: list[Path], apply: bool) -> tuple[int, int, int]:
             continue
         try:
             f.unlink()
+            log.info("deleted %s", rel)
             deleted += 1
             size += n
         except OSError as exc:
@@ -136,13 +150,34 @@ def _remove_empty_dirs(out_dir: Path) -> None:
             d.rmdir()
 
 
-def apply_moves(moves: list[tuple[Path, Path]], apply: bool) -> tuple[int, int]:
+def apply_moves(moves: list[tuple[Path, Path]], apply: bool, newest_wins: bool = False) -> tuple[int, int]:
+    """Move src -> dst. On a name clash: skip, or with newest_wins (clean mode) keep the newer file of the two
+    and delete the older one (an old render left at the top of output/ vs. a fresh one in its segment folder)."""
     moved = skipped = 0
     for src, dst in moves:
         rel_src, rel_dst = src.relative_to(OUTPUT_DIR.parent), dst.relative_to(OUTPUT_DIR.parent)
         if dst.exists():
-            log.warning("skip   %s (already exists: %s)", rel_src, rel_dst)
-            skipped += 1
+            if not (newest_wins and src.is_file() and dst.is_file()):
+                log.warning("skip   %s (already exists: %s)", rel_src, rel_dst)
+                skipped += 1
+                continue
+            older, newer = (src, dst) if src.stat().st_mtime <= dst.stat().st_mtime else (dst, src)
+            if not apply:
+                print(f"  delete  {older.relative_to(OUTPUT_DIR.parent)}  (older duplicate of "
+                      f"{newer.relative_to(OUTPUT_DIR.parent)})")
+                moved += 1
+                continue
+            try:
+                if older is src:
+                    src.unlink()
+                    log.info("deleted %s (older duplicate of %s)", rel_src, rel_dst)
+                else:
+                    src.replace(dst)
+                    log.info("replaced %s with newer %s", rel_dst, rel_src)
+                moved += 1
+            except OSError as exc:
+                log.warning("skip   %s (%s; close any program using it and run again)", rel_src, exc)
+                skipped += 1
             continue
         if not apply:
             print(f"  {rel_src}  ->  {rel_dst}")
@@ -156,6 +191,20 @@ def apply_moves(moves: list[tuple[Path, Path]], apply: bool) -> tuple[int, int]:
             log.warning("skip   %s (%s; close any program using it and run again)", rel_src, exc)
             skipped += 1
     return moved, skipped
+
+
+def tidy_and_clean() -> str:
+    """Move + clean for real (what episode_producer runs after every successful stage). Returns a summary line."""
+    if not OUTPUT_DIR.is_dir():
+        return "output/ does not exist yet"
+    segments = segment_names()
+    moved, skipped = apply_moves(plan_moves(OUTPUT_DIR, segments), apply=True, newest_wins=True)
+    deleted, failed, size = delete_files(plan_deletions(OUTPUT_DIR, [], segments), apply=True)
+    _remove_empty_dirs(OUTPUT_DIR)
+    if not (moved or skipped or deleted or failed):
+        return "output/ already tidy"
+    return (f"moved {moved}, deleted {deleted} ({size / 1e6:.1f} MB)"
+            + (f", {skipped + failed} skipped (in use or name clash)" if skipped or failed else ""))
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -175,7 +224,7 @@ def main(argv: list[str] | None = None) -> int:
             print("output/ is already tidy.")
             return 0
         if args.apply:
-            moved, skipped = apply_moves(moves, apply=True)
+            moved, skipped = apply_moves(moves, apply=True, newest_wins=args.clean)
             print(f"Moved {moved} item(s), skipped {skipped}.")
             if args.clean:  # re-plan on the real, moved layout
                 deleted, failed, size = delete_files(plan_deletions(OUTPUT_DIR, [], segments), apply=True)
@@ -183,7 +232,7 @@ def main(argv: list[str] | None = None) -> int:
                 tail = f", {failed} failed." if failed else "."
                 print(f"Deleted {deleted} file(s), {size / 1e6:.1f} MB freed{tail}")
             return 0
-        moved, skipped = apply_moves(moves, apply=False)
+        moved, skipped = apply_moves(moves, apply=False, newest_wins=args.clean)
         deleted, _, size = delete_files(doomed, apply=False)
         print(f"\nDry run: {moved} item(s) would move, {skipped} skipped"
               + (f", {deleted} file(s) would be DELETED ({size / 1e6:.1f} MB)" if args.clean else "")

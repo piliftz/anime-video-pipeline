@@ -359,6 +359,17 @@ def stage_status(ep: Episode) -> None:
         print(f"\nMeasured Wan time so far: {total_s / 60:.1f} min")
 
 
+def auto_tidy() -> None:
+    """After a successful stage: sort output/ into segment folders and delete throwaway files (tidy_output.py rules:
+    output/review/, *_small.mp4, drafts superseded by a newer full render). Never fails the production run."""
+    from tidy_output import tidy_and_clean
+
+    try:
+        log.info("Tidy output/: %s", tidy_and_clean())
+    except (OSError, PipelineError) as exc:
+        log.warning("Tidy output/ skipped: %s", exc)
+
+
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(description="Produce an episode segment: keyframes -> motion -> assemble.")
     p.add_argument("script", type=Path, help="Episode script JSON (e.g. series/arc_forge/ep01_pilot.script.json)")
@@ -369,21 +380,27 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--lang", default="en", help="Assembly language: en or ja (needs voices_<lang> in the script).")
     p.add_argument("--comfy-url")
     p.add_argument("--comfy-dir")
+    p.add_argument("--no-tidy", action="store_true",
+                   help="Skip the automatic output/ tidy + clean that runs after every successful stage.")
     p.add_argument("-v", "--verbose", action="store_true")
     args, passthrough = p.parse_known_args(argv)
     setup_logging(args.verbose)
     try:
         ep = Episode(args.script, args.segment)
         cut_ids = [c.strip() for c in args.cuts.split(",")] if args.cuts else None
+        code = 0
         if args.stage == "keyframes":
             stage_keyframes(ep, cut_ids, args.force, args.comfy_url, args.comfy_dir)
         elif args.stage == "motion":
-            return stage_motion(ep, cut_ids, args.force, args.comfy_url, args.comfy_dir)
+            code = stage_motion(ep, cut_ids, args.force, args.comfy_url, args.comfy_dir)
         elif args.stage == "assemble":
-            return stage_assemble(ep, args.lang, passthrough)
+            code = stage_assemble(ep, args.lang, passthrough)
         else:
             stage_status(ep)
-        return 0
+            return 0
+        if code == 0 and not args.no_tidy:
+            auto_tidy()
+        return code
     except PipelineError as exc:
         log.error("%s", exc)
         return 1
