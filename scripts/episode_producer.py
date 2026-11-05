@@ -65,6 +65,7 @@ class Episode:
         self.work = resolve_path(self.base, self.prod["work_dir"]) / segment
         self.keyframe_dir = self.work / "keyframes"
         self.clip_dir = self.work / "clips"
+        self.out_dir = OUTPUT_DIR / self.name  # everything this segment renders: videos, subs, credits, sheets
         chars_file = resolve_path(self.base, self.prod.get("characters_file", "characters.json"))
         raw_chars = load_json(chars_file)
         self.characters = {k: {"tags": v["tags"]} for k, v in raw_chars.items() if isinstance(v, dict) and "tags" in v}
@@ -115,7 +116,7 @@ def stage_keyframes(ep: Episode, cut_ids: list[str] | None, force: bool, comfy_u
     sb_path = save_json(TEMP_DIR / f"{ep.name}_keyframes.json", storyboard)
     generate_images(sb_path, cut_ids, force, comfy_url, comfy_dir)
     sheet = build_sheet(collect(ep.keyframe_dir, None), tile_h=300, cols=3)
-    out = save_sheet(sheet, OUTPUT_DIR / f"{ep.name}_keyframes.png")
+    out = save_sheet(sheet, ensure_dir(ep.out_dir) / f"{ep.name}_keyframes.png")
     print(f"Review the keyframes: {out}")
 
 
@@ -171,11 +172,12 @@ def stage_motion(ep: Episode, cut_ids: list[str] | None, force: bool, comfy_url,
                 continue
             meta["job_hash"] = job_hash
             save_json(ep.clip(cut) / "clip.json", meta)
-            write_preview(ep.clip(cut), ensure_dir(OUTPUT_DIR / ep.name) / f"{cut['id']}.mp4", ep.fps)
+            write_preview(ep.clip(cut), ensure_dir(ep.out_dir / "wan_previews") / f"{cut['id']}.mp4", ep.fps)
             per_frame = meta["generation_seconds"] / max(1, meta["frames"])
             log.info("[%s] %.1f min for %d frames (%.1f s/frame)", cut["id"], meta["generation_seconds"] / 60,
                      meta["frames"], per_frame)
-    log.info("Motion stage finished in %.1f min. Previews: %s", (time.time() - t_all) / 60, OUTPUT_DIR / ep.name)
+    log.info("Motion stage finished in %.1f min. Previews: %s", (time.time() - t_all) / 60,
+             ep.out_dir / "wan_previews")
     if failures:
         log.error("Failed cuts: %s (re-run 'motion' to retry only these)", ", ".join(failures))
         return 1
@@ -261,7 +263,7 @@ def build_storyboard(ep: Episode, lang: str) -> tuple[dict, list[str]]:
     title = ep.script["title"].get(lang) or ep.script["title"]["en"]
     storyboard = {
         "project": {"title": f"{ep.script['series'].get(lang, '')} - {title}",
-                    "output": str(OUTPUT_DIR / f"{ep.name}_{lang}.mp4"), "fps": ep.fps, "fit": "cover"},
+                    "output": str(ep.out_dir / f"{ep.name}_{lang}.mp4"), "fps": ep.fps, "fit": "cover"},
         "speakers": voices,
         "audio": {"music": music, "require_license": True},
         "transitions": {"default": {"type": "cut", "duration": 0.0}},
@@ -284,11 +286,24 @@ def stage_assemble(ep: Episode, lang: str, passthrough: list[str]) -> int:
     sb_path = save_json(TEMP_DIR / f"{ep.name}_{lang}.storyboard.json", storyboard)
     log.info("Storyboard: %s (%d cuts)", sb_path, len(storyboard["scenes"]))
     code = orchestrate([str(sb_path), *passthrough])
-    write_voicevox_credits(ep, lang, storyboard)
+    write_voicevox_credits(rendered_path(Path(storyboard["project"]["output"]), passthrough), storyboard)
     return code
 
 
-def write_voicevox_credits(ep: Episode, lang: str, storyboard: dict) -> None:
+def rendered_path(default: Path, passthrough: list[str]) -> Path:
+    """The file the orchestrator actually wrote: -o/--output overrides, --draft adds '_draft'."""
+    out = default
+    for i, arg in enumerate(passthrough):
+        if arg in ("-o", "--output") and i + 1 < len(passthrough):
+            out = Path(passthrough[i + 1])
+        elif arg.startswith("--output="):
+            out = Path(arg.split("=", 1)[1])
+    if "--draft" in passthrough:
+        out = out.with_name(out.stem + "_draft" + out.suffix)
+    return out
+
+
+def write_voicevox_credits(video: Path, storyboard: dict) -> None:
     """VOICEVOX characters each have their own terms; most require a credit like 'VOICEVOX:Name'.
     Write the credit lines for the video description, plus each character's terms to read."""
     # Credit exactly the voices that speak in this render (not the whole cast list).
@@ -297,7 +312,7 @@ def write_voicevox_credits(ep: Episode, lang: str, storyboard: dict) -> None:
                     if k in spoken and v.get("engine") == "voicevox" and v.get("voicevox", {}).get("speaker")})
     if not names:
         return
-    out = ensure_dir(OUTPUT_DIR) / f"{ep.name}_{lang}_credits.txt"
+    out = ensure_dir(video.parent) / f"{video.stem}_credits.txt"  # same file the render's audio credits use
     lines = ["Voices (paste into the video description / end credits):"] + [f"VOICEVOX:{n}" for n in names]
     terms_dir = OUTPUT_DIR / "voicevox_terms"
     try:

@@ -75,7 +75,7 @@ tested. They aren't listed yet because neither has been run on your machine.
    quality bar for the episode:
    ```powershell
    .venv\Scripts\python scripts\episode_producer.py series\arc_forge\ep01_pilot.script.json keyframes
-   start output\ep01_cold_open_keyframes.png            # review; fix a cut by adding "seed": N to it
+   start output\ep01_cold_open\ep01_cold_open_keyframes.png         # review; fix a cut by adding "seed": N to it
    .venv\Scripts\python scripts\episode_producer.py series\arc_forge\ep01_pilot.script.json motion      # hours: run overnight
    .venv\Scripts\python scripts\episode_producer.py series\arc_forge\ep01_pilot.script.json status
    .venv\Scripts\python scripts\episode_producer.py series\arc_forge\ep01_pilot.script.json assemble --draft

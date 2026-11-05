@@ -33,6 +33,7 @@ scripts/
   fetch_sfx.py            Freesound CC0-only SFX: search -> temp/sfx_candidates (audition) -> keep -> manifest
   lock_refs.py            copy picked reference takes -> series/<show>/refs/*.jpg + record seed/prompt
   contact_sheet.py        labeled grid of generated takes (rows per take group, '#n · seed') for picking
+  tidy_output.py          one-off: sort a cluttered output/ into per-segment folders + review/ (dry run; --apply)
 series/arc_forge/         the show: bible.md, characters.json (canonical tags), ep01_pilot.script.json (EN/JA,
                           'production' block + per-cut motion wan|still|clip), character_refs.json, locked_refs.json
 make_video.cmd            Windows one-command entry: orchestrator --generate-images
@@ -45,7 +46,8 @@ promo/                    Remotion + Three.js + GSAP promo toolkit (TitleCard, T
 storyboard_template.json  reference storyboard; every supported key appears here
 assets/ {clips,images,audio/bgm,fonts}   inputs (fonts/ is passed to libass as fontsdir)
 temp/                     voiceover cache, timeline JSON, ASS, lossless master (gitignored)
-output/                   final MP4 + SRT (gitignored)
+output/                   renders (gitignored): output/<epNN_segment>/ holds that segment's MP4s, SRTs, credits,
+                          keyframe sheet and wan_previews/; output/voicevox_terms/ shared; output/review/ = ad-hoc
 ```
 
 ## Environment setup
