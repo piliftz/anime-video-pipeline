@@ -67,7 +67,8 @@ viewers decide in the first 30–60 s). Script: `ep01_pilot.script.json`.
 | 0:00–1:20 | Cold open | Kaito in handcuffs in an interrogation room. Gōda: a Class-A Vein died when he touched it. "Start from the beginning." |
 | 1:20–1:25 | Title card | Remotion `TitleCard` (5 s) |
 | 1:25–2:00 | Act A, seq 1 (written) | Hazard Trial arena: ignitions, Rei's S-rank, Kaito's zero reading (comedy drop), the fire wall, the real Vein breaks through. Shonen pacing, ~1.8 s/cut. |
-| 2:00–16:30 | Act A rest + Act B (outline) | Kaito charges in and grabs the Vein (Zero-Catalyst reveal), catalysts black out, security takes him; aftermath. |
+| 2:00–2:45 | Act A, seq 2 (written) | Kaito charges in and grabs the Vein (Zero-Catalyst reveal), every catalyst in the arena blacks out (music-free silence), security drones take him down. |
+| 2:45–16:30 | **Unwritten: no story yet** | The outline's beats now end at 2:45. Filling ~14 min needs new story (see the runtime gap note in ROADMAP), not slower pacing. |
 | 16:30–19:30 | Resolution | Back to interrogation. Gōda believes him and isn't allowed to say so. The academy Director, on a monitor: "Find out what he is. Quietly." |
 | 19:30–20:00 | Stinger | Slums. A hooded figure holds a vial of glowing Vein crystal: "So the zero finally woke up." (Sets up Ep 4.) |
 

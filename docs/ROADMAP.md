@@ -47,7 +47,18 @@ CUDA 13 PyTorch build ComfyUI asked for; fewer steps; whether thermal throttling
 batch was slower per frame than the single test. Combined with item 1's bonus, this decides
 episode length and how many cuts per episode can move.
 
+## 5. Runtime gap (blocks the 20-minute pilot)
+Written so far: cold open 1:20 + title 0:05 + Act A seq 1 ~0:35 + seq 2 ~0:45 = **~2:45**. The remaining outline
+(resolution + stinger) adds ~3 min, so the pilot's story is **~6 min**, against a `target_runtime_sec` of 1200.
+At ~1.8 s/cut, 14 more minutes is ~450 cuts, which needs real story: scenes, characters, stakes. It can't be
+stretched by slowing the pacing. Options: (a) ship the pilot at ~8–10 min with a short added scene or two;
+(b) write new Act B material (Kaito's life as a Zero, Rei's view, the Director's motive, the squad);
+(c) both. Decide before writing more cuts.
+
 ## Done
+- 2026-11-05: **Act A seq 2** (`act_a_seq2`, 19 cuts): the charge, the grab (Zero-Catalyst reveal), the blackout
+  with no music, the drone arrest. Wan heroes a2_06 grab, a2_08 Vein dies, a2_12 lights die. New SFX names
+  power_down, drone_hover, stun_zap, heartbeat; new speaker Drone (JA: monotone VOICEVOX, intonation 0).
 - 2026-11-04: **Shonen pacing toolkit**: crash_zoom/slam_out/whip presets, continuous shake, colored impact
   flashes, per-sequence dialogue padding, loudness normalization (-14 LUFS, -1 dBTP). Act A sequence 1
   written: 19 cuts, ~35 s, avg 1.8 s/cut, 3 Wan hero shots + 16 FX-driven stills (limited animation),

@@ -968,13 +968,624 @@
       }
     },
     {
+      "id": "act_a_seq2",
+      "time": "after act_a_seq1",
+      "status": "written",
+      "location": "Spark-Forge Academy, Hazard Trial arena",
+      "time_of_day": "night",
+      "sound_design_note": "battle_theme drives the charge (a2_01-a2_05) and CUTS DEAD on the grab impact (a2_06). a2_06-a2_15 have no music at all: only crackle, power-downs and a heartbeat. The silence is the reveal; don't fill it. tension_drone creeps in with the red lasers (a2_16) and the handcuff clink on a2_19 bridges back to the interrogation room.",
+      "audio": {
+        "music": [
+          {
+            "name": "battle_theme",
+            "start_cut": "a2_01",
+            "end_cut": "a2_05",
+            "volume": 0.55,
+            "fade_in": 0.0,
+            "fade_out": 0.0,
+            "duck_to": 0.6,
+            "duck_fade": 0.15
+          },
+          {
+            "name": "tension_drone",
+            "start_cut": "a2_16",
+            "end_cut": "a2_19",
+            "volume": 0.45,
+            "fade_in": 0.4,
+            "fade_out": 0.1
+          }
+        ]
+      },
+      "dialogue_timing": {
+        "offset": 0.1,
+        "tail": 0.3
+      },
+      "cuts": [
+        {
+          "id": "a2_01",
+          "duration": 1.0,
+          "motion": "still",
+          "shot": "Kaito sprints INTO the danger",
+          "characters": [
+            "Kaito"
+          ],
+          "action": "Students flee past the camera; Kaito runs the other way, straight at the Vein.",
+          "keyframe_prompt": "1boy, solo focus, running toward viewer, determined, gritted teeth, crowd running away, blurry background, fire, sparks, dynamic angle, motion lines, full body",
+          "fx": {
+            "ken_burns": {
+              "enabled": true,
+              "preset": "crash_zoom"
+            },
+            "speed_lines": {
+              "enabled": true,
+              "style": "radial",
+              "opacity": 0.5
+            },
+            "shake": {
+              "enabled": true,
+              "amount": 8
+            }
+          },
+          "sfx": [
+            {
+              "name": "footsteps_run",
+              "at": 0.0,
+              "volume": 0.9
+            }
+          ],
+          "dialogue": []
+        },
+        {
+          "id": "a2_02",
+          "duration": 1.4,
+          "motion": "still",
+          "shot": "Insert, sneakers skidding through embers",
+          "characters": [],
+          "action": "His sneakers skid through burning debris. Rei shouts off-screen.",
+          "keyframe_prompt": "close-up, feet focus, sneakers, running, embers, sparks, cracked floor, debris, motion blur, orange glow",
+          "fx": {
+            "ken_burns": {
+              "enabled": true,
+              "preset": "whip_right"
+            },
+            "speed_lines": {
+              "enabled": true,
+              "style": "horizontal",
+              "opacity": 0.5
+            }
+          },
+          "sfx": [
+            {
+              "name": "whoosh",
+              "at": 0.1,
+              "volume": 0.8
+            }
+          ],
+          "dialogue": [
+            {
+              "speaker": "Rei",
+              "en": "Zero! What are you doing?!",
+              "ja": "ゼロ！何してるの！？",
+              "emotion": "alarmed",
+              "ja_review": true,
+              "delivery": "off-screen"
+            }
+          ]
+        },
+        {
+          "id": "a2_03",
+          "duration": 1.6,
+          "motion": "still",
+          "shot": "Gōda grips the balcony rail",
+          "characters": [
+            "Goda"
+          ],
+          "action": "Gōda leans over the observation rail and bellows.",
+          "keyframe_prompt": "1boy, solo, leaning forward, gripping railing, shouting, balcony, from below, fire glow, night, upper body",
+          "fx": {
+            "ken_burns": {
+              "enabled": true,
+              "preset": "push_in"
+            },
+            "shake": {
+              "enabled": true,
+              "amount": 4
+            }
+          },
+          "sfx": [],
+          "dialogue": [
+            {
+              "speaker": "Goda",
+              "en": "Kurogane! Stand down!",
+              "ja": "黒鉄！下がれ！",
+              "emotion": "commanding",
+              "ja_review": true
+            }
+          ]
+        },
+        {
+          "id": "a2_04",
+          "duration": 1.3,
+          "motion": "still",
+          "shot": "Kaito vaults the debris (silhouette)",
+          "characters": [
+            "Kaito"
+          ],
+          "action": "Kaito leaps over a slab of rubble, a black silhouette against the orange Vein.",
+          "keyframe_prompt": "1boy, solo, jumping, midair, from below, silhouette, backlighting, orange glow, sparks, debris, dynamic angle",
+          "fx": {
+            "ken_burns": {
+              "enabled": true,
+              "preset": "crash_zoom"
+            },
+            "impact": {
+              "enabled": true,
+              "at": [
+                0.6
+              ],
+              "flash_color": "#FF7A1A",
+              "shake": 14
+            }
+          },
+          "sfx": [
+            {
+              "name": "whoosh",
+              "at": 0.0,
+              "volume": 0.9
+            }
+          ],
+          "dialogue": []
+        },
+        {
+          "id": "a2_05",
+          "duration": 1.6,
+          "motion": "still",
+          "shot": "Insert, bandaged hand reaching into the heat",
+          "characters": [],
+          "action": "His bandaged hand reaches for the crystal; the bandage edges char.",
+          "keyframe_prompt": "close-up, hand focus, reaching, bandaged hand, fingerless gloves, burning bandage, embers, heat haze, glowing orange crystal, orange glow",
+          "fx": {
+            "ken_burns": {
+              "enabled": true,
+              "preset": "push_in"
+            },
+            "shake": {
+              "enabled": true,
+              "amount": 6
+            }
+          },
+          "sfx": [
+            {
+              "name": "fire_roar",
+              "at": 0.0,
+              "volume": 0.6
+            }
+          ],
+          "dialogue": [
+            {
+              "speaker": "Kaito",
+              "en": "Okay. Okay. This is gonna hurt.",
+              "ja": "よし……よし。これ、絶対痛いやつだ。",
+              "emotion": "scared, joking",
+              "ja_review": true,
+              "delivery": "over the hand"
+            }
+          ]
+        },
+        {
+          "id": "a2_06",
+          "duration": 3.0,
+          "motion": "wan",
+          "shot": "HERO: the grab (Zero-Catalyst reveal)",
+          "characters": [],
+          "action": "His hand clamps onto the Vein. Gray frost bursts out from his fingers across the crystal. Music cuts dead.",
+          "keyframe_prompt": "close-up, hand focus, grabbing, glowing orange crystal, bandaged hand, fingerless gloves, gray frost spreading from fingers, ice cracks, sparks, fire, dramatic lighting",
+          "motion_prompt": "the hand clamps around the glowing crystal, gray frost spreads outward from the fingers across the crystal, sparks burst and then fade, camera pushes in slowly",
+          "fx": {
+            "anime_timing": {
+              "enabled": true,
+              "on": 2
+            },
+            "impact": {
+              "enabled": true,
+              "at": [
+                0.0
+              ],
+              "flash_color": "#FF7A1A",
+              "shake": 24
+            }
+          },
+          "sfx": [
+            {
+              "name": "impact_boom",
+              "at": 0.0,
+              "volume": 1.0
+            },
+            {
+              "name": "construct_crack",
+              "at": 0.3,
+              "volume": 0.9
+            }
+          ],
+          "dialogue": []
+        },
+        {
+          "id": "a2_07",
+          "duration": 1.8,
+          "motion": "still",
+          "shot": "Insert, frost-cracks climb his forearm",
+          "characters": [],
+          "action": "Gray frost-like cracks crawl from his wrist toward the elbow. He holds on anyway.",
+          "keyframe_prompt": "close-up, forearm focus, gray cracks on skin, frost, ice cracks, rolled up sleeves, gray blazer, bandaged hand, dim lighting, orange glow",
+          "fx": {
+            "ken_burns": {
+              "enabled": true,
+              "preset": "push_in"
+            },
+            "shake": {
+              "enabled": true,
+              "amount": 3
+            }
+          },
+          "sfx": [
+            {
+              "name": "construct_crack",
+              "at": 0.2,
+              "volume": 0.7
+            }
+          ],
+          "dialogue": [
+            {
+              "speaker": "Kaito",
+              "en": "Not... today.",
+              "ja": "……今日じゃ、ねえ。",
+              "emotion": "straining",
+              "ja_review": true,
+              "delivery": "through gritted teeth, off-screen"
+            }
+          ]
+        },
+        {
+          "id": "a2_08",
+          "duration": 3.0,
+          "motion": "wan",
+          "shot": "HERO: the Vein goes dark",
+          "characters": [],
+          "action": "A wave of gray spreads out from his hand; the whole fissure's glow drains away. The fire dies.",
+          "keyframe_prompt": "no humans, giant crystal fissure, glowing orange crystals, gray dead crystals spreading from the center, arena floor, darkness, embers, wide shot, dramatic",
+          "motion_prompt": "the orange glow drains out of the crystals, a wave of gray spreads outward from the center across the fissure, the fire dies down, embers fall, camera slowly pulls back",
+          "fx": {
+            "anime_timing": {
+              "enabled": true,
+              "on": 2
+            }
+          },
+          "sfx": [
+            {
+              "name": "power_down",
+              "at": 0.4,
+              "volume": 1.0
+            }
+          ],
+          "dialogue": []
+        },
+        {
+          "id": "a2_09",
+          "duration": 1.2,
+          "motion": "still",
+          "shot": "Insert, a student's lightning snuffs out",
+          "characters": [],
+          "action": "A student's crackling lightning sputters and dies in their hand.",
+          "keyframe_prompt": "close-up, hand focus, electricity fading, dying sparks, school uniform sleeve, dark, blue light",
+          "fx": {
+            "ken_burns": {
+              "enabled": true,
+              "preset": "push_in"
+            }
+          },
+          "sfx": [
+            {
+              "name": "power_down",
+              "at": 0.1,
+              "volume": 0.5
+            }
+          ],
+          "dialogue": []
+        },
+        {
+          "id": "a2_10",
+          "duration": 2.0,
+          "motion": "still",
+          "shot": "Rei's barrier dissolves (from behind)",
+          "characters": [
+            "Rei"
+          ],
+          "action": "Rei's cyan barrier dissolves into fading particles. She stumbles forward.",
+          "keyframe_prompt": "1girl, solo, from behind, cyan barrier dissolving, fading particles, outstretched arm, stumbling, dark, embers",
+          "fx": {
+            "ken_burns": {
+              "enabled": true,
+              "preset": "drift"
+            }
+          },
+          "sfx": [
+            {
+              "name": "glass_shatter",
+              "at": 0.3,
+              "volume": 0.5
+            }
+          ],
+          "dialogue": []
+        },
+        {
+          "id": "a2_11",
+          "duration": 1.8,
+          "motion": "still",
+          "shot": "Extreme close-up, Rei's eyes: the glow is gone",
+          "characters": [
+            "Rei"
+          ],
+          "action": "Rei's eyes, wide. For the first time, no cyan glow in them.",
+          "keyframe_prompt": "1girl, solo, eyes focus, close-up, cyan eyes, wide-eyed, shocked, white hair, dark, dim lighting",
+          "negative": "glowing eyes, glow",
+          "fx": {
+            "ken_burns": {
+              "enabled": true,
+              "preset": "push_in"
+            }
+          },
+          "sfx": [],
+          "dialogue": [
+            {
+              "speaker": "Rei",
+              "en": "...He switched it off.",
+              "ja": "……消した……？",
+              "emotion": "stunned whisper",
+              "ja_review": true
+            }
+          ]
+        },
+        {
+          "id": "a2_12",
+          "duration": 3.0,
+          "motion": "wan",
+          "shot": "HERO: the arena lights die",
+          "characters": [],
+          "action": "The stadium floodlights shut off bank by bank. Thousands of people, total silence.",
+          "keyframe_prompt": "no humans, stadium, night, floodlights, crowd silhouettes, darkness spreading, wide shot, scenery",
+          "motion_prompt": "the stadium floodlights shut off one bank at a time from left to right, the arena falls into darkness, faint embers drift, static camera",
+          "fx": {
+            "anime_timing": {
+              "enabled": true,
+              "on": 2
+            }
+          },
+          "sfx": [
+            {
+              "name": "power_down",
+              "at": 0.2,
+              "volume": 0.8
+            }
+          ],
+          "dialogue": []
+        },
+        {
+          "id": "a2_13",
+          "duration": 1.8,
+          "motion": "still",
+          "shot": "Control room: every readout at zero",
+          "characters": [],
+          "action": "The technician, a silhouette, in front of monitors that all read zero.",
+          "keyframe_prompt": "1girl, solo, from behind, silhouette, control room, monitors, flat line graphs, dark, red light",
+          "fx": {
+            "ken_burns": {
+              "enabled": true,
+              "preset": "push_in"
+            }
+          },
+          "sfx": [],
+          "dialogue": [
+            {
+              "speaker": "Technician",
+              "en": "Every catalyst in the arena... just read zero.",
+              "ja": "アリーナ内の全触媒……反応、ゼロです。",
+              "emotion": "disbelieving",
+              "ja_review": true
+            }
+          ]
+        },
+        {
+          "id": "a2_14",
+          "duration": 2.2,
+          "motion": "still",
+          "shot": "Kaito kneeling on the dead Vein (wide, from behind)",
+          "characters": [
+            "Kaito"
+          ],
+          "action": "Kaito kneels on gray, dead crystal. Cold mist rises off his arm. Just his breathing.",
+          "keyframe_prompt": "1boy, solo, from behind, kneeling, gray dead crystals, steam, cold breath, dark arena, wide shot, small figure",
+          "fx": {
+            "ken_burns": {
+              "enabled": true,
+              "preset": "push_in"
+            }
+          },
+          "sfx": [
+            {
+              "name": "heartbeat",
+              "at": 0.2,
+              "volume": 0.7
+            }
+          ],
+          "dialogue": []
+        },
+        {
+          "id": "a2_15",
+          "duration": 2.4,
+          "motion": "still",
+          "shot": "Kaito's exhausted grin",
+          "characters": [
+            "Kaito"
+          ],
+          "action": "A crooked, exhausted grin. Callback to the cold open.",
+          "keyframe_prompt": "1boy, solo, tired smile, sweat, panting, dirty face, looking down, dim lighting, upper body",
+          "fx": {
+            "ken_burns": {
+              "enabled": true,
+              "preset": "push_in"
+            }
+          },
+          "sfx": [],
+          "dialogue": [
+            {
+              "speaker": "Kaito",
+              "en": "See...? Nobody burned.",
+              "ja": "ほらな……誰も、燃えてねえ。",
+              "emotion": "exhausted, relieved",
+              "ja_review": true,
+              "delivery": "eyes lowered, barely audible"
+            }
+          ]
+        },
+        {
+          "id": "a2_16",
+          "duration": 1.0,
+          "motion": "still",
+          "shot": "Insert, red laser dots on his chest",
+          "characters": [],
+          "action": "Red targeting dots slide onto his blazer. An alarm wails.",
+          "keyframe_prompt": "close-up, chest focus, red laser sight dots, gray blazer, school uniform, orange piping, dark, red light",
+          "fx": {
+            "ken_burns": {
+              "enabled": true,
+              "preset": "crash_zoom"
+            },
+            "impact": {
+              "enabled": true,
+              "at": [
+                0.0
+              ],
+              "flash_color": "#FF2A2A",
+              "shake": 10
+            }
+          },
+          "sfx": [
+            {
+              "name": "alarm_klaxon",
+              "at": 0.0,
+              "volume": 0.8
+            }
+          ],
+          "dialogue": []
+        },
+        {
+          "id": "a2_17",
+          "duration": 1.6,
+          "motion": "still",
+          "shot": "Security drones descend",
+          "characters": [],
+          "action": "Security drones drop out of the dark, red eyes, searchlights.",
+          "keyframe_prompt": "no humans, security drones, flying, red lights, mechanical, hovering, night sky, from below, searchlights",
+          "fx": {
+            "ken_burns": {
+              "enabled": true,
+              "preset": "slam_out"
+            },
+            "shake": {
+              "enabled": true,
+              "amount": 4
+            }
+          },
+          "sfx": [
+            {
+              "name": "drone_hover",
+              "at": 0.0,
+              "volume": 0.8
+            }
+          ],
+          "dialogue": [
+            {
+              "speaker": "Drone",
+              "en": "Unregistered catalyst anomaly. Subdue.",
+              "ja": "未登録の触媒異常を確認。制圧します。",
+              "emotion": "flat, robotic",
+              "ja_review": true
+            }
+          ]
+        },
+        {
+          "id": "a2_18",
+          "duration": 0.8,
+          "motion": "still",
+          "shot": "Stun net fires at camera",
+          "characters": [],
+          "action": "An electric net blasts toward the lens.",
+          "keyframe_prompt": "no humans, electric net, lightning, energy net flying toward viewer, sparks, dark, blue-white light",
+          "fx": {
+            "ken_burns": {
+              "enabled": true,
+              "preset": "crash_zoom"
+            },
+            "impact": {
+              "enabled": true,
+              "at": [
+                0.0
+              ],
+              "flash_color": "#FFFFFF",
+              "shake": 28
+            },
+            "speed_lines": {
+              "enabled": true,
+              "style": "radial",
+              "opacity": 0.6
+            }
+          },
+          "sfx": [
+            {
+              "name": "stun_zap",
+              "at": 0.0,
+              "volume": 1.0
+            },
+            {
+              "name": "impact_boom",
+              "at": 0.05,
+              "volume": 0.8
+            }
+          ],
+          "dialogue": []
+        },
+        {
+          "id": "a2_19",
+          "duration": 1.2,
+          "motion": "still",
+          "shot": "Kaito hits the floor (smash to the cold open)",
+          "characters": [
+            "Kaito"
+          ],
+          "action": "Floor level: Kaito's face hits the ground, eyes sliding shut. Handcuff clink bridges to the interrogation room.",
+          "keyframe_prompt": "1boy, solo, lying on ground, on stomach, cheek on floor, eyes half-closed, unconscious, electricity, sparks, dark, close-up",
+          "fx": {
+            "shake": {
+              "enabled": true,
+              "amount": 3
+            }
+          },
+          "sfx": [
+            {
+              "name": "chain_clink",
+              "at": 0.85,
+              "volume": 0.9
+            }
+          ],
+          "dialogue": []
+        }
+      ]
+    },
+    {
       "id": "act_a_rest",
       "status": "outline",
       "beats": [
-        "Kaito charges INTO the Vein while everyone runs out (hype: speed lines, ember flashes, battle theme peak).",
-        "He grabs the Vein bare-handed. Gray frost-cracks climb his arm; the Vein goes dark (the Zero-Catalyst reveal).",
-        "Every catalyst within ten meters flickers off, Rei's barrier included. Total silence.",
-        "Security drones lock on: 'Unregistered catalyst anomaly.' He's taken down (smash cut to the cold-open room)."
+        "(Written as act_a_seq2: the charge, the grab, the blackout and the arrest, ~35-40 s.)"
       ]
     },
     {
@@ -1058,6 +1669,11 @@
         "Technician": {
           "voice": "en-US-AriaNeural",
           "rate": "+10%"
+        },
+        "Drone": {
+          "voice": "en-US-ChristopherNeural",
+          "rate": "-5%",
+          "pitch": "-12Hz"
         }
       },
       "subtitles": {
@@ -1109,6 +1725,15 @@
             "speaker": "冥鳴ひまり",
             "style": "ノーマル",
             "speed": 1.15
+          }
+        },
+        "Drone": {
+          "engine": "voicevox",
+          "voicevox": {
+            "speaker": "青山龍星",
+            "style": "ノーマル",
+            "speed": 1.05,
+            "intonation": 0.0
           }
         }
       },
@@ -1176,6 +1801,18 @@
         },
         "construct_crack": {
           "search": "glass crack ice crack"
+        },
+        "power_down": {
+          "search": "power down electricity shutdown"
+        },
+        "drone_hover": {
+          "search": "drone hover buzz"
+        },
+        "stun_zap": {
+          "search": "electric zap shock"
+        },
+        "heartbeat": {
+          "search": "heartbeat single thump"
         }
       },
       "music_library": {
