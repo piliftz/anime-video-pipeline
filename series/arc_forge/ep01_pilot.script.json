@@ -1900,7 +1900,7 @@
             "Kaito"
           ],
           "action": "The shonen bite back.",
-          "keyframe_prompt": "1boy, solo, upper body, half smile, looking to the side, sweat, handcuffs, dim lighting, interrogation room",
+          "keyframe_prompt": "1boy, solo, upper body, smirk, confident, raised eyebrow, looking to the side, sweat, handcuffs, dim lighting, interrogation room",
           "fx": {},
           "sfx": [],
           "dialogue": [
@@ -1911,7 +1911,9 @@
               "emotion": "dry, defiant",
               "ja_review": true
             }
-          ]
+          ],
+          "seed": 7508,
+          "negative": "crying, tears, sad"
         },
         {
           "id": "r_09",
@@ -1920,7 +1922,7 @@
           "shot": "Insert: Gōda slides a catalyst cell across the table",
           "characters": [],
           "action": "A palm-sized cell glowing cyan slides across the steel table.",
-          "keyframe_prompt": "close-up, hand focus, dark-skinned hand, gray trench coat sleeve, sliding a small glowing cyan cylinder device across a steel table, energy cell, cyan glow, dim lighting",
+          "keyframe_prompt": "close-up, hand focus, dark skin, dark-skinned male, dark-skinned hand, gray trench coat sleeve, pushing a small glowing cyan metal cylinder lying on its side across a steel table, energy cell, cyan glow, dim lighting",
           "fx": {
             "ken_burns": {
               "enabled": true,
@@ -1943,7 +1945,9 @@
               "ja_review": true,
               "delivery": "off-screen"
             }
-          ]
+          ],
+          "seed": 7509,
+          "negative": "pale skin, light skin, white skin, platform, circle, hologram, magic circle"
         },
         {
           "id": "r_10",
@@ -2016,7 +2020,9 @@
             }
           },
           "sfx": [],
-          "dialogue": []
+          "dialogue": [],
+          "seed": 7512,
+          "negative": "pale skin, light skin, white skin"
         },
         {
           "id": "r_13",
@@ -2287,7 +2293,7 @@
           "shot": "Insert: he pockets the dead cell, not the evidence bag",
           "characters": [],
           "action": "An open evidence bag waits on the table. Gōda's hand slips the dead cell into his own coat instead.",
-          "keyframe_prompt": "close-up, hand focus, dark-skinned hand, gray trench coat sleeve, putting a small gray cylinder device into coat pocket, open evidence bag on steel table, dim lighting",
+          "keyframe_prompt": "close-up, hand focus, dark skin, dark-skinned male, dark-skinned hand, gray trench coat sleeve, slipping a small dull gray metal cylinder into a coat pocket, unlit, open plastic evidence bag on steel table, dim lighting",
           "fx": {
             "ken_burns": {
               "enabled": true,
@@ -2301,7 +2307,9 @@
               "volume": 0.6
             }
           ],
-          "dialogue": []
+          "dialogue": [],
+          "seed": 7522,
+          "negative": "pale skin, light skin, white skin, phone, smartphone, tablet, glowing"
         },
         {
           "id": "r_23",
@@ -2370,7 +2378,7 @@
           "shot": "The monitor: a faceless silhouette",
           "characters": [],
           "action": "The Director: a silhouette against a city of lights. Gōda answers off-screen.",
-          "keyframe_prompt": "no humans, computer monitor, faceless silhouette of a seated person on screen, high-backed chair, city lights behind, blue screen glow, dark office",
+          "keyframe_prompt": "no humans, computer monitor, black silhouette of a person's head and shoulders on screen, faceless, video call, blue screen glow, dark office, city lights in window",
           "fx": {
             "ken_burns": {
               "enabled": true,
@@ -2387,7 +2395,9 @@
               "ja_review": true,
               "delivery": "off-screen"
             }
-          ]
+          ],
+          "seed": 7525,
+          "negative": "empty room, chair, desk focus"
         },
         {
           "id": "r_26",
@@ -2396,7 +2406,7 @@
           "shot": "The monitor, closer",
           "characters": [],
           "action": "The silhouette doesn't move.",
-          "keyframe_prompt": "no humans, close-up, computer monitor, faceless silhouette on screen, blue screen glow, scan lines, dark",
+          "keyframe_prompt": "no humans, close-up, computer monitor, faceless silhouette on screen, head and shoulders, blue screen glow, scan lines, dark",
           "fx": {
             "ken_burns": {
               "enabled": true,
@@ -2412,7 +2422,9 @@
               "emotion": "calm",
               "ja_review": true
             }
-          ]
+          ],
+          "seed": 7526,
+          "negative": "empty screen, chair"
         },
         {
           "id": "r_27",
@@ -2434,7 +2446,9 @@
               "emotion": "careful",
               "ja_review": true
             }
-          ]
+          ],
+          "seed": 7527,
+          "negative": "pale skin, light skin, white skin, blue eyes"
         },
         {
           "id": "r_28",
@@ -2479,7 +2493,7 @@
           "shot": "Insert: Gōda's fist around the dead cell",
           "characters": [],
           "action": "In the dark, Gōda closes his fist around the gray cell.",
-          "keyframe_prompt": "close-up, hand focus, dark-skinned hand, gray trench coat sleeve, clenched fist, holding a small gray cylinder device, dark, blue light",
+          "keyframe_prompt": "close-up, hand focus, dark skin, dark-skinned male, dark-skinned hand, gray trench coat sleeve, clenched fist, holding a small dull gray metal cylinder, unlit, dead, dark, blue light",
           "fx": {
             "ken_burns": {
               "enabled": true,
@@ -2491,7 +2505,9 @@
             }
           },
           "sfx": [],
-          "dialogue": []
+          "dialogue": [],
+          "seed": 7529,
+          "negative": "pale skin, light skin, white skin, glowing, glow, cyan light"
         },
         {
           "id": "r_30",
@@ -2502,7 +2518,7 @@
             "Kaito"
           ],
           "action": "Kaito alone on a bench in a holding cell. Moonlight through a barred window.",
-          "keyframe_prompt": "1boy, from behind, back view, sitting on a bench, holding cell, barred window, moonlight beam, dust particles, night, dark, wide shot, small figure, lonely",
+          "keyframe_prompt": "1boy, from behind, back view, sitting on a bench, holding cell, barred window, blue moonlight beam, cold blue light, dust particles, night, dark, wide shot, small figure, lonely",
           "motion_prompt": "dust drifts slowly through the moonlight beam, the boy's shoulders rise and fall as he breathes, static camera",
           "fx": {},
           "sfx": [
@@ -2512,7 +2528,9 @@
               "volume": 0.4
             }
           ],
-          "dialogue": []
+          "dialogue": [],
+          "seed": 7530,
+          "negative": "orange light, warm light, fire, sunset"
         },
         {
           "id": "r_31",
