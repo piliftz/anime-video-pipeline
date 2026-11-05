@@ -298,7 +298,16 @@
           "enabled": true,
           "preset": "pull_out"
         },
-        "fade_out": 1.5
+        "fade_out": 1.5,
+        "blackout": {
+          "enabled": true,
+          "start": 1.5,
+          "end": 3.5,
+          "brightness": 0.2,
+          "saturation": 0.3,
+          "steps": 3,
+          "easing": "ease_in"
+        }
       },
       "transition_in": {
         "type": "fade_black",

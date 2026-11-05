@@ -59,6 +59,10 @@ spilling into shared system memory, or the GPU dropping clocks (battery, power m
 it needs a GPU log (`nvidia-smi ... -l 10`) during the next motion run before anything is changed.
 
 ## Done
+- 2026-11-05: **`fx.blackout`** (brightness/saturation ramp, optional steps). Reason: both seq-2 Wan "state change"
+  shots failed. a2_08 (Vein drains to gray) invented a disembodied hand and a white smoke column; a2_12 (lights die)
+  barely dimmed. Wan did fine on *motion* (a1_13, a1_17) but not on *global lighting/colour changes*, at least in
+  these 2 samples. Both cuts are now stills with blackout: same story beat, no GPU time, deterministic.
 - 2026-11-05: **Act A seq 2** (`act_a_seq2`, 19 cuts): the charge, the grab (Zero-Catalyst reveal), the blackout
   with no music, the drone arrest. Wan heroes a2_06 grab, a2_08 Vein dies, a2_12 lights die. New SFX names
   power_down, drone_hover, stun_zap, heartbeat; new speaker Drone (JA: monotone VOICEVOX, intonation 0).

@@ -200,6 +200,11 @@ to the storyboard file**. Unspecified keys fall back to the defaults below.
 - `shake: { "enabled": true, "amount": 10, "fps": 12 }` adds a continuous energy rumble (pixels at 1080p,
   changing `fps` times per second like anime camera shake). Speed lines stay steady on top of it.
 - `impact.flash_color`: the flash after the hit frame, e.g. `"#FF7A1A"` (ember) or `"#19E6FF"` (cyan).
+- `blackout: { "enabled": true, "start": 0.3, "end": 2.2, "brightness": 0.15, "saturation": 0.0, "steps": 3,
+  "easing": "ease_in" }` ramps brightness and saturation from 1.0 down to the targets between `start` and `end`
+  (seconds into the cut), then holds. `steps > 0` makes it stepped (lights dying bank by bank); `0` is smooth.
+  Use `saturation` alone for an energy drain (color to gray), `brightness` for lights out. It runs after the grade
+  and before speed lines and impacts, so a hit flash stays bright over a dark frame.
 - Ken Burns zoom must be ≥ 1.0, and panning only has an effect when zoom > 1 because there is
   nothing to pan across otherwise. Easings: `linear`, `ease_in`, `ease_out`, `ease_in_out`, `sine`.
 - Grade overrides: `saturation`, `contrast`, `brightness`, `gamma`, `black_lift`,

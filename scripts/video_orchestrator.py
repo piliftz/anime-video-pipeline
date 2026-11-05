@@ -99,6 +99,7 @@ FX_DEFAULTS = {
     "anime_timing": {"enabled": False, "on": 2},   # hold each drawing 2 (twos) or 3 (threes) frames
     "shake": {"enabled": False, "amount": 10.0, "fps": 12},  # continuous energy rumble
     "impact": {"enabled": False, "at": [0.0]},     # inverted frame + flash + shake at these seconds
+    "blackout": {"enabled": False},                # brightness/saturation ramp down (lights out, color drain)
     "fade_in": 0.0,
     "fade_out": 0.0,
 }

@@ -1259,22 +1259,30 @@
         {
           "id": "a2_08",
           "duration": 3.0,
-          "motion": "wan",
-          "shot": "HERO: the Vein goes dark",
+          "motion": "still",
+          "shot": "The Vein goes dark (color drains to gray)",
           "characters": [],
           "action": "A wave of gray spreads out from his hand; the whole fissure's glow drains away. The fire dies.",
           "keyframe_prompt": "no humans, giant crystal fissure, glowing orange crystals, gray dead crystals spreading from the center, arena floor, darkness, embers, wide shot, dramatic",
-          "motion_prompt": "the orange glow drains out of the crystals, a wave of gray spreads outward from the center across the fissure, the fire dies down, embers fall, camera slowly pulls back",
           "fx": {
-            "anime_timing": {
+            "ken_burns": {
               "enabled": true,
-              "on": 2
+              "preset": "pull_out"
+            },
+            "blackout": {
+              "enabled": true,
+              "start": 0.3,
+              "end": 2.0,
+              "brightness": 0.55,
+              "saturation": 0.0,
+              "steps": 0,
+              "easing": "ease_in_out"
             }
           },
           "sfx": [
             {
               "name": "power_down",
-              "at": 0.4,
+              "at": 0.3,
               "volume": 1.0
             }
           ],
@@ -1292,6 +1300,15 @@
             "ken_burns": {
               "enabled": true,
               "preset": "push_in"
+            },
+            "blackout": {
+              "enabled": true,
+              "start": 0.3,
+              "end": 0.9,
+              "brightness": 0.3,
+              "saturation": 0.2,
+              "steps": 0,
+              "easing": "ease_in"
             }
           },
           "sfx": [
@@ -1361,23 +1378,37 @@
         {
           "id": "a2_12",
           "duration": 3.0,
-          "motion": "wan",
-          "shot": "HERO: the arena lights die",
+          "motion": "still",
+          "shot": "The arena lights die bank by bank",
           "characters": [],
           "action": "The stadium floodlights shut off bank by bank. Thousands of people, total silence.",
           "keyframe_prompt": "no humans, futuristic arena, night, metal arena floor, cracked floor, glowing crystal fissure, floodlights, crowd silhouettes in stands, darkness spreading, wide shot, scenery, sci-fi",
-          "motion_prompt": "the stadium floodlights shut off one bank at a time from left to right, the arena falls into darkness, faint embers drift, static camera",
           "fx": {
-            "anime_timing": {
+            "blackout": {
               "enabled": true,
-              "on": 2
+              "start": 0.4,
+              "end": 2.4,
+              "brightness": 0.15,
+              "saturation": 0.4,
+              "steps": 3,
+              "easing": "linear"
             }
           },
           "sfx": [
             {
               "name": "power_down",
-              "at": 0.2,
+              "at": 1.07,
+              "volume": 0.7
+            },
+            {
+              "name": "power_down",
+              "at": 1.73,
               "volume": 0.8
+            },
+            {
+              "name": "power_down",
+              "at": 2.4,
+              "volume": 1.0
             }
           ],
           "dialogue": [],

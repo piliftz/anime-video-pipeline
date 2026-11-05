@@ -437,6 +437,10 @@ ANIME_TIMING_DEFAULTS = {"enabled": False, "on": 2}
 IMPACT_DEFAULTS = {"enabled": False, "at": [0.0], "invert": True, "flash": True, "shake": 24.0, "settle": 0.5,
                    "seed": 11, "flash_color": "#FFFFFF"}  # e.g. "#FF7A1A" ember / "#19E6FF" cyan catalyst flash
 SHAKE_DEFAULTS = {"enabled": False, "amount": 10.0, "fps": 12, "seed": 5}  # px at 1080p; offset changes `fps`/s
+# Lights-out / energy-drain ramp: brightness and saturation go from 1.0 to the targets between start and end
+# (seconds into the cut). steps > 0 makes it stepped (lights dying bank by bank); 0 is a smooth ramp.
+BLACKOUT_DEFAULTS = {"enabled": False, "start": 0.0, "end": 1.0, "brightness": 0.15, "saturation": 0.0,
+                     "steps": 0, "easing": "ease_in"}
 
 
 def validate_timing_and_impact(fx: dict) -> None:
@@ -452,6 +456,15 @@ def validate_timing_and_impact(fx: dict) -> None:
         hits = impact["at"]
         if not isinstance(hits, list) or not all(isinstance(h, (int, float)) and h >= 0 for h in hits):
             raise PipelineError(f"impact.at must be a list of seconds >= 0; got {hits!r}")
+    blackout = {**BLACKOUT_DEFAULTS, **(fx.get("blackout") or {})}
+    if blackout["enabled"]:
+        if not 0 <= float(blackout["start"]) < float(blackout["end"]):
+            raise PipelineError("blackout needs 0 <= start < end (seconds into the cut)")
+        if not (0 <= float(blackout["brightness"]) <= 1 and 0 <= float(blackout["saturation"]) <= 1):
+            raise PipelineError("blackout.brightness and blackout.saturation must be between 0 and 1")
+        if int(blackout["steps"]) < 0:
+            raise PipelineError("blackout.steps must be >= 0 (0 = smooth)")
+        ease(blackout["easing"], 0.0)
 
 
 def anime_timing(clip, cfg: dict | None, fps: float):
@@ -543,9 +556,37 @@ def camera_shake(clip, cfg: dict | None):
     return clip.transform(frame_fn, apply_to=[])
 
 
+def blackout(clip, cfg: dict | None):
+    """Ramp brightness and saturation down over [start, end]: lights going out, or a catalyst's color draining.
+
+    Deterministic and cheap, so a lights-out beat doesn't need a video model (Wan rarely changes global lighting
+    on request). Holds the final level after `end`."""
+    cfg = {**BLACKOUT_DEFAULTS, **(cfg or {})}
+    if not cfg["enabled"]:
+        return clip
+    start, end, steps = float(cfg["start"]), float(cfg["end"]), int(cfg["steps"])
+    b_end, s_end = float(cfg["brightness"]), float(cfg["saturation"])
+
+    def frame_fn(get_frame, t):
+        frame = _rgb(get_frame(t))
+        x = min(max((t - start) / (end - start), 0.0), 1.0)
+        if steps > 0:
+            x = np.floor(x * steps + 1e-6) / steps
+        k = ease(cfg["easing"], x)
+        if k <= 0:
+            return frame
+        bright, sat = 1.0 + (b_end - 1.0) * k, 1.0 + (s_end - 1.0) * k
+        f = frame.astype(np.float32)
+        luma = (f @ LUMA)[..., None]
+        out = (luma + (f - luma) * sat) * bright
+        return np.clip(out + 0.5, 0, 255).astype(np.uint8)
+
+    return clip.transform(frame_fn, apply_to=[])
+
+
 def apply_scene_fx(clip, fx: dict | None, canvas: tuple[int, int], fit: str = "cover",
                    background=(0, 0, 0), fps: float = 24.0):
-    """Apply anime timing -> camera -> shake -> grade -> speed lines -> impact per a storyboard 'fx' block."""
+    """Apply anime timing -> camera -> shake -> grade -> blackout -> speed lines -> impact per a storyboard 'fx'."""
     fx = fx or {}
     clip = anime_timing(clip, fx.get("anime_timing"), fps)
     clip = camera_transform(clip, canvas, fit, fx.get("ken_burns"), background)
@@ -553,6 +594,7 @@ def apply_scene_fx(clip, fx: dict | None, canvas: tuple[int, int], fit: str = "c
     grade = fx.get("color_grade") or {}
     if grade.get("enabled"):
         clip = color_grade(clip, grade)
+    clip = blackout(clip, fx.get("blackout"))
     lines = fx.get("speed_lines") or {}
     if lines.get("enabled"):
         timing = {**ANIME_TIMING_DEFAULTS, **(fx.get("anime_timing") or {})}
