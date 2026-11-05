@@ -10,12 +10,21 @@ Layout after tidying (the same layout episode_producer.py writes to from now on)
     voicevox_terms/        each VOICEVOX character's terms (shared)
     review/                everything else: contact sheets, frame strips, test stills, small copies, logs
 
+With --clean it also DELETES files that are safe to lose (permanently: they don't go to the Recycle Bin):
+  - everything in output/review/ (contact sheets, strips, test frames, small copies, logs)
+  - *_small.mp4 copies anywhere
+  - a draft render (_draft.mp4 + its .srt and _credits.txt) once the full render of the same segment and
+    language exists and is newer
+It never deletes full renders, their subtitles or credits, keyframe sheets, Wan previews or voicevox_terms.
+
 Segment names come from the episode scripts in series/*/*.script.json, so a file is only filed under a
 segment that really exists. Runs as a dry run unless --apply is given. Existing files are never
 overwritten: a name clash is reported and the file stays where it is.
 
   python scripts/tidy_output.py            # show what would move
   python scripts/tidy_output.py --apply    # move
+  python scripts/tidy_output.py --clean            # show what would move AND what would be deleted
+  python scripts/tidy_output.py --clean --apply    # move, then delete
 """
 
 from __future__ import annotations
@@ -65,6 +74,68 @@ def plan_moves(out_dir: Path, segments: list[str]) -> list[tuple[Path, Path]]:
     return moves
 
 
+def _final_files(out_dir: Path, moves: list[tuple[Path, Path]]) -> dict[Path, Path]:
+    """Where every file in output/ ends up after the moves -> where it is now (lets a dry run plan deletions)."""
+    moved = dict(moves)
+    final: dict[Path, Path] = {}
+    for f in out_dir.rglob("*"):
+        if not f.is_file():
+            continue
+        dst = moved.get(f)
+        if dst is None:  # inside a moved folder?
+            for parent in f.parents:
+                if parent in moved:
+                    dst = moved[parent] / f.relative_to(parent)
+                    break
+        final[dst or f] = f
+    return final
+
+
+def plan_deletions(out_dir: Path, moves: list[tuple[Path, Path]], segments: list[str]) -> list[Path]:
+    """Current paths of files that are safe to delete (see the module docstring)."""
+    final = _final_files(out_dir, moves)
+    review = out_dir / "review"
+    doomed: list[Path] = []
+    for dst, src in final.items():
+        if review in dst.parents or dst.name.endswith("_small.mp4"):
+            doomed.append(src)
+            continue
+        m = re.match(r"^(.*)_draft(\.mp4|\.srt|_credits\.txt)$", dst.name)
+        if m and dst.parent.name in segments:
+            full = dst.with_name(f"{m.group(1)}.mp4")
+            full_src = final.get(full)
+            draft_video = final.get(dst.with_name(f"{m.group(1)}_draft.mp4"), src)
+            if full_src is not None and full_src.stat().st_mtime >= draft_video.stat().st_mtime:
+                doomed.append(src)
+    return sorted(doomed)
+
+
+def delete_files(paths: list[Path], apply: bool) -> tuple[int, int, int]:
+    deleted = failed = size = 0
+    for f in paths:
+        rel = f.relative_to(OUTPUT_DIR.parent)
+        n = f.stat().st_size
+        if not apply:
+            print(f"  delete  {rel}  ({n / 1e6:.1f} MB)")
+            deleted += 1
+            size += n
+            continue
+        try:
+            f.unlink()
+            deleted += 1
+            size += n
+        except OSError as exc:
+            log.warning("could not delete %s (%s; close any program using it and run again)", rel, exc)
+            failed += 1
+    return deleted, failed, size
+
+
+def _remove_empty_dirs(out_dir: Path) -> None:
+    for d in sorted((d for d in out_dir.rglob("*") if d.is_dir()), key=lambda d: len(d.parts), reverse=True):
+        if not any(d.iterdir()):
+            d.rmdir()
+
+
 def apply_moves(moves: list[tuple[Path, Path]], apply: bool) -> tuple[int, int]:
     moved = skipped = 0
     for src, dst in moves:
@@ -88,22 +159,35 @@ def apply_moves(moves: list[tuple[Path, Path]], apply: bool) -> tuple[int, int]:
 
 
 def main(argv: list[str] | None = None) -> int:
-    p = argparse.ArgumentParser(description="Sort output/ into one folder per episode segment (moves, never deletes).")
-    p.add_argument("--apply", action="store_true", help="Actually move the files (default: dry run).")
+    p = argparse.ArgumentParser(description="Sort output/ into one folder per episode segment; --clean deletes "
+                                            "review files, small copies and superseded drafts.")
+    p.add_argument("--apply", action="store_true", help="Actually move (and with --clean, delete). Default: dry run.")
+    p.add_argument("--clean", action="store_true", help="Also delete files that are safe to lose (permanent).")
     args = p.parse_args(argv)
     setup_logging()
     try:
         if not OUTPUT_DIR.is_dir():
             raise PipelineError(f"No output folder at {OUTPUT_DIR}")
-        moves = plan_moves(OUTPUT_DIR, segment_names())
-        if not moves:
+        segments = segment_names()
+        moves = plan_moves(OUTPUT_DIR, segments)
+        doomed = plan_deletions(OUTPUT_DIR, moves, segments) if args.clean else []
+        if not moves and not doomed:
             print("output/ is already tidy.")
             return 0
-        moved, skipped = apply_moves(moves, args.apply)
         if args.apply:
+            moved, skipped = apply_moves(moves, apply=True)
             print(f"Moved {moved} item(s), skipped {skipped}.")
-        else:
-            print(f"\nDry run: {moved} item(s) would move, {skipped} skipped. Run again with --apply to move them.")
+            if args.clean:  # re-plan on the real, moved layout
+                deleted, failed, size = delete_files(plan_deletions(OUTPUT_DIR, [], segments), apply=True)
+                _remove_empty_dirs(OUTPUT_DIR)
+                tail = f", {failed} failed." if failed else "."
+                print(f"Deleted {deleted} file(s), {size / 1e6:.1f} MB freed{tail}")
+            return 0
+        moved, skipped = apply_moves(moves, apply=False)
+        deleted, _, size = delete_files(doomed, apply=False)
+        print(f"\nDry run: {moved} item(s) would move, {skipped} skipped"
+              + (f", {deleted} file(s) would be DELETED ({size / 1e6:.1f} MB)" if args.clean else "")
+              + ". Add --apply to do it.")
         return 0
     except PipelineError as exc:
         log.error("%s", exc)
