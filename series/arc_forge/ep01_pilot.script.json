@@ -834,8 +834,8 @@
           "dialogue": [
             {
               "speaker": "Technician",
-              "en": "Readings are spiking. This isn't the simulation!",
-              "ja": "数値が急上昇……これはシミュレーションじゃない！",
+              "en": "This isn't the simulation!",
+              "ja": "シミュレーションじゃない！",
               "emotion": "panicked",
               "ja_review": true
             }
