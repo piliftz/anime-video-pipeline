@@ -207,6 +207,8 @@ class ComfyServer:
         parsed = urllib.parse.urlparse(self.client.url)
         cmd = [str(python), str(main_py), "--port", str(parsed.port or 8188), "--listen", parsed.hostname or "127.0.0.1"]
         ensure_dir(self.log_path.parent)
+        if self.log_path.is_file():  # keep the previous run's log (it may hold a crash) instead of overwriting it
+            self.log_path.replace(self.log_path.with_name("comfyui_server.prev.log"))
         log.info("Starting ComfyUI: %s  (log: %s)", " ".join(cmd), self.log_path)
         self._log_fh = self.log_path.open("w", encoding="utf-8", errors="replace")
         flags = subprocess.CREATE_NEW_PROCESS_GROUP if sys.platform == "win32" else 0
@@ -241,6 +243,11 @@ class ComfyServer:
         if getattr(self, "_log_fh", None):
             self._log_fh.close()
 
-    def __exit__(self, *exc) -> None:
+    def __exit__(self, exc_type, exc, tb) -> None:
+        if exc_type is not None and self.proc is not None:
+            # A failure while we own the server: say whether it crashed and show its last log lines right away.
+            code = self.proc.poll()
+            state = f"ComfyUI process EXITED with code {code}" if code is not None else "ComfyUI process still running"
+            log.error("%s. Last lines of %s:\n%s", state, self.log_path, self._tail(40))
         if not self.keep_running:
             self.stop()
