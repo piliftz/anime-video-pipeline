@@ -134,6 +134,7 @@ a visual change works without inspecting frames.
   `trimmed`, and older cached lines are trimmed in place on next use (boundaries shifted to match).
 - Final mix is loudness-normalized (`project.loudness_lufs`, default -14, -1 dBTP) in final_encode.
 - moviepy `time_transform` drops `.duration` unless keep_duration=True: always pass it for same-length remaps.
+- The redo plan (studio pipeline mapped to free local tools) is docs/LOCAL_ANIME_PIPELINE.md.
 - Planned work and its rationale lives in docs/ROADMAP.md (anime timing, impact frames, ControlNet, speed).
 
 ## Coding style

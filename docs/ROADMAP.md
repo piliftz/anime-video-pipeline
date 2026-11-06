@@ -5,6 +5,8 @@ The first show (Arc-Forge: Ignition) was removed at the owner's request. Its bib
 Remotion promo toolkit are recoverable from git history: `git checkout 5a0bcfe -- series/arc_forge promo`.
 The pipeline code (voices, audio licensing, subtitles, assembly, FX, ComfyUI/Wan clients) stays and is show-agnostic.
 
+**Plan for the redo:** [LOCAL_ANIME_PIPELINE.md](LOCAL_ANIME_PIPELINE.md) (studio pipeline mapped to free local tools).
+
 ## Why it was scrapped: owner feedback on the finished drafts
 "Doesn't feel like a popular anime; looks like a school project." Specifically:
 1. **No lip-sync** (the production rule hid mouths: backs, eyes, hands, silhouettes).
