@@ -151,6 +151,14 @@ a visual change works without inspecting frames.
   stepped shake, heavier hit sound (saturate the bass so it's audible on phone/laptop speakers, not just 30-60 Hz);
   "power styling looks cheap" → add noise-driven displacement/jagged energy arcs to the aura effect;
   "sound doesn't match the hit" → align the SFX transient to the apex/impact frame.
+- **Showrunner command menu (brief v2):** after every creative deliverable (storyboard, shot, sound, render), offer
+  exactly three choices, as clickable options where the client supports them: "REJECT - LACKS IMPACT" (harder
+  camera/hits/debris), "ADJUST PACE" (retime frames, align swells to hits), "APPROVED - EXECUTE RENDER" (lock it,
+  move to the next asset).
+- Music (brief v2: J-Rock intros 160-180 BPM, orchestral-rock outros 90-110 BPM): Claude composes chords, lead and
+  drum grids as a MIDI file and renders it headless (e.g. FluidSynth + a freely licensed soundfont), never as text for
+  the owner to paste into a piano roll. Be honest that free soundfonts sound cheap; compare by ear against CC0 tracks
+  or a local music model before committing. OpenToonz is not used (it needs human drawing).
 - Until Claude Code runs on the owner's laptop, every laptop step is a copy-paste command for the owner; keep those
   minimal and exact. Recommend running Claude Code locally so these steps can be executed directly.
 
