@@ -1,0 +1,46 @@
+{
+  "id": "lipsync_test",
+  "vrm": "assets/characters/_samples/VRM1_Constraint_Twist_Sample.vrm",
+  "background": "assets/generated/s01_station.png",
+  "duration": 10.0,
+  "render": {"resolution": [1920, 1080], "fps": 24, "on": 2, "samples": 16},
+  "line": {
+    "text": "They said I'd never make it this far. Watch me prove every one of them wrong!",
+    "voice": "en-US-AriaNeural",
+    "rate": "+0%",
+    "pitch": "+10Hz",
+    "offset": 1.2,
+    "tail": 0.5,
+    "recognizer": "pocketSphinx",
+    "mouth_gain": 1.0,
+    "subtitle_text": null
+  },
+  "expressions": [
+    {"name": "neutral", "weight": 1.0, "at": 0.0, "ramp": 0.01},
+    {"name": "angry", "weight": 0.7, "at_sentence": 2, "delay": -0.15, "ramp": 0.15}
+  ],
+  "gestures": [
+    {"name": "nod", "at_sentence": 1, "delay": 1.6},
+    {"name": "fist_to_chest", "side": "right", "at_sentence": 2, "delay": 0.25, "hold": 2.2}
+  ],
+  "blink": {"enabled": true, "interval": 3.4, "first": 0.6},
+  "camera": {
+    "framing": "medium",
+    "focal_mm": 50,
+    "offset_x": 0.08,
+    "low_angle_deg": 6,
+    "push_in": 0.05,
+    "background_distance": 6.0,
+    "punches": [{"at_sentence": 2, "delay": 0.25, "amount": 0.08, "duration": 0.12}]
+  },
+  "lighting": {
+    "key_color": [0.8, 0.68, 0.58], "key_strength": 1.5,
+    "rim_color": [0.45, 0.65, 1.0], "rim_strength": 5.0,
+    "ambient_color": [0.35, 0.42, 0.65], "ambient_strength": 0.4
+  },
+  "spring_bones": true,
+  "sfx": [
+    {"file": "assets/audio/sfx/whoosh.mp3", "at_sentence": 2, "delay": 0.2, "volume": 0.7}
+  ],
+  "fx": {"fade_in": 0.3, "fade_out": 0.4}
+}

@@ -31,6 +31,12 @@ scripts/
   audio_manifest.py       audio license manifest (assets/audio/manifest.json): add/list/check; allow-list of licenses
                           safe for monetized video (CC0, YouTube Audio Library, CC-BY + attribution, own, generated)
   fetch_sfx.py            Freesound CC0-only SFX: search -> temp/sfx_candidates (audition) -> keep -> manifest
+  character_shot.py       shot spec -> voice -> Rhubarb mouth cues -> Blender frames -> one-scene storyboard -> MP4
+                          (frames reused by job hash; --benchmark N measures Eevee s/frame). Needs $BLENDER_EXE,
+                          $RHUBARB_EXE and the Blender VRM add-on. Template: character_shot_template.json
+  blender_vrm_shot.py     runs INSIDE Blender (bpy): VRM 1.0 import (MToon + outlines kept), lip-sync, expressions
+                          with VRM override rules, blinks, idle + gestures, camera, Eevee on twos. Poses are
+                          rotations in armature rest frame (basis = M^-1 R M); imports only stdlib + pipeline_utils
   lock_refs.py            copy picked reference takes -> series/<show>/refs/*.jpg + record seed/prompt
   contact_sheet.py        labeled grid of generated takes (rows per take group, '#n · seed') for picking
   tidy_output.py          sort output/ into per-segment folders; --clean deletes ONLY known throwaway patterns (review/),
@@ -77,6 +83,7 @@ python scripts/setup_voicevox.py                          # install the VOICEVOX
 python scripts/voicevox_client.py                         # list VOICEVOX voices
 python scripts/setup_models.py --model wan2.2-ti2v-5b
 python scripts/video_generator.py assets/generated/s02_hikari.png --prompt "..." [--length 121 --size 1280x704]
+python scripts/character_shot.py character_shot_template.json [--frames-only | --benchmark 48 | --draft]
 ```
 ComfyUI is optional: everything except `--generate-images` works without it. There is no real
 ComfyUI in the cloud sandbox; test the client against a mock that implements the same HTTP routes

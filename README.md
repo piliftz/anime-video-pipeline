@@ -328,6 +328,36 @@ for a dramatic beat; scene `sfx: [{ file, at, volume }]`; `audio.require_license
 writes `output/<name>_credits.txt` with the attribution lines your audio requires. Audio files are gitignored,
 so licensed tracks are never pushed to your repository; only the manifest is.
 
+### Character shots: lip-synced 3D cel-shaded characters (Blender + VRM + Rhubarb)
+A VRoid character (`.vrm`, **VRM 1.0**) speaks one line in front of a background, rendered headless in Blender:
+```powershell
+blender --command extension install -s --enable vrm     # once: the VRM add-on (MIT/GPL)
+# once: Rhubarb Lip Sync from github.com/DanielSWolf/rhubarb-lip-sync/releases; set BLENDER_EXE and RHUBARB_EXE
+.venv\Scripts\python scripts\character_shot.py character_shot_template.json            # frames + final MP4
+.venv\Scripts\python scripts\character_shot.py character_shot_template.json --frames-only
+.venv\Scripts\python scripts\character_shot.py character_shot_template.json --benchmark 48   # Eevee s/frame
+```
+Steps: the line is voiced through `voiceover_generator` (same cache as the orchestrator, so audio and mouth
+match), Rhubarb turns the WAV into mouth shapes (`line.recognizer`: `pocketSphinx` for English, `phonetic` for
+Japanese), `blender_vrm_shot.py` keys lip-sync (Rhubarb A-H/X → VRM `aa ih ou ee oh`), VRM expressions (with
+the spec's mouth/blink override rules), blinks, idle breathing/sway, gestures and the camera, renders with Eevee
+on twos (`render.on`: each drawing held 2 frames like TV anime; held frames are hard links), then the frame
+folder becomes the clip of a one-scene storyboard (narration, subtitles, `sfx`, `fx`) for the normal encode.
+Frames are reused when the job is unchanged (`--force` re-renders); outputs land in `output/<id>/`, frames and a
+debug `.blend` in `temp/character_shots/<id>/`.
+
+Spec keys (`character_shot_template.json` shows all of them; paths are relative to the spec file):
+`id`, `vrm`, `background` (image placed on a plane 6 m behind the character), `duration`,
+`render: {resolution, fps, on, samples}`, `line: {text, voice, rate, pitch, volume, engine, voicevox, offset,
+tail, recognizer, mouth_gain, subtitle_text}`, `expressions: [{name, weight, at|at_sentence+delay, ramp}]` (any
+expression on the model: `happy angry sad relaxed surprised neutral`...), `gestures: [{name: fist_to_chest|nod,
+side, at|at_sentence+delay, hold}]`, `blink: {enabled, interval, first}`, `camera: {framing: medium|closeup,
+focal_mm, offset_x, low_angle_deg, push_in, background_distance, punches: [{at|at_sentence, amount, duration}]}`,
+`lighting: {key_color, key_strength, rim_color, rim_strength, ambient_color, ambient_strength}`, `spring_bones`
+(hair/cloth physics, pre-rolled 2 s so it settles before frame 1), `sfx: [{file, at|at_sentence, volume}]`, `fx`.
+Times: `at` = seconds into the shot; `at_sentence` = start of that sentence (1-based) of the spoken line plus
+`delay`. Measured on an RTX 5060 Laptop: 1080p, 16 samples, about 0.56 s per frame after the first.
+
 ## 5. Using Stable Diffusion and AnimateDiff output
 
 The pipeline doesn't care which tool generated your media. It only needs files on disk.

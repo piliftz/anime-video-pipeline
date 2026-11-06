@@ -21,6 +21,27 @@ The owner is designing one character in **VRoid Studio** and will export a `.vrm
 
 1. Install and verify (check versions and licenses as you go; record exact versions here afterwards):
    Blender (supports the RTX 5060 / Blackwell GPU; verify), the **VRM add-on for Blender**, **Rhubarb Lip Sync**.
+   **Installed and verified 2026-11-07:**
+   - Blender **5.2.2 LTS** (`$BLENDER_EXE` = `C:\Program Files\Blender Foundation\Blender 5.2\blender.exe`, GPL).
+     Headless Eevee render works on the RTX 5060 (OpenGL backend, driver 616.92); Cycles sees it via OptiX and CUDA.
+   - VRM add-on **"VRM format" 4.10.4** (extensions.blender.org id `vrm`, MIT / GPL-3.0-or-later), installed with
+     `blender --command extension install -s --enable vrm`; `bpy.ops.import_scene.vrm` is available headless.
+   - Rhubarb Lip Sync **1.14.0** (`$RHUBARB_EXE` = `C:\Users\adu94\tools\Rhubarb-Lip-Sync-1.14.0-Windows\rhubarb.exe`,
+     MIT; bundled deps BSD-2 / Boost / MIT). Zip sha256 `62fa416a…098d1fe3`. Takes 48 kHz mono WAV directly.
+     Recognizers: `pocketSphinx` (English, ~2 s per 1.8 s line) and `phonetic` (language-independent: use for JA).
+     Use `-f json --extendedShapes GHX`.
+   **Steps 2-3 built and tested 2026-11-07 on a sample model** (pixiv's `VRM1_Constraint_Twist_Sample.vrm`
+   from vrm-c/vrm-specification, VRM Public License 1.0, internal testing only, gitignored under
+   `assets/characters/_samples/`): `scripts/character_shot.py` + `scripts/blender_vrm_shot.py`, spec
+   `character_shot_template.json` → `output/lipsync_test/lipsync_test.mp4`. Verified in frames and audio: mouth
+   cues line up with speech onsets (1.24 s, 4.00 s, end 5.94 s), expression change, fist gesture, nod, blink,
+   camera punch, spring-bone hair/sleeves (needs the 2 s pre-roll, else sleeves stick out in T-pose).
+   Eevee benchmark (48 frames, 1920x1080, 16 samples, on ones): first frame 1.30 s, then **0.56 s/frame**
+   (0.54-0.59). The 10 s shot on twos: 120 drawings, 71 s of rendering; whole flow ~2.5 min incl. encode.
+   Known gaps: MToon caps light intensity, so the character stays bright against night backgrounds (light
+   colour is the only lever so far); the key light's cel shadow edge can cross the mouth; only two gestures
+   (fist_to_chest, nod); English voice via edge-tts. When the owner's `hero.vrm` lands: copy the template,
+   point `vrm` at it, render, show the owner.
 2. Write a headless Blender script (`blender --background --python ...`) that:
    - imports the VRM, applies Eevee + toon (cel) shading with outlines;
    - places the character over an Animagine background (ComfyUI is at `C:\Users\adu94\comfyui-anime`,
