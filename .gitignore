@@ -40,3 +40,6 @@ assets/generated/
 
 # JavaScript dependencies (e.g. a leftover promo/node_modules) never belong in git
 node_modules/
+
+# VRoid character models (large binaries; keep locally, back up separately)
+*.vrm
