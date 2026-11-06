@@ -2,10 +2,10 @@
 """Lay out generated images in one labeled grid so you can compare takes and pick the best.
 
 Labels show the file name and, when a generation sidecar (<image>.png.json) exists, its seed.
-Images are grouped in rows by name prefix (e.g. ref_kaito_portrait_1..4 share a row).
+Images are grouped in rows by name prefix (e.g. ref_hero_portrait_1..4 share a row).
 
 Examples:
-  python scripts/contact_sheet.py assets/generated/arc_forge/refs -o output/refs_sheet.png
+  python scripts/contact_sheet.py assets/generated/<show>/refs -o output/refs_sheet.png
   python scripts/contact_sheet.py assets/generated --filter s0 --cols 3
 """
 
@@ -37,7 +37,7 @@ def collect(folder: Path, name_filter: str | None) -> list[Path]:
 
 
 def group_key(path: Path) -> str:
-    """'ref_kaito_portrait_3' -> 'ref_kaito_portrait'; files without a trailing number are their own group."""
+    """'ref_hero_portrait_3' -> 'ref_hero_portrait'; files without a trailing number are their own group."""
     return re.sub(r"_\d+$", "", path.stem)
 
 

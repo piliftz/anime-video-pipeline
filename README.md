@@ -313,7 +313,7 @@ Renders refuse unregistered files and licenses that are unsafe for monetized vid
 setx FREESOUND_API_KEY "your-key"        # once, then open a new terminal
 .venv\Scripts\python scripts\fetch_sfx.py search "handcuffs chain clink" --name chain_clink   # 3 candidates to listen to
 .venv\Scripts\python scripts\fetch_sfx.py keep chain_clink 2
-.venv\Scripts\python scripts\fetch_sfx.py script series\arc_forge\ep01_pilot.script.json   # every SFX a script needs
+.venv\Scripts\python scripts\fetch_sfx.py script series\<show>\ep01.script.json   # every SFX a script needs
 # CC0 music beds from Freesound work the same way (no YouTube channel needed):
 .venv\Scripts\python scripts\fetch_sfx.py search "dark ambient drone" --name tension_drone --min-duration 30 --max-duration 180
 .venv\Scripts\python scripts\fetch_sfx.py keep tension_drone 1 --kind music

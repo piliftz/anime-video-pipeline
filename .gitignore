@@ -37,3 +37,6 @@ Thumbs.db
 
 # AI-generated scene images (+ prompt sidecars) - regenerate with --generate-images
 assets/generated/
+
+# JavaScript dependencies (e.g. a leftover promo/node_modules) never belong in git
+node_modules/

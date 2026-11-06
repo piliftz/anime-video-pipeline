@@ -10,8 +10,8 @@ high-quality preview MP3s (about 128 kbps), fine for SFX; original files need a 
 
   python scripts/fetch_sfx.py search "chain clink" --name chain_clink      # downloads 3 candidates
   python scripts/fetch_sfx.py keep chain_clink 2                           # register candidate #2
-  python scripts/fetch_sfx.py script series/arc_forge/ep01_pilot.script.json   # every SFX + music/ambience bed
-  python scripts/fetch_sfx.py script series/arc_forge/ep01_pilot.script.json --auto-keep   # ...and keep #1 of each
+  python scripts/fetch_sfx.py script series/<show>/ep01.script.json   # every SFX + music/ambience bed
+  python scripts/fetch_sfx.py script series/<show>/ep01.script.json --auto-keep   # ...and keep #1 of each
   python scripts/fetch_sfx.py search "dark ambient drone" --name tension_drone --min-duration 30 --max-duration 180
   python scripts/fetch_sfx.py keep tension_drone 1 --kind music              # CC0 music beds work the same way
 """

@@ -488,7 +488,7 @@ def anime_timing(clip, cfg: dict | None, fps: float):
 def impact_frames(clip, cfg: dict | None, fps: float):
     """Anime impact hits: 1 inverted high-contrast B&W frame, a white flash, then a decaying shake.
 
-    Same look as promo/src/components/Fx.tsx `Impact`. Shake offsets are seeded per hit and frame, so renders
+    Shake offsets are seeded per hit and frame, so renders
     are deterministic. The shake re-samples only the ~settle-seconds after each hit."""
     cfg = {**IMPACT_DEFAULTS, **(cfg or {})}
     if not cfg["enabled"] or not cfg["at"]:

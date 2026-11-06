@@ -36,15 +36,11 @@ scripts/
   tidy_output.py          sort output/ into per-segment folders; --clean deletes ONLY known throwaway patterns (review/),
                           older duplicates and drafts superseded by a newer full render; unknown files go to other/
                           (kept). episode_producer runs it (move + clean) after every successful stage (--no-tidy)
-series/arc_forge/         the show: bible.md, characters.json (canonical tags), ep01_pilot.script.json (EN/JA,
-                          'production' block + per-cut motion wan|still|clip), character_refs.json, locked_refs.json
+series/<show>/            a show: bible.md, characters.json (canonical tags), <episode>.script.json (EN/JA,
+                          'production' block + per-cut motion wan|still|clip), character_refs.json, locked_refs.json.
+                          None yet: the first show (Arc-Forge) was removed 2026-11-06, see docs/ROADMAP.md
 make_video.cmd            Windows one-command entry: orchestrator --generate-images
 my_story.json             full example storyboard using only generated images
-promo/                    Remotion + Three.js + GSAP promo toolkit (TitleCard, Teaser, CountdownReel); see
-                          promo/README.md. Rule: every pixel is a pure function of useCurrentFrame()
-                          (no Math.random, no r3f useFrame, GSAP only via useGsapTimeline seek). Fonts are
-                          bundled in promo/public/fonts. Verify with `npx tsc --noEmit` and
-                          `npx remotion still ... --gl=swangle --browser-executable=<headless chrome>`.
 storyboard_template.json  reference storyboard; every supported key appears here
 assets/ {clips,images,audio/bgm,fonts}   inputs (fonts/ is passed to libass as fontsdir)
 temp/                     voiceover cache, timeline JSON, ASS, lossless master (gitignored)
@@ -74,9 +70,9 @@ python scripts/subtitle_generator.py from-timeline temp/sakura_horizon_timeline.
 python scripts/video_orchestrator.py my_story.json --generate-images --draft     # needs ComfyUI ($COMFYUI_DIR)
 python scripts/image_generator.py my_story.json --scenes s02_hikari --force
 python scripts/setup_models.py --verify
-python scripts/episode_producer.py series/arc_forge/ep01_pilot.script.json keyframes|motion|status
-python scripts/episode_producer.py series/arc_forge/ep01_pilot.script.json assemble --draft --tts-fallback silence
-python scripts/episode_producer.py series/arc_forge/ep01_pilot.script.json assemble --lang ja --draft
+python scripts/episode_producer.py series/<show>/ep01.script.json keyframes|motion|status
+python scripts/episode_producer.py series/<show>/ep01.script.json assemble --draft --tts-fallback silence
+python scripts/episode_producer.py series/<show>/ep01.script.json assemble --lang ja --draft
 python scripts/setup_voicevox.py                          # install the VOICEVOX engine (no Japanese UI)
 python scripts/voicevox_client.py                         # list VOICEVOX voices
 python scripts/setup_models.py --model wan2.2-ti2v-5b

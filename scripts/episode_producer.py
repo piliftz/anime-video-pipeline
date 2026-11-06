@@ -13,9 +13,9 @@ overnight run simply continues where it stopped.
   status     what's done, what's missing, measured generation times
 
 Example (Windows):
-  .venv\\Scripts\\python scripts\\episode_producer.py series\\arc_forge\\ep01_pilot.script.json keyframes
-  .venv\\Scripts\\python scripts\\episode_producer.py series\\arc_forge\\ep01_pilot.script.json motion
-  .venv\\Scripts\\python scripts\\episode_producer.py series\\arc_forge\\ep01_pilot.script.json assemble --draft
+  .venv\\Scripts\\python scripts\\episode_producer.py series\\<show>\\ep01.script.json keyframes
+  .venv\\Scripts\\python scripts\\episode_producer.py series\\<show>\\ep01.script.json motion
+  .venv\\Scripts\\python scripts\\episode_producer.py series\\<show>\\ep01.script.json assemble --draft
 """
 
 from __future__ import annotations
@@ -374,7 +374,7 @@ def auto_tidy() -> None:
 
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(description="Produce an episode segment: keyframes -> motion -> assemble.")
-    p.add_argument("script", type=Path, help="Episode script JSON (e.g. series/arc_forge/ep01_pilot.script.json)")
+    p.add_argument("script", type=Path, help="Episode script JSON (e.g. series/<show>/ep01.script.json)")
     p.add_argument("stage", choices=["keyframes", "motion", "assemble", "status"])
     p.add_argument("--segment", default="cold_open")
     p.add_argument("--cuts", help="Comma-separated cut ids to (re)process, e.g. c003,c006")

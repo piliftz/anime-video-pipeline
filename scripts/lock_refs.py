@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """Lock picked character reference takes into the series folder.
 
-Reads a picks file (e.g. series/arc_forge/locked_refs.json), copies each picked generated image
+Reads a picks file (e.g. series/<show>/locked_refs.json), copies each picked generated image
 into series/<show>/refs/ as a compact JPEG (small enough to commit), and records the take's seed,
 size and exact prompt from its generation sidecar. Locked refs are the inputs for IP-Adapter
 character consistency later on; they are NOT regenerated or overwritten by image_generator.py.
 
-  python scripts/lock_refs.py series/arc_forge/locked_refs.json
+  python scripts/lock_refs.py series/<show>/locked_refs.json
 """
 
 from __future__ import annotations
@@ -59,7 +59,7 @@ def lock(picks_path: Path, max_height: int = 1536, quality: int = 92) -> list[Pa
 
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(description="Copy picked reference takes into the series refs folder.")
-    p.add_argument("picks", type=Path, help="Picks JSON, e.g. series/arc_forge/locked_refs.json")
+    p.add_argument("picks", type=Path, help="Picks JSON, e.g. series/<show>/locked_refs.json")
     p.add_argument("-v", "--verbose", action="store_true")
     args = p.parse_args(argv)
     setup_logging(args.verbose)
