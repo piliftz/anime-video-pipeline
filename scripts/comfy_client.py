@@ -97,9 +97,19 @@ class ComfyClient:
     def wait(self, prompt_id: str, timeout: float = 1800.0, poll: float = 1.0) -> dict:
         """Block until the prompt finishes; return its 'outputs' dict."""
         start = time.time()
+        last_queue_check, missing = start, 0
         while time.time() - start < timeout:
             hist = self._request(f"/history/{prompt_id}")
             entry = hist.get(prompt_id)
+            if not entry and time.time() - last_queue_check >= 10:
+                # A job that is neither queued, running nor in the history was dropped: ComfyUI's worker died
+                # (seen with CUDA out-of-memory inside its memory manager). Without this check we'd wait for hours.
+                last_queue_check = time.time()
+                missing = 0 if self._in_queue(prompt_id) else missing + 1
+                if missing >= 2:
+                    raise PipelineError(
+                        "ComfyUI dropped the job without a result: its worker most likely crashed, often from running "
+                        "out of GPU memory. See temp/comfyui_server.log; close other GPU apps (or restart) and re-run.")
             if entry:
                 status = entry.get("status", {})
                 if status.get("status_str") == "error":
@@ -112,6 +122,15 @@ class ComfyClient:
                     return entry.get("outputs", {})
             time.sleep(poll)
         raise PipelineError(f"Timed out after {timeout:.0f}s waiting for ComfyUI prompt {prompt_id}.")
+
+    def _in_queue(self, prompt_id: str) -> bool:
+        """True if the prompt is running or pending (or the queue can't be read: don't guess)."""
+        try:
+            q = self._request("/queue")
+        except PipelineError:
+            return True
+        return any(len(item) > 1 and item[1] == prompt_id
+                   for key in ("queue_running", "queue_pending") for item in q.get(key, []))
 
     def upload_image(self, path: Path, name: str | None = None) -> str:
         """Upload a local image to ComfyUI's input folder; return the value LoadImage expects."""
