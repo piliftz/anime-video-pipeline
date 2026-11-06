@@ -137,6 +137,23 @@ a visual change works without inspecting frames.
 - The redo plan (studio pipeline mapped to free local tools) is docs/LOCAL_ANIME_PIPELINE.md.
 - Planned work and its rationale lives in docs/ROADMAP.md (anime timing, impact frames, ControlNet, speed).
 
+## Working with the owner (studio mandate, from the owner's "Shonen Anime Production System" brief)
+- The owner is **showrunner / executive producer / final judge** only: no drawing, 3D modeling, composing, or
+  video/audio editing. Never ask them to adjust anything in a GUI. Deliver complete, runnable automation instead.
+- Claude covers the crew roles: **Director** (storyboard with frame-exact timing at 24 fps, camera, expressions),
+  **Technical Animator** (Blender via `bpy`, Eevee + toon shading for the anime look), **VFX Compositor** (Blender
+  compositor + this pipeline's FX, not DaVinci Resolve GUI node graphs), **Audio Engineer** (this pipeline's
+  millisecond cue placement and mix, ffmpeg EQ/compression/sidechain, procedural sound synthesis in Python; not
+  Reaper, which is paid after 60 days, or Vital, which needs a DAW and hand-tweaking).
+- One accepted exception: character design in VRoid Studio (sliders, ~30-60 min per character, not scriptable),
+  or third-party VRoid Hub models whose license allows commercial use.
+- Critique playbook (owner verdict → action): "lacks impact" → harder camera acceleration, lower angle, more
+  stepped shake, heavier hit sound (saturate the bass so it's audible on phone/laptop speakers, not just 30-60 Hz);
+  "power styling looks cheap" → add noise-driven displacement/jagged energy arcs to the aura effect;
+  "sound doesn't match the hit" → align the SFX transient to the apex/impact frame.
+- Until Claude Code runs on the owner's laptop, every laptop step is a copy-paste command for the owner; keep those
+  minimal and exact. Recommend running Claude Code locally so these steps can be executed directly.
+
 ## Coding style
 - Python 3.10+, `from __future__ import annotations`, type hints on public functions.
 - Line length ≤ 120. f-strings. `pathlib.Path`, never string path joins.

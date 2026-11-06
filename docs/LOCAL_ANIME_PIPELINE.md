@@ -51,7 +51,7 @@ Without animators, the drawing stages need a substitute.
 | 3. Ink & paint (*shiage*) | Paint team | **Toon (cel) shading** in Blender: flat colours and outlines, automatic | 🧪 |
 | Dialogue lip-sync (*kuchipaku*) | Animators | **Rhubarb Lip Sync** (free, open source): voice line → mouth shapes (A/I/U/E/O), automatic | 🧪 |
 | 4. Backgrounds (*bijutsu*) | Background painters | **Animagine XL on ComfyUI** | ✅ |
-| 5. Compositing (*satsu*) | Compositors | This pipeline: grade, impact frames, shake, speed lines, blackout. Blender compositor and particles for auras, glows, dust | ✅ partly |
+| 5. Compositing (*satsu*) | Compositors | This pipeline: grade, impact frames, shake, speed lines, blackout. **Blender compositor** (scriptable) and particles for auras, glows, dust. Not DaVinci Resolve: its node graphs are built by hand in a GUI | ✅ partly |
 
 This is the **3DCG anime** approach (e.g. *Land of the Lustrous*, *Beastars*, Genshin/Honkai-style cutscenes):
 3D characters rendered to look 2D. It is the only free, local way found so far to get **real movement, consistent
@@ -73,8 +73,8 @@ characters and accurate lip-sync** without human animators.
 |---|---|---|---|
 | 1. Voice acting (*afreco*) | Seiyū, Neumann U87, Pro Tools | edge-tts (EN) + VOICEVOX (JA), silence trimming | ⚠️ works, **flat delivery** |
 | 2. Music (BGM) | Composer, orchestra, Kontakt/Spitfire | CC0 tracks via Freesound (wired in). Free composing tools exist (LMMS + Vital synth) but need a composer | ⚠️ generic |
-| 3. Sound effects (SE) | Designers in Phase Plant/Serum + Foley | Freesound CC0 (wired in) + scripted layering, pitching, reversing and distortion with ffmpeg | ✅ base / 🧪 layering |
-| 4. Final mix | Sound director, Avid S6, FabFilter, iZotope | Ducking, per-cut music/SFX, drops, −14 LUFS loudness (built). Per-stem EQ/compression and sidechain ducking via ffmpeg filters | ✅ basic / 🧪 upgrade |
+| 3. Sound effects (SE) | Designers in Phase Plant/Serum + Foley | Freesound CC0 (wired in) + scripted layering, pitching, reversing and distortion with ffmpeg + **procedural synthesis in Python** (oscillators, LFOs, filters, drive; replaces hand-tweaked Vital patches) | ✅ base / 🧪 layering |
+| 4. Final mix | Sound director, Avid S6, FabFilter, iZotope | Ducking, per-cut music/SFX, drops, −14 LUFS loudness (built). Per-stem EQ/compression and sidechain ducking via ffmpeg filters. Not Reaper (paid after its 60-day evaluation, and a GUI) | ✅ basic / 🧪 upgrade |
 
 **Buildable now, free:**
 1. **Signature power sounds:** layered fire roar + low boom + reversed whoosh, pitched and saturated per character.
@@ -107,7 +107,12 @@ paid service (the owner's muapi balance was $0.00), not free alternatives.
 
 ---
 
-## 5. Decision and next step
+## 5. Working model
+The owner is showrunner only (see "Working with the owner" in CLAUDE.md): every crew task is delivered as
+automation. Biggest enabler: running Claude Code on the laptop itself, so installs, Blender renders and checks run
+directly instead of through copy-pasted commands.
+
+## 6. Decision and next step
 
 Chosen direction: **local and free**, accepting long render times. Next step is a **10-second test** before any new
 story is written:
