@@ -48,7 +48,7 @@
             {
               "name": "fluorescent_buzz",
               "at": 0.0,
-              "volume": 0.5
+              "volume": 0.2
             },
             {
               "name": "water_drip",
@@ -1728,7 +1728,7 @@
             {
               "name": "fluorescent_buzz",
               "at": 0.0,
-              "volume": 0.5
+              "volume": 0.2
             },
             {
               "name": "water_drip",

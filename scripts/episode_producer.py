@@ -205,7 +205,9 @@ def build_storyboard(ep: Episode, lang: str) -> tuple[dict, list[str]]:
                 warnings.append(f"{cut['id']}: no keyframe yet, skipped")
                 continue
             if motion == "wan":
-                warnings.append(f"{cut['id']}: no motion clip yet, using the still keyframe")
+                warnings.append(f"{cut['id']}: no motion clip yet, using the still keyframe (slow push-in)")
+                if not scene["fx"].get("ken_burns", {}).get("enabled"):  # never a dead frozen frame
+                    scene["fx"]["ken_burns"] = {"enabled": True, "preset": "push_in"}
             scene["clip"] = str(ep.keyframe(cut))
         elif motion == "clip":
             src = resolve_path(ep.base, cut.get("clip"))
