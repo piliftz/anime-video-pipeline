@@ -34,9 +34,13 @@ scripts/
   character_shot.py       shot spec -> voice -> Rhubarb mouth cues -> Blender frames -> one-scene storyboard -> MP4
                           (frames reused by job hash; --benchmark N measures Eevee s/frame). Needs $BLENDER_EXE,
                           $RHUBARB_EXE and the Blender VRM add-on. Template: character_shot_template.json
-  blender_vrm_shot.py     runs INSIDE Blender (bpy): VRM 1.0 import (MToon + outlines kept), lip-sync, expressions
-                          with VRM override rules, blinks, idle + gestures, camera, Eevee on twos. Poses are
-                          rotations in armature rest frame (basis = M^-1 R M); imports only stdlib + pipeline_utils
+  blender_vrm_shot.py     runs INSIDE Blender (bpy): VRM 1.0 import (MToon + outlines kept), anime mouth flaps,
+                          VRM + raw shape-key expressions, blinks, key-pose gestures (antic/overshoot/hold), hard
+                          camera cuts (low/dutch/ECU, DoF), MToon-based scene lighting (tint, rim, face shift),
+                          Eevee on twos. Poses are rotations in armature rest frame (basis = M^-1 R M); MToon
+                          ignores light intensity, so look changes go through material factors, not lamps.
+                          Imports only stdlib + pipeline_utils
+character_backgrounds.json  image_generator storyboard for text-free character-shot backgrounds (bg_*.png)
   lock_refs.py            copy picked reference takes -> series/<show>/refs/*.jpg + record seed/prompt
   contact_sheet.py        labeled grid of generated takes (rows per take group, '#n · seed') for picking
   tidy_output.py          sort output/ into per-segment folders; --clean deletes ONLY known throwaway patterns (review/),

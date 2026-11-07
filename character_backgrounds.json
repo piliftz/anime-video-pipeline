@@ -1,0 +1,44 @@
+{
+  "project": {"title": "Character shot backgrounds", "resolution": [1920, 1080], "fps": 24},
+  "image_generation": {
+    "checkpoint": "animagine",
+    "output_dir": "assets/generated",
+    "width": 1344,
+    "height": 768,
+    "rating": "safe"
+  },
+  "scenes": [
+    {
+      "id": "bg_platform_night_a",
+      "generate": {
+        "prompt": "no humans, scenery, empty train station platform, night, rain, wet concrete, puddles, reflections, overhead fluorescent lights, blue neon glow, city lights bokeh, depth of field, cinematic lighting",
+        "negative": "text, sign, signboard, neon sign, kanji, hiragana, katakana, letters, english text, japanese text, writing, billboard, poster, banner, logo, number, timetable, screen",
+        "seed": 7101
+      }
+    },
+    {
+      "id": "bg_platform_night_b",
+      "generate": {
+        "prompt": "no humans, scenery, empty train station platform, night, rain, wet concrete, puddles, reflections, overhead fluorescent lights, blue neon glow, city lights bokeh, depth of field, cinematic lighting",
+        "negative": "text, sign, signboard, neon sign, kanji, hiragana, katakana, letters, english text, japanese text, writing, billboard, poster, banner, logo, number, timetable, screen",
+        "seed": 7202
+      }
+    },
+    {
+      "id": "bg_platform_night_c",
+      "generate": {
+        "prompt": "no humans, scenery, rooftop, night, rain, city skyline, skyscraper lights, blue neon glow, bokeh, wet floor, reflections, cloudy sky, depth of field, cinematic lighting",
+        "negative": "text, sign, signboard, neon sign, kanji, hiragana, katakana, letters, english text, japanese text, writing, billboard, poster, banner, logo, number, screen",
+        "seed": 7303
+      }
+    },
+    {
+      "id": "bg_platform_night_d",
+      "generate": {
+        "prompt": "no humans, scenery, rooftop, night, rain, city skyline, skyscraper lights, blue neon glow, bokeh, wet floor, reflections, cloudy sky, depth of field, cinematic lighting",
+        "negative": "text, sign, signboard, neon sign, kanji, hiragana, katakana, letters, english text, japanese text, writing, billboard, poster, banner, logo, number, screen",
+        "seed": 7404
+      }
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 {
   "id": "lipsync_test",
   "vrm": "assets/characters/_samples/VRM1_Constraint_Twist_Sample.vrm",
-  "background": "assets/generated/s01_station.png",
+  "background": "assets/generated/bg_platform_night_b.png",
   "duration": 10.0,
   "render": {"resolution": [1920, 1080], "fps": 24, "on": 2, "samples": 16},
   "line": {
@@ -12,35 +12,44 @@
     "offset": 1.2,
     "tail": 0.5,
     "recognizer": "pocketSphinx",
-    "mouth_gain": 1.0,
+    "mouth_style": "anime",
+    "mouth_gain": 1.2,
     "subtitle_text": null
   },
   "expressions": [
-    {"name": "neutral", "weight": 1.0, "at": 0.0, "ramp": 0.01},
-    {"name": "angry", "weight": 0.7, "at_sentence": 2, "delay": -0.15, "ramp": 0.15}
+    {"shape_keys": {"Fcl_BRW_Sorrow": 0.7, "Fcl_EYE_Sorrow": 0.25}, "weight": 1.0, "at": 0.0, "ramp": 0.01},
+    {"shape_keys": {"Fcl_BRW_Angry": 1.0, "Fcl_EYE_Angry": 0.75}, "weight": 1.0, "at_sentence": 2, "delay": -0.35, "ramp": 0.1}
   ],
   "gestures": [
-    {"name": "nod", "at_sentence": 1, "delay": 1.6},
-    {"name": "fist_to_chest", "side": "right", "at_sentence": 2, "delay": 0.25, "hold": 2.2}
+    {"name": "head_down", "at": 0.9, "hold": 2.3},
+    {"name": "fist_raise", "side": "right", "at_sentence": 2, "delay": 0.15, "hold": 0.43, "release": 0.0}
   ],
   "blink": {"enabled": true, "interval": 3.4, "first": 0.6},
+  "cuts": [
+    {"at": 0.0, "framing": "closeup", "target": "eyes", "focal_mm": 85, "yaw_deg": 14, "low_angle_deg": 3,
+     "dutch_deg": 6, "offset_y": -0.12, "push_in": 0.08, "fstop": 2.8},
+    {"at_sentence": 2, "delay": -0.35, "framing": "medium_closeup", "target": "right_hand", "lock": 1.0,
+     "focal_mm": 24, "yaw_deg": -22, "low_angle_deg": 28, "dutch_deg": -14, "offset_y": 0.3, "fstop": 4.0},
+    {"at_sentence": 2, "delay": 1.0, "framing": "closeup", "target": "face", "focal_mm": 50, "yaw_deg": 16,
+     "low_angle_deg": 14, "dutch_deg": 10, "push_in": 0.1, "fstop": 2.8},
+    {"at": 6.25, "framing": "extreme_closeup", "target": "eyes", "focal_mm": 85, "dutch_deg": -4,
+     "offset_y": 0.08, "push_in": 0.12, "fstop": 8.0}
+  ],
   "camera": {
-    "framing": "medium",
-    "focal_mm": 50,
-    "offset_x": 0.08,
-    "low_angle_deg": 6,
-    "push_in": 0.05,
     "background_distance": 6.0,
-    "punches": [{"at_sentence": 2, "delay": 0.25, "amount": 0.08, "duration": 0.12}]
+    "punches": [{"at_sentence": 2, "delay": 0.45, "amount": 0.1, "duration": 0.1}]
   },
   "lighting": {
-    "key_color": [0.8, 0.68, 0.58], "key_strength": 1.5,
-    "rim_color": [0.45, 0.65, 1.0], "rim_strength": 5.0,
-    "ambient_color": [0.35, 0.42, 0.65], "ambient_strength": 0.4
+    "key_color": [0.9, 0.82, 0.75], "key_strength": 1.5, "back_strength": 3.0,
+    "ambient_color": [0.35, 0.42, 0.65], "ambient_strength": 0.4,
+    "exposure": 0.72, "match_background": 0.4, "shade_darken": 0.75,
+    "rim_color": [0.35, 0.6, 1.0], "rim_strength": 0.8, "rim_power": 6.0, "rim_lift": 0.0,
+    "face_shading_shift": 0.6, "background_brightness": 0.9
   },
   "spring_bones": true,
   "sfx": [
-    {"file": "assets/audio/sfx/whoosh.mp3", "at_sentence": 2, "delay": 0.2, "volume": 0.7}
+    {"file": "assets/audio/sfx/whoosh.mp3", "at_sentence": 2, "delay": 0.15, "volume": 0.7},
+    {"file": "assets/audio/sfx/impact_boom.mp3", "at_sentence": 2, "delay": 0.45, "volume": 0.6}
   ],
-  "fx": {"fade_in": 0.3, "fade_out": 0.4}
+  "fx": {"fade_in": 0.3, "fade_out": 0.6}
 }

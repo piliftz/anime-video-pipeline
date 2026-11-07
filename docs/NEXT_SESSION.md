@@ -42,6 +42,13 @@ The owner is designing one character in **VRoid Studio** and will export a `.vrm
    colour is the only lever so far); the key light's cel shadow edge can cross the mouth; only two gestures
    (fist_to_chest, nod); English voice via edge-tts. When the owner's `hero.vrm` lands: copy the template,
    point `vrm` at it, render, show the owner.
+   **Owner verdict 2026-11-07: tech APPROVED, look REJECTED.** Reworked the same line: 4 hard cuts (eyes close-up
+   with head down, low/dutch 24 mm fist cut, low/dutch shouting close-up, extreme close-up on the eyes), anime
+   closed/half/open mouth flaps (mouth_gain 1.2), brows/eyes via raw shape keys so the mouth stays free, key-pose
+   gestures (fist_raise: anticipation, overshoot, hold; head_down), lighting through MToon (exposure 0.72, 40%
+   tint toward the background mean, tight blue fresnel rim, face shading shift so no shadow edge on the face),
+   Eevee depth of field per cut, text-free background bg_platform_night_b (character_backgrounds.json; c is a
+   rooftop alternative). Render: 0.70 s/drawing with DoF and close-ups. Awaiting the owner's next verdict.
 2. Write a headless Blender script (`blender --background --python ...`) that:
    - imports the VRM, applies Eevee + toon (cel) shading with outlines;
    - places the character over an Animagine background (ComfyUI is at `C:\Users\adu94\comfyui-anime`,

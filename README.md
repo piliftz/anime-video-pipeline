@@ -347,16 +347,30 @@ Frames are reused when the job is unchanged (`--force` re-renders); outputs land
 debug `.blend` in `temp/character_shots/<id>/`.
 
 Spec keys (`character_shot_template.json` shows all of them; paths are relative to the spec file):
-`id`, `vrm`, `background` (image placed on a plane 6 m behind the character), `duration`,
+`id`, `vrm`, `background` (image on a plane behind the character, sized to cover every cut), `duration`,
 `render: {resolution, fps, on, samples}`, `line: {text, voice, rate, pitch, volume, engine, voicevox, offset,
-tail, recognizer, mouth_gain, subtitle_text}`, `expressions: [{name, weight, at|at_sentence+delay, ramp}]` (any
-expression on the model: `happy angry sad relaxed surprised neutral`...), `gestures: [{name: fist_to_chest|nod,
-side, at|at_sentence+delay, hold}]`, `blink: {enabled, interval, first}`, `camera: {framing: medium|closeup,
-focal_mm, offset_x, low_angle_deg, push_in, background_distance, punches: [{at|at_sentence, amount, duration}]}`,
-`lighting: {key_color, key_strength, rim_color, rim_strength, ambient_color, ambient_strength}`, `spring_bones`
-(hair/cloth physics, pre-rolled 2 s so it settles before frame 1), `sfx: [{file, at|at_sentence, volume}]`, `fx`.
-Times: `at` = seconds into the shot; `at_sentence` = start of that sentence (1-based) of the spoken line plus
-`delay`. Measured on an RTX 5060 Laptop: 1080p, 16 samples, about 0.56 s per frame after the first.
+tail, recognizer, mouth_style: anime|visemes, mouth_gain, subtitle_text}`. `anime` mouth style = readable
+closed / half / open flaps; `mouth_gain` above 1 opens wider than the model's own shapes (try 1.2-1.4).
+`expressions: [{name | shape_keys: {key: weight}, weight, at|at_sentence+delay, ramp}]`: `name` is any VRM
+expression on the model (`happy angry sad relaxed surprised`...; VRM override rules apply, and VRoid's emotions
+also move the mouth), `shape_keys` drives raw keys such as VRoid's `Fcl_BRW_Angry` + `Fcl_EYE_Angry` (brows and
+eyes only, so lip-sync stays free). `gestures: [{name: fist_raise|fist_to_chest|head_down|nod, side,
+at|at_sentence+delay, hold}]`, built from key poses: anticipation, overshoot strike, settle, held pose, release.
+`cuts: [{at|at_sentence+delay, framing: extreme_closeup|closeup|medium_closeup|medium, target:
+eyes|face|chest|right_hand|left_hand, lock, focal_mm, yaw_deg, low_angle_deg, dutch_deg, offset_x, offset_y,
+push_in, fstop}]`: the camera hard-cuts at each `at`; `lock` = seconds into the cut at which the target is
+measured (aim at where the fist ends up, not where it starts); `fstop` sets the background blur (Eevee depth of
+field). `camera: {background_distance, punches: [{at|at_sentence, amount, duration}]}` (snap zoom-ins).
+`lighting: {key_color, key_strength, back_strength, ambient_color, ambient_strength, exposure,
+match_background, shade_darken, rim_color, rim_strength, rim_power, rim_lift, face_shading_shift,
+background_brightness}`: MToon ignores light intensity, so the character is lit into the scene through her
+materials: `exposure` darkens, `match_background` tints toward the background's mean colour, `rim_*` is a
+coloured fresnel rim (neon), `face_shading_shift` keeps the cel shadow edge off the face. `blink: {enabled,
+interval, first}`, `spring_bones` (hair/cloth physics, pre-rolled 2 s so it settles before frame 1),
+`sfx: [{file, at|at_sentence, volume}]`, `fx`. Times: `at` = seconds into the shot; `at_sentence` = start of
+that sentence (1-based) of the spoken line plus `delay`. Backgrounds for character shots are generated from
+`character_backgrounds.json` (`python scripts/image_generator.py character_backgrounds.json`).
+Measured on an RTX 5060 Laptop: 1080p, 16 samples, about 0.56 s per frame after the first (one medium shot).
 
 ## 5. Using Stable Diffusion and AnimateDiff output
 

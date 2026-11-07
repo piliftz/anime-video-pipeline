@@ -43,20 +43,32 @@ SHOT_DEFAULTS = {
     "duration": 10.0,
     "render": {"resolution": [1920, 1080], "fps": 24, "on": 2, "samples": 16},
     "line": {"text": "", "voice": None, "rate": "+0%", "pitch": "+0Hz", "volume": "+0%", "engine": "edge",
-             "voicevox": None, "offset": 1.0, "tail": 0.5, "recognizer": "pocketSphinx", "mouth_gain": 1.0,
-             "subtitle_text": None},
-    "expressions": [],   # [{"name": VRM expression, "weight", "at"|"at_sentence"+"delay", "ramp"}]
-    "gestures": [],      # [{"name": fist_to_chest|nod, "side": right|left, "at"|"at_sentence", "hold"}]
+             "voicevox": None, "offset": 1.0, "tail": 0.5, "recognizer": "pocketSphinx",
+             "mouth_style": "anime", "mouth_gain": 1.0, "subtitle_text": None},
+    # [{"name": VRM expression | "shape_keys": {key: weight}, "weight", "at"|"at_sentence"+"delay", "ramp"}]
+    "expressions": [],
+    "gestures": [],      # [{"name": fist_raise|fist_to_chest|head_down|nod, "side", "at"|"at_sentence", "hold"}]
     "blink": {"enabled": True, "interval": 3.4, "first": 1.2},
-    "camera": {"framing": "medium", "focal_mm": 50.0, "offset_x": 0.0, "low_angle_deg": 0.0, "push_in": 0.0,
-               "background_distance": 6.0, "punches": []},
-    "lighting": {"key_color": [1.0, 0.9, 0.8], "key_strength": 2.0, "rim_color": [0.5, 0.7, 1.0],
-                 "rim_strength": 3.0, "ambient_color": [0.6, 0.65, 0.8], "ambient_strength": 0.5},
+    "cuts": [],          # CUT_DEFAULTS-shaped camera setups; the camera hard-cuts at each one's start
+    "camera": {"background_distance": 6.0, "punches": []},
+    "lighting": {"key_color": [1.0, 0.9, 0.8], "key_strength": 1.5, "back_strength": 3.0,
+                 "ambient_color": [0.4, 0.45, 0.6], "ambient_strength": 0.4,
+                 "exposure": 0.85, "match_background": 0.3, "shade_darken": 0.8,
+                 "rim_color": [0.4, 0.65, 1.0], "rim_strength": 1.0, "rim_power": 3.0, "rim_lift": 0.05,
+                 "face_shading_shift": 0.6, "background_brightness": 1.0},
     "spring_bones": True,
     "sfx": [],           # [{"file", "at"|"at_sentence", "volume"}]
     "fx": {},            # passed to the storyboard scene (fade_in, fade_out, color_grade, ...)
 }
+CUT_DEFAULTS = {
+    "framing": "medium",       # extreme_closeup | closeup | medium_closeup | medium
+    "target": "chest",         # eyes | face | chest | right_hand | left_hand
+    "lock": 0.0,               # seconds after the cut starts at which the target position is measured
+    "focal_mm": 50.0, "yaw_deg": 0.0, "low_angle_deg": 0.0, "dutch_deg": 0.0,
+    "offset_x": 0.0, "offset_y": 0.0, "push_in": 0.0, "fstop": 4.0,
+}
 RECOGNIZERS = ("pocketSphinx", "phonetic")
+MOUTH_STYLES = ("anime", "visemes")
 
 
 # --------------------------------------------------------------------------- #
@@ -79,13 +91,19 @@ def load_shot(path: Path) -> tuple[dict, Path]:
         errors.append("line.text: required.")
     if shot["line"]["recognizer"] not in RECOGNIZERS:
         errors.append(f"line.recognizer must be one of {RECOGNIZERS} (phonetic for non-English).")
+    if shot["line"]["mouth_style"] not in MOUTH_STYLES:
+        errors.append(f"line.mouth_style must be one of {MOUTH_STYLES}.")
+    for i, cue in enumerate(shot["expressions"]):
+        if ("name" in cue) == ("shape_keys" in cue):
+            errors.append(f"expressions[{i}]: give exactly one of 'name' (VRM expression) or 'shape_keys'.")
+    shot["cuts"] = [deep_merge(CUT_DEFAULTS, c) for c in shot["cuts"]] or [deep_merge(CUT_DEFAULTS, {"at": 0.0})]
     if int(shot["render"]["on"]) not in (1, 2, 3):
         errors.append("render.on must be 1, 2 or 3 (frames each drawing is held).")
     for i, cue in enumerate(shot["sfx"]):
         p = resolve_path(base, cue.get("file"))
         if p is None or not p.is_file():
             errors.append(f"sfx[{i}]: file not found: {p}")
-    for group in ("expressions", "gestures", "sfx"):
+    for group in ("expressions", "gestures", "sfx", "cuts"):
         for i, cue in enumerate(shot[group]):
             if ("at" in cue) == ("at_sentence" in cue):
                 errors.append(f"{group}[{i}]: give exactly one of 'at' (seconds) or 'at_sentence' (1-based).")
@@ -189,6 +207,15 @@ def run_blender(job_path: Path, log_path: Path) -> None:
 # --------------------------------------------------------------------------- #
 # Main flow
 # --------------------------------------------------------------------------- #
+def background_mean(path: Path) -> list[float]:
+    """Mean sRGB colour (0-1) of the background, used to tint the character toward the scene."""
+    from PIL import Image
+
+    with Image.open(path) as im:
+        pixels = list(im.convert("RGB").resize((64, 36)).getdata())
+    return [round(sum(c) / (len(pixels) * 255), 4) for c in zip(*pixels)]
+
+
 def make_job(shot: dict, voice: dict, cues: list[dict], frames_dir: Path, work: Path) -> dict:
     offset = float(shot["line"]["offset"])
     sentences = voice.get("boundaries") or [{"start": 0.0, "end": voice["duration"]}]
@@ -207,6 +234,9 @@ def make_job(shot: dict, voice: dict, cues: list[dict], frames_dir: Path, work: 
                             "raise 'duration' or lower line.offset.")
     camera = dict(shot["camera"])
     camera["punches"] = timed(camera["punches"])
+    cuts = timed(shot["cuts"])
+    if cuts[0]["at"] > 0:
+        raise PipelineError(f"The first cut must start at 0 s (it starts at {cuts[0]['at']:.2f}s).")
     render = shot["render"]
     return {
         "vrm": str(shot["_vrm"]), "background": str(shot["_background"]) if shot["_background"] else None,
@@ -216,10 +246,11 @@ def make_job(shot: dict, voice: dict, cues: list[dict], frames_dir: Path, work: 
         "resolution": list(render["resolution"]), "samples": int(render["samples"]),
         "mouth_cues": [{"start": round(offset + c["start"], 4), "end": round(offset + c["end"], 4),
                         "value": c["value"]} for c in cues],
-        "mouth_gain": float(shot["line"]["mouth_gain"]),
+        "mouth_gain": float(shot["line"]["mouth_gain"]), "mouth_style": shot["line"]["mouth_style"],
         "speech": [[offset, end]],
         "expressions": timed(shot["expressions"]), "gestures": timed(shot["gestures"]),
-        "blink": shot["blink"], "camera": camera, "lighting": shot["lighting"],
+        "blink": shot["blink"], "camera": camera, "cuts": cuts, "lighting": shot["lighting"],
+        "background_mean": background_mean(shot["_background"]) if shot["_background"] else None,
         "spring_bones": bool(shot["spring_bones"]),
     }
 
