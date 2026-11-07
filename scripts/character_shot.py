@@ -48,7 +48,11 @@ SHOT_DEFAULTS = {
     # [{"name": VRM expression | "shape_keys": {key: weight}, "weight", "at"|"at_sentence"+"delay", "ramp"}]
     "expressions": [],
     "gestures": [],      # [{"name": fist_raise|fist_to_chest|head_down|nod, "side", "at"|"at_sentence", "hold"}]
-    "blink": {"enabled": True, "interval": 3.4, "first": 1.2},
+    "blink": {"enabled": True, "interval": 3.4, "first": 1.2, "closeup_hold_max": 2.5},
+    # House rule (owner, 2026-11-07): strike gestures always wear the fighting face (VRoid shape-key names).
+    "strike_face": {"enabled": True, "ramp": 0.06,
+                    "shape_keys": {"Fcl_BRW_Angry": 1.9, "Fcl_EYE_Angry": 1.0},
+                    "gritted": {"Fcl_MTH_I": 1.3, "Fcl_MTH_E": 0.4}},
     "cuts": [],          # CUT_DEFAULTS-shaped camera setups; the camera hard-cuts at each one's start
     "camera": {"background_distance": 6.0, "punches": []},
     "lighting": {"key_color": [1.0, 0.9, 0.8], "key_strength": 1.5, "key_direction": [1.0, 0.9, 0.9],
@@ -253,6 +257,7 @@ def make_job(shot: dict, voice: dict, cues: list[dict], frames_dir: Path, work: 
         "mouth_gain": float(shot["line"]["mouth_gain"]), "mouth_style": shot["line"]["mouth_style"],
         "speech": [[offset, end]],
         "expressions": timed(shot["expressions"]), "gestures": timed(shot["gestures"]),
+        "strike_face": shot["strike_face"],
         "blink": shot["blink"], "camera": camera, "cuts": cuts, "lighting": shot["lighting"],
         "background_mean": background_mean(shot["_background"]) if shot["_background"] else None,
         "spring_bones": bool(shot["spring_bones"]),

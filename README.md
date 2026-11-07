@@ -371,7 +371,9 @@ the body in shadow, `face_shading_shift` keeps the edge off the face, `rim_*` = 
 `catchlight` makes eye-highlight materials (name contains e.g. `Highlight`, VRoid) emissive.
 Impact frames, speed lines and shake for a hit come from the shot's `fx` (storyboard fx in shot seconds,
 e.g. `speed_lines: {start, end, center}`, `impact: {at: [apex]}`); put the hit SFX on the same apex. `blink: {enabled,
-interval, first}`, `spring_bones` (hair/cloth physics, pre-rolled 2 s so it settles before frame 1),
+interval, first, closeup_hold_max}` (no blinks inside close-up cuts shorter than this; default 2.5 s),
+`strike_face: {enabled, shape_keys, gritted, ramp}` (house rule: `fist_raise`/`fist_to_chest` always wear
+angry brows, open angry eyes and gritted teeth between flaps from wind-up to release; VRoid key names), `spring_bones` (hair/cloth physics, pre-rolled 2 s so it settles before frame 1),
 `sfx: [{file, at|at_sentence, volume}]`, `fx`. Times: `at` = seconds into the shot; `at_sentence` = start of
 that sentence (1-based) of the spoken line plus `delay`. Backgrounds for character shots are generated from
 `character_backgrounds.json` (`python scripts/image_generator.py character_backgrounds.json`).

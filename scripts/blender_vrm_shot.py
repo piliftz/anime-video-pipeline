@@ -245,7 +245,7 @@ def gesture_def(rig: Rig, name: str, side: str) -> dict:
                               "head": rot(rig.pitch, 4.0)}),
             "hold": (hold, {"upper_chest": rot(rig.yaw, 12.0 * turn) @ rot(rig.pitch, 9.0),
                             "chest": rot(rig.pitch, 4.0), "neck": rot(rig.pitch, 2.0),
-                            "head": rot(rig.pitch, 7.0) @ rot(rig.yaw, -8.0 * turn)}),
+                            "head": rot(rig.pitch, 3.0) @ rot(rig.yaw, -8.0 * turn)}),
             "antic_s": 0.2, "strike_s": 0.1, "settle_s": 0.12, "release_s": 0.45, "overshoot": 1.18,
         }
     if name == "fist_to_chest":
@@ -399,13 +399,26 @@ class Face:
             kb.keyframe_insert("value", frame=frame)
 
 
+CLOSEUPS = ("closeup", "extreme_closeup")
+STRIKE_GESTURES = ("fist_raise", "fist_to_chest")
+
+
 def blink_times(job: dict) -> list[float]:
+    """Natural blink rhythm, minus blinks that would land inside a short close-up hold (a blink there reads as a
+    flinch and kills the stare): close-up cuts shorter than blink.closeup_hold_max seconds get none."""
     cfg = job["blink"]
     if not cfg.get("enabled", True):
         return []
+    cuts = job["cuts"]
+    quiet = []
+    for i, c in enumerate(cuts):
+        end = cuts[i + 1]["at"] if i + 1 < len(cuts) else job["duration"]
+        if c["framing"] in CLOSEUPS and end - c["at"] < float(cfg.get("closeup_hold_max", 2.5)):
+            quiet.append((float(c["at"]), end))
     out, t, k = [], float(cfg.get("first", 1.2)), 1
     while t < job["duration"] - 0.3:
-        out.append(t)
+        if not any(a - 0.25 < t < b for a, b in quiet):
+            out.append(t)
         jitter = (math.sin(k * 12.9898) * 43758.5453) % 1.0  # deterministic, so reruns match
         t += float(cfg.get("interval", 3.4)) * (0.7 + 0.6 * jitter)
         k += 1
@@ -418,7 +431,10 @@ def face_weights(t: float, job: dict, blinks: list[float]) -> dict[str, float]:
 
     def u_at(c: dict) -> float:
         ramp = max(1e-3, float(c.get("ramp", 0.2)))
-        return ease("ease_in_out", (t - float(c["at"])) / ramp) if t >= float(c["at"]) else 0.0
+        u = ease("ease_in_out", (t - float(c["at"])) / ramp) if t >= float(c["at"]) else 0.0
+        if c.get("until") is not None and t >= float(c["until"]):  # timed cue: fades back out
+            u *= 1.0 - ease("ease_in_out", (t - float(c["until"])) / ramp)
+        return u
 
     shape = "X"
     for cue in job["mouth_cues"]:
@@ -706,15 +722,30 @@ def build(job: dict):
     face = Face(rig, float(job.get("mouth_gain", 1.0)))
     if job["mouth_style"] not in MOUTH_STYLES:
         raise PipelineError(f"mouth_style must be one of {', '.join(MOUTH_STYLES)}")
-    for c in job["expressions"]:
-        face.check(c)
     gestures = []
     for g in job["gestures"]:
         side = g.get("side", "right")
         if side not in ("left", "right"):
             raise PipelineError(f"gesture side must be left or right, got {side!r}")
         d = gesture_def(rig, g["name"], side)
-        gestures.append((g, d, gesture_keys(g, d)))
+        keys = gesture_keys(g, d)
+        gestures.append((g, d, keys))
+        sf = job["strike_face"]
+        if sf.get("enabled", True) and g["name"] in STRIKE_GESTURES:
+            # House rule: strikes always carry the fighting face from wind-up to release: angry brows and open,
+            # angry eyes (replacing any half-lidded cue) and gritted teeth between mouth flaps.
+            start, end = keys[0][0], keys[-2][0]
+            ramp = float(sf.get("ramp", 0.06))
+            job["expressions"].append({"shape_keys": sf["shape_keys"], "at": start, "until": end, "ramp": ramp})
+            job["expressions"].append({"shape_keys": sf["gritted"], "at": start, "until": end, "ramp": ramp,
+                                       "when_mouth_closed": True})
+    job["expressions"].sort(key=lambda c: float(c["at"]))
+    for c in job["expressions"]:
+        try:
+            face.check(c)
+        except PipelineError as exc:
+            raise PipelineError(f"{exc} (strike_face uses VRoid shape-key names; set strike_face.shape_keys/"
+                                "gritted for this model or strike_face.enabled false)") from exc
     if job.get("spring_bones", True):
         arm.data.vrm_addon_extension.spring_bone1.enable_animation = True
     setup_render(job)

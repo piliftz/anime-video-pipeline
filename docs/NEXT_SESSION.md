@@ -55,6 +55,9 @@ The owner is designing one character in **VRoid Studio** and will export a `.vrm
    overdriven angry brows (1.9) + narrowed eyes + gritted teeth between flaps, eye close-up cut to 1.85 s with
    a hard flag shadow across the upper face and emissive catchlights; shot now 8.1 s. Frame cache key now
    includes blender_vrm_shot.py (code changes used to be skipped).
+   **APPROVED - EXECUTE RENDER (v3, commit 2e0a4fe): look locked.** Owner house rules, now defaults: strikes
+   wear angry brows + gritted teeth (no half-lidded look); no blinks in short close-up holds. Next: wait for
+   the owner's `assets/characters/hero.vrm`, then copy character_shot_template.json, point `vrm` at it, render.
 2. Write a headless Blender script (`blender --background --python ...`) that:
    - imports the VRM, applies Eevee + toon (cel) shading with outlines;
    - places the character over an Animagine background (ComfyUI is at `C:\Users\adu94\comfyui-anime`,
