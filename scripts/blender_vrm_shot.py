@@ -363,9 +363,15 @@ class Face:
         if "name" in cue and cue["name"] not in self.binds:
             raise PipelineError(f"Expression '{cue['name']}' is not on this model. "
                                 f"Available: {', '.join(sorted(self.binds))}")
-        for key in cue.get("shape_keys", {}):
+        for key, value in cue.get("shape_keys", {}).items():
             if key not in self.raw:
                 raise PipelineError(f"Shape key '{key}' is not on this model.")
+            top = float(value) * float(cue.get("weight", 1.0))
+            if top > 1.0:  # overdrive past the modelled shape (e.g. brows further down-and-in)
+                for obj, full in self.raw[key]:
+                    kb = obj.data.shape_keys.key_blocks[full]
+                    kb.slider_max = max(kb.slider_max, top)
+                    self.limit[(obj.name, full)] = max(self.limit[(obj.name, full)], top)
 
     def apply(self, weights: dict[str, float], frame: int) -> None:
         mouth_scale = blink_scale = 1.0
@@ -414,20 +420,27 @@ def face_weights(t: float, job: dict, blinks: list[float]) -> dict[str, float]:
         ramp = max(1e-3, float(c.get("ramp", 0.2)))
         return ease("ease_in_out", (t - float(c["at"])) / ramp) if t >= float(c["at"]) else 0.0
 
-    for i, c in enumerate(cues):
-        u = u_at(c)
-        for nxt in cues[i + 1:]:
-            u *= 1.0 - u_at(nxt)
-        if u <= 0:
-            continue
-        parts = {c["name"]: 1.0} if "name" in c else {f"shape:{k}": float(v) for k, v in c["shape_keys"].items()}
-        for k, v in parts.items():
-            w[k] = min(1.0, w.get(k, 0.0) + float(c.get("weight", 1.0)) * v * u)
     shape = "X"
     for cue in job["mouth_cues"]:
         if cue["start"] <= t < cue["end"]:
             shape = cue["value"]
             break
+    closed = not MOUTH_STYLES[job["mouth_style"]][shape]
+    # Cues cross-fade in order; 'when_mouth_closed' cues (e.g. gritted teeth) only show between flaps and
+    # cross-fade among themselves, not with the others.
+    for group in ([c for c in cues if not c.get("when_mouth_closed")],
+                  [c for c in cues if c.get("when_mouth_closed")]):
+        for i, c in enumerate(group):
+            if c.get("when_mouth_closed") and not closed:
+                continue
+            u = u_at(c)
+            for nxt in group[i + 1:]:
+                u *= 1.0 - u_at(nxt)
+            if u <= 0:
+                continue
+            parts = {c["name"]: 1.0} if "name" in c else {f"shape:{k}": float(v) for k, v in c["shape_keys"].items()}
+            for k, v in parts.items():
+                w[k] = w.get(k, 0.0) + float(c.get("weight", 1.0)) * v * u
     for k, v in MOUTH_STYLES[job["mouth_style"]][shape].items():
         w[k] = v * float(job.get("mouth_gain", 1.0))
     for b in blinks:
@@ -445,15 +458,24 @@ def srgb_to_linear(c: float) -> float:
 
 
 def style_materials(job: dict, face_objects: set) -> None:
-    """Light the character into the scene through MToon parameters (MToon caps light intensity)."""
+    """Light the character into the scene through MToon parameters (MToon ignores light intensity).
+
+    Lit side: base colour x exposure x lit_tint (warm), optionally pulled toward the background mean.
+    Shadow side: the material's shade colour blended toward shadow_color (blue), darkened. Hard terminator via
+    shading_toony; shading_shift < 0 widens the shadow side. Face materials get their own shift so the
+    terminator never crosses the face. Catchlights: emissive boost on materials named like the eye highlight.
+    """
     look = job["lighting"]
     mean = [srgb_to_linear(c) for c in (job.get("background_mean") or [1.0, 1.0, 1.0])]
     peak = max(mean) or 1.0
     match = float(look["match_background"])
-    tint = [float(look["exposure"]) * ((1 - match) + match * c / peak) for c in mean]
-    shade_mul = [c * float(look["shade_darken"]) for c in tint]
+    tint = [float(look["exposure"]) * lt * ((1 - match) + match * c / peak)
+            for c, lt in zip(mean, look["lit_tint"])]
+    shadow = [srgb_to_linear(c) for c in look["shadow_color"]]
+    st, dark = float(look["shadow_tint"]), float(look["shade_darken"])
     rim = [c * float(look["rim_strength"]) for c in look["rim_color"]]
     face_mats = {m.name for o in face_objects for m in o.data.materials if m}
+    catch = look["catchlight"]
     for mat in bpy.data.materials:
         ext = getattr(mat, "vrm_addon_extension", None)
         if ext is None or not ext.mtoon1.enabled:
@@ -462,26 +484,37 @@ def style_materials(job: dict, face_objects: set) -> None:
         mt = ext.mtoon1.extensions.vrmc_materials_mtoon
         base = list(pbr.base_color_factor)
         pbr.base_color_factor = (*[b * k for b, k in zip(base[:3], tint)], base[3])
-        mt.shade_color_factor = tuple(s * k for s, k in zip(mt.shade_color_factor, shade_mul))
+        mt.shade_color_factor = tuple(((1 - st) * s * k + st * c) * dark
+                                      for s, k, c in zip(mt.shade_color_factor, tint, shadow))
         mt.parametric_rim_color_factor = rim
         mt.parametric_rim_fresnel_power_factor = float(look["rim_power"])
         mt.parametric_rim_lift_factor = float(look["rim_lift"])
         mt.rim_lighting_mix_factor = 0.0
-        if mat.name in face_mats:
-            mt.shading_shift_factor = float(look["face_shading_shift"])
+        mt.shading_toony_factor = float(look["toony"])
+        mt.shading_shift_factor = float(look["face_shading_shift" if mat.name in face_mats else "shading_shift"])
+        if any(n.lower() in mat.name.lower() for n in catch["materials"]):
+            ext.mtoon1.emissive_factor = (1.0, 1.0, 1.0)
+            ext.mtoon1.extensions.khr_materials_emissive_strength.emissive_strength = float(catch["strength"])
 
 
-def setup_lights(rig: Rig, job: dict) -> None:
+def setup_lights(rig: Rig, job: dict) -> Vector:
+    """Key + back sun lights and the world; returns the direction toward the key light."""
     lighting = job["lighting"]
     right = -rig.outward["left"]  # character's right
+    kf, kr, ku = (float(v) for v in lighting["key_direction"])  # forward, character's right, up
+    key_pos = (rig.forward * kf + right * kr + UP * ku).normalized()
     for name, pos, color, strength in (
-        ("Key", rig.forward * 1.0 + right * 0.75 + UP * 0.9, lighting["key_color"], lighting["key_strength"]),
+        ("Key", key_pos, lighting["key_color"], lighting["key_strength"]),
         ("Rim", -rig.forward * 1.0 - right * 0.8 + UP * 0.6, lighting["rim_color"], lighting["back_strength"]),
     ):
         data = bpy.data.lights.new(name, "SUN")
         data.color = color
         data.energy = float(strength)
-        data.angle = math.radians(5)
+        # Near-zero softness + fine shadow map + no filtering: cast shadows (flags) stay hard-edged even
+        # in an extreme close-up, like a cel shadow.
+        data.angle = math.radians(0.2)
+        data.shadow_maximum_resolution = 0.0002
+        data.shadow_filter_radius = 0.0
         obj = bpy.data.objects.new(name, data)
         bpy.context.scene.collection.objects.link(obj)
         obj.rotation_mode = "QUATERNION"
@@ -492,6 +525,30 @@ def setup_lights(rig: Rig, job: dict) -> None:
     bg = world.node_tree.nodes["Background"]
     bg.inputs["Color"].default_value = (*lighting["ambient_color"], 1.0)
     bg.inputs["Strength"].default_value = float(lighting["ambient_strength"])
+    return key_pos
+
+
+def setup_flags(cuts: list, key_dir: Vector) -> list:
+    """Hard 'flag' shadows: an invisible panel between the key light and the face casts a shadow across the
+    upper face for cuts with face_shadow {edge: metres above the eye point}. One flag per such cut."""
+    flags = []
+    up_perp = (UP - key_dir * UP.dot(key_dir)).normalized()
+    for i, cut in enumerate(cuts):
+        cfg = cut.cfg.get("face_shadow")
+        if not cfg:
+            flags.append(None)
+            continue
+        edge = cut.eyes + UP * float(cfg.get("edge", 0.01)) + key_dir * 0.1
+        bpy.ops.mesh.primitive_plane_add(size=1.0)
+        flag = bpy.context.active_object
+        flag.name = f"ShadowFlag{i}"
+        flag.rotation_mode = "QUATERNION"
+        flag.rotation_quaternion = key_dir.to_track_quat("Z", "Y")
+        flag.location = edge + up_perp * 0.5
+        flag.visible_camera = False
+        flag.visible_diffuse = flag.visible_glossy = False
+        flags.append(flag)
+    return flags
 
 
 def setup_background(job: dict, rig: Rig, corners: list[Vector], plane_point: Vector) -> None:
@@ -548,7 +605,8 @@ class Cut:
         yaw = rot(UP, float(cfg["yaw_deg"]))
         self.back = yaw @ rig.forward           # from target toward the camera (horizontal)
         self.low = math.radians(float(cfg["low_angle_deg"]))
-        self.target = Vector()                  # filled by lock_targets()
+        self.target = Vector()                  # filled by build_cuts()
+        self.eyes = Vector()
 
     def placement(self, t: float, punches: list[dict]) -> tuple[Vector, Quaternion, float]:
         cfg = self.cfg
@@ -590,6 +648,7 @@ def build_cuts(job: dict, rig: Rig, gestures: list) -> list[Cut]:
         t_lock = min(cut.end - 1e-3, cut.at + float(cut.cfg["lock"]))
         rig.apply(body_pose(rig, t_lock, job, gestures), None)
         cut.target = rig.point(cut.cfg["target"])
+        cut.eyes = rig.point("eyes")
     return cuts
 
 
@@ -660,8 +719,17 @@ def build(job: dict):
         arm.data.vrm_addon_extension.spring_bone1.enable_animation = True
     setup_render(job)
     style_materials(job, face.face_objects)
-    setup_lights(rig, job)
+    key_dir = setup_lights(rig, job)
     cuts = build_cuts(job, rig, gestures)
+    flags = setup_flags(cuts, key_dir)
+    # Face shading shift is keyed per cut: high (no terminator on the face) except in face_shadow cuts, where
+    # it drops so the flag's cast shadow reads as a hard cel shadow.
+    face_shift_sockets = []
+    for o in face.face_objects:
+        for mat in o.data.materials:
+            node = mat.node_tree.nodes.get("Mtoon1Material.Mtoon1Output") if mat and mat.node_tree else None
+            if node is not None and "Shading Shift" in node.inputs:
+                face_shift_sockets.append(node.inputs["Shading Shift"])
     cam = setup_camera(job)
 
     scene = bpy.context.scene
@@ -679,6 +747,15 @@ def build(job: dict):
         for f in drawings:
             t = (f - 1) / job["fps"]
             cut = next(c for c in reversed(cuts) if c.at <= t + 1e-6)
+            for flag, owner in zip(flags, cuts):
+                if flag is not None:
+                    flag.hide_render = owner is not cut
+                    flag.keyframe_insert("hide_render", frame=f)
+            shadow_cfg = cut.cfg.get("face_shadow")
+            shift = float(shadow_cfg.get("face_shift", -0.1)) if shadow_cfg else float(job["lighting"]["face_shading_shift"])
+            for sock in face_shift_sockets:
+                sock.default_value = shift
+                sock.keyframe_insert("default_value", frame=f)
             rig.apply(body_pose(rig, t, job, gestures), f)
             face.apply(face_weights(t, job, blinks), f)
             key_camera(cam, cut, t, job, f)

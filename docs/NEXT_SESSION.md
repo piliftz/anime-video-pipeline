@@ -49,6 +49,12 @@ The owner is designing one character in **VRoid Studio** and will export a `.vrm
    tint toward the background mean, tight blue fresnel rim, face shading shift so no shadow edge on the face),
    Eevee depth of field per cut, text-free background bg_platform_night_b (character_backgrounds.json; c is a
    rooftop alternative). Render: 0.70 s/drawing with DoF and close-ups. Awaiting the owner's next verdict.
+   **Owner verdict: REJECT - LACKS IMPACT** (v2 committed as 8997201). v3: warm saturated skin with blue only on
+   the shadow side and rim (shade colour blend, toony 0.98, side key), fist cut at 18 mm with the fist ~1/3 of
+   frame + impact frame + radial speed lines + shake on the 4.30 s apex (boom SFX on the same frame),
+   overdriven angry brows (1.9) + narrowed eyes + gritted teeth between flaps, eye close-up cut to 1.85 s with
+   a hard flag shadow across the upper face and emissive catchlights; shot now 8.1 s. Frame cache key now
+   includes blender_vrm_shot.py (code changes used to be skipped).
 2. Write a headless Blender script (`blender --background --python ...`) that:
    - imports the VRM, applies Eevee + toon (cel) shading with outlines;
    - places the character over an Animagine background (ComfyUI is at `C:\Users\adu94\comfyui-anime`,

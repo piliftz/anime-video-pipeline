@@ -51,11 +51,14 @@ SHOT_DEFAULTS = {
     "blink": {"enabled": True, "interval": 3.4, "first": 1.2},
     "cuts": [],          # CUT_DEFAULTS-shaped camera setups; the camera hard-cuts at each one's start
     "camera": {"background_distance": 6.0, "punches": []},
-    "lighting": {"key_color": [1.0, 0.9, 0.8], "key_strength": 1.5, "back_strength": 3.0,
-                 "ambient_color": [0.4, 0.45, 0.6], "ambient_strength": 0.4,
-                 "exposure": 0.85, "match_background": 0.3, "shade_darken": 0.8,
-                 "rim_color": [0.4, 0.65, 1.0], "rim_strength": 1.0, "rim_power": 3.0, "rim_lift": 0.05,
-                 "face_shading_shift": 0.6, "background_brightness": 1.0},
+    "lighting": {"key_color": [1.0, 0.9, 0.8], "key_strength": 1.5, "key_direction": [1.0, 0.9, 0.9],
+                 "back_strength": 3.0, "ambient_color": [0.5, 0.46, 0.44], "ambient_strength": 0.25,
+                 "exposure": 0.95, "lit_tint": [1.0, 0.96, 0.9], "match_background": 0.0,
+                 "shadow_color": [0.25, 0.32, 0.65], "shadow_tint": 0.55, "shade_darken": 0.8,
+                 "toony": 0.98, "shading_shift": -0.15, "face_shading_shift": 0.6,
+                 "rim_color": [0.4, 0.65, 1.0], "rim_strength": 0.8, "rim_power": 6.0, "rim_lift": 0.0,
+                 "catchlight": {"materials": ["Highlight"], "strength": 2.5},
+                 "background_brightness": 1.0},
     "spring_bones": True,
     "sfx": [],           # [{"file", "at"|"at_sentence", "volume"}]
     "fx": {},            # passed to the storyboard scene (fade_in, fade_out, color_grade, ...)
@@ -66,6 +69,7 @@ CUT_DEFAULTS = {
     "lock": 0.0,               # seconds after the cut starts at which the target position is measured
     "focal_mm": 50.0, "yaw_deg": 0.0, "low_angle_deg": 0.0, "dutch_deg": 0.0,
     "offset_x": 0.0, "offset_y": 0.0, "push_in": 0.0, "fstop": 4.0,
+    "face_shadow": None,       # {"edge": metres above the eyes}: hard flag shadow across the upper face
 }
 RECOGNIZERS = ("pocketSphinx", "phonetic")
 MOUTH_STYLES = ("anime", "visemes")
@@ -257,7 +261,8 @@ def make_job(shot: dict, voice: dict, cues: list[dict], frames_dir: Path, work: 
 
 def render_frames(job: dict, work: Path, force: bool) -> None:
     frames_dir = Path(job["frames_dir"])
-    job_hash = hashlib.sha1(json.dumps(job, sort_keys=True).encode()).hexdigest()[:12]
+    # The renderer's own code is part of the key: a change to blender_vrm_shot.py re-renders.
+    job_hash = hashlib.sha1(json.dumps(job, sort_keys=True).encode() + BLENDER_SCRIPT.read_bytes()).hexdigest()[:12]
     stamp = frames_dir / ".job_hash"
     expected = int(round(job["duration"] * job["fps"]))
     if job.get("frame_limit"):

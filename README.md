@@ -354,18 +354,23 @@ closed / half / open flaps; `mouth_gain` above 1 opens wider than the model's ow
 `expressions: [{name | shape_keys: {key: weight}, weight, at|at_sentence+delay, ramp}]`: `name` is any VRM
 expression on the model (`happy angry sad relaxed surprised`...; VRM override rules apply, and VRoid's emotions
 also move the mouth), `shape_keys` drives raw keys such as VRoid's `Fcl_BRW_Angry` + `Fcl_EYE_Angry` (brows and
-eyes only, so lip-sync stays free). `gestures: [{name: fist_raise|fist_to_chest|head_down|nod, side,
+eyes only, so lip-sync stays free; values above 1 overdrive a shape, e.g. `Fcl_BRW_Angry: 1.9`). A cue with `when_mouth_closed: true` only shows between mouth flaps (gritted teeth: `Fcl_MTH_I` + `Fcl_MTH_E`). `gestures: [{name: fist_raise|fist_to_chest|head_down|nod, side,
 at|at_sentence+delay, hold}]`, built from key poses: anticipation, overshoot strike, settle, held pose, release.
 `cuts: [{at|at_sentence+delay, framing: extreme_closeup|closeup|medium_closeup|medium, target:
 eyes|face|chest|right_hand|left_hand, lock, focal_mm, yaw_deg, low_angle_deg, dutch_deg, offset_x, offset_y,
-push_in, fstop}]`: the camera hard-cuts at each `at`; `lock` = seconds into the cut at which the target is
+push_in, fstop, face_shadow: {edge, face_shift}}]`: the camera hard-cuts at each `at`; `face_shadow` adds a hard cel shadow across the upper face (an invisible flag between key light and face; `edge` = metres above the eyes) for that cut only; `lock` = seconds into the cut at which the target is
 measured (aim at where the fist ends up, not where it starts); `fstop` sets the background blur (Eevee depth of
 field). `camera: {background_distance, punches: [{at|at_sentence, amount, duration}]}` (snap zoom-ins).
-`lighting: {key_color, key_strength, back_strength, ambient_color, ambient_strength, exposure,
-match_background, shade_darken, rim_color, rim_strength, rim_power, rim_lift, face_shading_shift,
-background_brightness}`: MToon ignores light intensity, so the character is lit into the scene through her
-materials: `exposure` darkens, `match_background` tints toward the background's mean colour, `rim_*` is a
-coloured fresnel rim (neon), `face_shading_shift` keeps the cel shadow edge off the face. `blink: {enabled,
+`lighting: {key_color, key_strength, key_direction: [forward, right, up], back_strength, ambient_color,
+ambient_strength, exposure, lit_tint, match_background, shadow_color, shadow_tint, shade_darken, toony,
+shading_shift, face_shading_shift, rim_color, rim_strength, rim_power, rim_lift, catchlight: {materials,
+strength}, background_brightness}`: MToon ignores light intensity, so the look goes through the materials:
+lit side = colour x `exposure` x `lit_tint` (warm; `match_background` > 0 pulls it toward the background),
+shadow side blended toward `shadow_color` (blue), `toony` ~1 = hard terminator, `shading_shift` < 0 = more of
+the body in shadow, `face_shading_shift` keeps the edge off the face, `rim_*` = coloured fresnel rim (neon),
+`catchlight` makes eye-highlight materials (name contains e.g. `Highlight`, VRoid) emissive.
+Impact frames, speed lines and shake for a hit come from the shot's `fx` (storyboard fx in shot seconds,
+e.g. `speed_lines: {start, end, center}`, `impact: {at: [apex]}`); put the hit SFX on the same apex. `blink: {enabled,
 interval, first}`, `spring_bones` (hair/cloth physics, pre-rolled 2 s so it settles before frame 1),
 `sfx: [{file, at|at_sentence, volume}]`, `fx`. Times: `at` = seconds into the shot; `at_sentence` = start of
 that sentence (1-based) of the spoken line plus `delay`. Backgrounds for character shots are generated from
