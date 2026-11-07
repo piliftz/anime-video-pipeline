@@ -9,6 +9,87 @@
       "license": "generated",
       "attribution": null
     },
+    "assets/audio/music/battle_theme.mp3": {
+      "name": "battle_theme",
+      "kind": "music",
+      "source": "freesound",
+      "url": "https://freesound.org/people/looplicator/sounds/845719/",
+      "author": "looplicator",
+      "license": "CC0",
+      "attribution": null
+    },
+    "assets/audio/music/tension_drone.mp3": {
+      "name": "tension_drone",
+      "kind": "music",
+      "source": "freesound",
+      "url": "https://freesound.org/people/CVLTIV8R/sounds/799339/",
+      "author": "CVLTIV8R",
+      "license": "CC0",
+      "attribution": null
+    },
+    "assets/audio/music/title_sting.mp3": {
+      "name": "title_sting",
+      "kind": "music",
+      "source": "freesound",
+      "url": "https://freesound.org/people/AudioPapkin/sounds/822420/",
+      "author": "AudioPapkin",
+      "license": "CC0",
+      "attribution": null
+    },
+    "assets/audio/sfx/alarm_klaxon.mp3": {
+      "name": "alarm_klaxon",
+      "kind": "sfx",
+      "source": "freesound",
+      "url": "https://freesound.org/people/chungus43A/sounds/610056/",
+      "author": "chungus43A",
+      "license": "CC0",
+      "attribution": null
+    },
+    "assets/audio/sfx/arena_ambience.mp3": {
+      "name": "arena_ambience",
+      "kind": "ambience",
+      "source": "freesound",
+      "url": "https://freesound.org/people/brunoboselli/sounds/459675/",
+      "author": "brunoboselli",
+      "license": "CC0",
+      "attribution": null
+    },
+    "assets/audio/sfx/bag_rustle.mp3": {
+      "name": "bag_rustle",
+      "kind": "sfx",
+      "source": "freesound",
+      "url": "https://freesound.org/people/Caitlin_100/sounds/365520/",
+      "author": "Caitlin_100",
+      "license": "CC0",
+      "attribution": null
+    },
+    "assets/audio/sfx/chair_creak.mp3": {
+      "name": "chair_creak",
+      "kind": "sfx",
+      "source": "freesound",
+      "url": "https://freesound.org/people/Greg_Surr/sounds/590151/",
+      "author": "Greg_Surr",
+      "license": "CC0",
+      "attribution": null
+    },
+    "assets/audio/sfx/construct_crack.mp3": {
+      "name": "construct_crack",
+      "kind": "sfx",
+      "source": "freesound",
+      "url": "https://freesound.org/people/ahill86/sounds/206156/",
+      "author": "ahill86",
+      "license": "CC0",
+      "attribution": null
+    },
+    "assets/audio/sfx/crowd_laugh.mp3": {
+      "name": "crowd_laugh",
+      "kind": "sfx",
+      "source": "freesound",
+      "url": "https://freesound.org/people/deleted_user_2104797/sounds/324894/",
+      "author": "deleted_user_2104797",
+      "license": "CC0",
+      "attribution": null
+    },
     "assets/audio/sfx/demo_impact.wav": {
       "name": "demo_impact",
       "kind": "sfx",
@@ -16,6 +97,150 @@
       "url": null,
       "author": "make_demo_assets.py",
       "license": "generated",
+      "attribution": null
+    },
+    "assets/audio/sfx/energy_burst.mp3": {
+      "name": "energy_burst",
+      "kind": "sfx",
+      "source": "freesound",
+      "url": "https://freesound.org/people/qubodup/sounds/814044/",
+      "author": "qubodup",
+      "license": "CC0",
+      "attribution": null
+    },
+    "assets/audio/sfx/energy_charge.mp3": {
+      "name": "energy_charge",
+      "kind": "sfx",
+      "source": "freesound",
+      "url": "https://freesound.org/people/gulfstreamav/sounds/843330/",
+      "author": "gulfstreamav",
+      "license": "CC0",
+      "attribution": null
+    },
+    "assets/audio/sfx/file_slap.mp3": {
+      "name": "file_slap",
+      "kind": "sfx",
+      "source": "freesound",
+      "url": "https://freesound.org/people/Ferguido/sounds/272496/",
+      "author": "Ferguido",
+      "license": "CC0",
+      "attribution": null
+    },
+    "assets/audio/sfx/fire_roar.mp3": {
+      "name": "fire_roar",
+      "kind": "sfx",
+      "source": "freesound",
+      "url": "https://freesound.org/people/Bachsambora/sounds/752035/",
+      "author": "Bachsambora",
+      "license": "CC0",
+      "attribution": null
+    },
+    "assets/audio/sfx/fluorescent_buzz.mp3": {
+      "name": "fluorescent_buzz",
+      "kind": "sfx",
+      "source": "freesound",
+      "url": "https://freesound.org/people/chungus43A/sounds/733737/",
+      "author": "chungus43A",
+      "license": "CC0",
+      "attribution": null
+    },
+    "assets/audio/sfx/footsteps_run.mp3": {
+      "name": "footsteps_run",
+      "kind": "sfx",
+      "source": "freesound",
+      "url": "https://freesound.org/people/florianreichelt/sounds/459965/",
+      "author": "florianreichelt",
+      "license": "CC0",
+      "attribution": null
+    },
+    "assets/audio/sfx/glass_shatter.mp3": {
+      "name": "glass_shatter",
+      "kind": "sfx",
+      "source": "freesound",
+      "url": "https://freesound.org/people/C_Rogers/sounds/203373/",
+      "author": "C_Rogers",
+      "license": "CC0",
+      "attribution": null
+    },
+    "assets/audio/sfx/impact_boom.mp3": {
+      "name": "impact_boom",
+      "kind": "sfx",
+      "source": "freesound",
+      "url": "https://freesound.org/people/zenosounds/sounds/877229/",
+      "author": "zenosounds",
+      "license": "CC0",
+      "attribution": null
+    },
+    "assets/audio/sfx/monitor_static.mp3": {
+      "name": "monitor_static",
+      "kind": "sfx",
+      "source": "freesound",
+      "url": "https://freesound.org/people/uEffects/sounds/208056/",
+      "author": "uEffects",
+      "license": "CC0",
+      "attribution": null
+    },
+    "assets/audio/sfx/paper_slide.mp3": {
+      "name": "paper_slide",
+      "kind": "sfx",
+      "source": "freesound",
+      "url": "https://freesound.org/people/123jorre456/sounds/46625/",
+      "author": "123jorre456",
+      "license": "CC0",
+      "attribution": null
+    },
+    "assets/audio/sfx/room_tone.mp3": {
+      "name": "room_tone",
+      "kind": "ambience",
+      "source": "freesound",
+      "url": "https://freesound.org/people/artemditkovsky/sounds/860933/",
+      "author": "artemditkovsky",
+      "license": "CC0",
+      "attribution": null
+    },
+    "assets/audio/sfx/scanner_beep.mp3": {
+      "name": "scanner_beep",
+      "kind": "sfx",
+      "source": "freesound",
+      "url": "https://freesound.org/people/Breviceps/sounds/493163/",
+      "author": "Breviceps",
+      "license": "CC0",
+      "attribution": null
+    },
+    "assets/audio/sfx/stun_zap.mp3": {
+      "name": "stun_zap",
+      "kind": "sfx",
+      "source": "freesound",
+      "url": "https://freesound.org/people/BigKahuna360/sounds/160421/",
+      "author": "BigKahuna360",
+      "license": "CC0",
+      "attribution": null
+    },
+    "assets/audio/sfx/switch_click.mp3": {
+      "name": "switch_click",
+      "kind": "sfx",
+      "source": "freesound",
+      "url": "https://freesound.org/people/EricsSoundschmiede/sounds/457411/",
+      "author": "EricsSoundschmiede",
+      "license": "CC0",
+      "attribution": null
+    },
+    "assets/audio/sfx/water_drip.mp3": {
+      "name": "water_drip",
+      "kind": "sfx",
+      "source": "freesound",
+      "url": "https://freesound.org/people/deleted_user_2104797/sounds/166318/",
+      "author": "deleted_user_2104797",
+      "license": "CC0",
+      "attribution": null
+    },
+    "assets/audio/sfx/whoosh.mp3": {
+      "name": "whoosh",
+      "kind": "sfx",
+      "source": "freesound",
+      "url": "https://freesound.org/people/florianreichelt/sounds/683096/",
+      "author": "florianreichelt",
+      "license": "CC0",
       "attribution": null
     }
   }
