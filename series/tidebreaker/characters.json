@@ -1,0 +1,27 @@
+{
+  "_about": "Canonical character tags (design lock). DRAFT until the owner's 2D sketches are approved; then tags are corrected to match the sketches and 'refs' point at the locked reference images (scripts/lock_refs.py). Keep in sync with characters.md.",
+  "Rinka": {
+    "tags": "1girl, black hair, medium hair, messy hair, side braid, grey eyes, tan skin, sleeveless, dark blue tunic, rope belt, grey pants, scar on hand, straw sandals",
+    "status": "draft"
+  },
+  "Tomo": {
+    "tags": "1boy, male child, black hair, short hair, grey eyes, oversized clothes, blue tunic, wooden fish necklace",
+    "status": "draft"
+  },
+  "Seiran": {
+    "tags": "1boy, young man, white hair, short hair, indigo eyes, half-closed eyes, pale skin, white armor, ceremonial armor, indigo robe, long sleeves, hands behind back",
+    "status": "draft"
+  },
+  "Hisui": {
+    "tags": "1girl, mature female, green hair, long hair, braided ponytail, hair over shoulder, hairpin, amber eyes, layered kimono, green kimono, gold trim, closed fan, smile",
+    "status": "draft"
+  },
+  "Yuzu": {
+    "tags": "1girl, orange hair, short hair, bob cut, green eyes, round eyewear, grey kimono, tasuki, gloves, dirty face",
+    "status": "draft"
+  },
+  "Gonta": {
+    "tags": "1boy, mature male, very tall, muscular, bald, short beard, black beard, tan skin, sleeveless vest, towel around neck, anchor tattoo, rope",
+    "status": "draft"
+  }
+}

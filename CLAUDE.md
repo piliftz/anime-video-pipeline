@@ -55,7 +55,9 @@ character_backgrounds.json  image_generator storyboard for text-free character-s
                           (kept). episode_producer runs it (move + clean) after every successful stage (--no-tidy)
 series/<show>/            a show: bible.md, characters.json (canonical tags), <episode>.script.json (EN/JA,
                           'production' block + per-cut motion wan|still|clip), character_refs.json, locked_refs.json.
-                          None yet: the first show (Arc-Forge) was removed 2026-11-06, see docs/ROADMAP.md
+                          Current show: series/tidebreaker/ (LOCKED 2026-11-09: bible.md, characters.md, draft
+                          characters.json, sketch_prompts.md). The owner's character sketches go in
+                          assets/characters/tidebreaker/. The first show (Arc-Forge) was removed 2026-11-06
 make_video.cmd            Windows one-command entry: orchestrator --generate-images
 my_story.json             full example storyboard using only generated images
 storyboard_template.json  reference storyboard; every supported key appears here
@@ -183,6 +185,24 @@ a visual change works without inspecting frames.
   or a local music model before committing. OpenToonz is not used (it needs human drawing).
 - Until Claude Code runs on the owner's laptop, every laptop step is a copy-paste command for the owner; keep those
   minimal and exact. Recommend running Claude Code locally so these steps can be executed directly.
+
+## System Operational Guidelines & Project Constraints
+
+### 1. Lip Sync & Framing Rules
+* My neural lip-sync pipeline is fully functional. Rinka's mouth must stay on screen whenever she speaks.
+* Do not write or suggest storyboard shots, cinematography, or choreography that hide her face, film her from behind, or use foreground abstractions to avoid drawing mouth shapes during active dialogue lines.
+
+### 2. Art Direction & Hair Physics
+* All hair and environmental movement must come from explicit multi-frame line drawings to maintain a clean, crisp traditional 2D animation style.
+* Never animate hair physics, fabric, or details by warping, bending, or morphing the underlying geometry of the frames.
+
+### 3. File System & Tool Capabilities
+* You do not possess automated folder-monitoring agents or background system triggers to watch the workspace directories.
+* I am managing the physical asset files and tracking directory modifications locally. When I place finalized reference sheets into `assets/characters/tidebreaker/`, I will notify you here so that you can invoke your visual/environment file tools to read and audit them.
+
+### 4. Version Control & Commits
+* You cannot programmatically execute git commits or perform automated workspace modifications autonomously.
+* You will build, format, and suggest file updates directly in our chat window, and you will wait for my explicit authorization before saving, writing, or committing changes to the project state.
 
 ## Coding style
 - Python 3.10+, `from __future__ import annotations`, type hints on public functions.
