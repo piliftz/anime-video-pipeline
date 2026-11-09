@@ -1,0 +1,18 @@
+{
+  "project": {"title": "2D cel style test keyframes", "resolution": [1920, 1080], "fps": 24},
+  "image_generation": {"checkpoint": "animagine", "output_dir": "../../assets/generated/cel_test", "width": 1344,
+                       "height": 768, "rating": "safe"},
+  "characters": {
+    "Hero": {"tags": "1girl, solo, long brown hair, sidelocks, brown eyes, white shirt, short sleeves"}
+  },
+  "scenes": [
+    {"id": "cel_c1_eyes", "generate": {"characters": ["Hero"], "seed": 4101,
+      "prompt": "anime screencap, close-up, portrait, face focus, looking down, bitter, frown, half-closed eyes, closed mouth, warm lantern light from the side, hard shadow across face, dark wooden interior, blurry background, orange lanterns, bokeh, embers, cinematic lighting, thick outlines, detailed eyes"}},
+    {"id": "cel_c2_fist", "generate": {"characters": ["Hero"], "seed": 4202,
+      "prompt": "anime screencap, from below, foreshortening, clenched hand, fist in foreground, punching toward viewer, determined, angry, water swirling around arm, flowing water, water splash, glowing blue water, white foam, dynamic pose, motion lines, embers, japanese wooden fortress interior, lanterns, cinematic lighting, thick outlines"}},
+    {"id": "cel_c3_shout", "generate": {"characters": ["Hero"], "seed": 4303,
+      "prompt": "anime screencap, close-up, face focus, angry, shouting, open mouth, teeth, v-shaped eyebrows, glaring, from below, hair blowing in wind, water droplets, blue rim light, embers, warm orange lanterns in background, blurry background, cinematic lighting, thick outlines, detailed eyes"}},
+    {"id": "cel_c4_eyes", "generate": {"characters": ["Hero"], "seed": 4404,
+      "prompt": "anime screencap, extreme close-up, eye focus, eyes, glaring, v-shaped eyebrows, determined, shadow over upper face, catchlight, light particles, embers, cinematic lighting, thick outlines, detailed eyes"}}
+  ]
+}

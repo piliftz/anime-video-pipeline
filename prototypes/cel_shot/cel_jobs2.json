@@ -1,0 +1,8 @@
+[
+ {"base": "cel_c3_m_open", "out": "cel_c3_m_closed", "seed": 41, "denoise": 1.0, "fresh": true, "feather": 16,
+  "shapes": [["ellipse", [0.43, 0.84, 0.2, 0.19]]],
+  "prompt": "anime screencap, close-up, face focus, angry, closed mouth, clenched teeth, gritted teeth, grimace, chin, v-shaped eyebrows, from below, warm light, thick outlines"},
+ {"base": "cel_c3_m_open", "out": "cel_c3_m_half", "seed": 42, "denoise": 1.0, "fresh": true, "feather": 16,
+  "shapes": [["ellipse", [0.43, 0.84, 0.2, 0.19]]],
+  "prompt": "anime screencap, close-up, face focus, angry, shouting, open mouth, small open mouth, teeth, chin, v-shaped eyebrows, from below, warm light, thick outlines"}
+]

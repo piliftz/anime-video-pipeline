@@ -1,0 +1,48 @@
+{
+  "role": "hero (female) voice, LOCKED 2026-11-08 by the owner",
+  "source": "Qwen3-TTS-12Hz-1.7B-VoiceDesign (Apache-2.0), generated locally 2026-11-07, picked by the owner",
+  "take": "output/tts_compare/qwen3_female_split_seed1.wav",
+  "seed": 1,
+  "text": [
+    "They said I'd never make it this far.",
+    "Watch me prove every one of them wrong!"
+  ],
+  "instruct_voice": "A young female anime heroine in her late teens with a clear, bright, strong voice, youthful but not childish, with grit underneath.",
+  "instruct_s1": "She speaks quietly and bitterly, low intensity, remembering an insult.",
+  "instruct_s2": "She shouts at full power with fierce anger and unbreakable determination, voice straining, like a battle cry.",
+  "license": "generated",
+  "approved_lines": [
+    {
+      "take": "output/tts_compare/hero_lock/qwen3_calm_seed3.wav",
+      "seed": 3,
+      "text": "I'm not running anymore. Not from them, and not from myself.",
+      "instruct": "instruct_voice + instruct_s1"
+    },
+    {
+      "take": "output/tts_compare/hero_lock/qwen3_shout_seed3.wav",
+      "seed": 3,
+      "text": "Get out of my way!",
+      "instruct": "instruct_voice + instruct_s2"
+    }
+  ],
+  "note": "Qwen3 VoiceDesign is not seed-stable across texts: seed 1 matched on the original line, seed 3 on both test lines. Clones (Chatterbox, IndexTTS-2.5) rejected.",
+  "engine": {
+    "model": "Qwen3-TTS 1.7B Base (Apache-2.0)",
+    "method": "voice clone, ICL (ref audio + ref text)",
+    "refs": {
+      "calm": {
+        "audio": "hero_calm_seed3.wav",
+        "text": "I'm not running anymore. Not from them, and not from myself."
+      },
+      "shout": {
+        "audio": "hero_shout_seed3.wav",
+        "text": "Get out of my way!"
+      }
+    },
+    "usage": "storyboard speaker: {\"engine\": \"qwen3\", \"qwen3\": {\"voice\": \"hero\", \"delivery\": \"calm|shout\"}}; refs.*.audio is relative to this file; the clip copies voice AND delivery, no text instructions",
+    "approved_test": "output/tts_compare/hero_clone/clone_*_seed1/2.wav (owner: \"Yes, that's her\")",
+    "env": "C:/Users/adu94/tools/tts/qwen3 (torch cu128), HF_HOME=C:/Users/adu94/tools/tts/hf",
+    "speed": "~2.3x realtime, 4.2 GB VRAM peak on RTX 5060",
+    "model_id": "Qwen/Qwen3-TTS-12Hz-1.7B-Base"
+  }
+}

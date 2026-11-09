@@ -1,0 +1,17 @@
+[
+ {"base": "cel_c1_eyes", "out": "cel_c1_m_half", "seed": 11, "denoise": 0.72, "feather": 14,
+  "shapes": [["ellipse", [0.455, 0.64, 0.055, 0.055]]],
+  "prompt": "anime screencap, close-up, face focus, looking down, bitter, frown, parted lips, open mouth, small mouth, talking, warm lantern light, hard shadow across face, thick outlines"},
+ {"base": "cel_c1_eyes", "out": "cel_c1_m_open", "seed": 12, "denoise": 0.78, "feather": 14,
+  "shapes": [["ellipse", [0.455, 0.645, 0.06, 0.065]]],
+  "prompt": "anime screencap, close-up, face focus, looking down, bitter, frown, open mouth, talking, teeth, warm lantern light, hard shadow across face, thick outlines"},
+ {"base": "cel_c3_shout", "out": "cel_c3_m_open", "seed": 31, "denoise": 0.8, "feather": 22,
+  "shapes": [["ellipse", [0.43, 0.84, 0.2, 0.19]]],
+  "prompt": "anime screencap, close-up, face focus, angry, shouting, wide open mouth, upper teeth, tongue, v-shaped eyebrows, from below, warm light, thick outlines"},
+ {"base": "cel_c3_shout", "out": "cel_c3_m_half", "seed": 32, "denoise": 0.82, "feather": 22,
+  "shapes": [["ellipse", [0.43, 0.84, 0.2, 0.19]]],
+  "prompt": "anime screencap, close-up, face focus, angry, shouting, open mouth, clenched teeth, teeth, v-shaped eyebrows, from below, warm light, thick outlines"},
+ {"base": "cel_c3_shout", "out": "cel_c3_m_closed", "seed": 33, "denoise": 0.85, "feather": 22,
+  "shapes": [["ellipse", [0.43, 0.84, 0.2, 0.19]]],
+  "prompt": "anime screencap, close-up, face focus, angry, clenched teeth, gritted teeth, grimace, v-shaped eyebrows, from below, warm light, thick outlines"}
+]

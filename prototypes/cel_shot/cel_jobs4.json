@@ -1,0 +1,5 @@
+[
+ {"base": "cel_c2_fist", "out": "cel_c2_f_closed", "seed": 61, "denoise": 0.72, "feather": 10,
+  "shapes": [["ellipse", [0.487, 0.235, 0.05, 0.065]]],
+  "prompt": "anime screencap, from below, upper body, angry, v-shaped eyebrows, glaring, clenched teeth, gritted teeth, warm lantern light, thick outlines"}
+]

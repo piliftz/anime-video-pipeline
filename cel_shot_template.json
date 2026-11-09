@@ -1,0 +1,111 @@
+{
+  "id": "cel_demo",
+  "duration": 6.6,
+  "fps": 24,
+  "on": 2,
+  "line": {
+    "text": "They said I'd never make it this far. Watch me prove every one of them wrong!",
+    "engine": "qwen3",
+    "qwen3": {"voice": "hero", "delivery": ["calm", "shout"], "seed": 1, "sentence_pause": 0.6},
+    "offset": 0.7,
+    "tail": 0.5,
+    "recognizer": "pocketSphinx",
+    "mouth_source": "flaps",
+    "mouth_lead": 0.04
+  },
+  "character": {"name": "Hero", "tags": "1girl, solo, long brown hair, sidelocks, brown eyes, white shirt, short sleeves"},
+  "image_generation": {"checkpoint": "animagine", "output_dir": "assets/generated/cel_test", "rating": "safe"},
+  "comp": {"embers": {"count": 70, "seed": 7}, "bloom": {"threshold": 0.93, "strength": 0.35}},
+  "sfx": [
+    {"file": "assets/audio/sfx/whoosh.mp3", "at_sentence": 2, "delay": -0.25, "volume": 0.7},
+    {"file": "assets/audio/sfx/impact_boom.mp3", "at_sentence": 2, "delay": 0.0, "volume": 0.8}
+  ],
+  "fx": {
+    "fade_in": 0.3,
+    "fade_out": 0.3,
+    "speed_lines": {"enabled": true, "style": "radial", "start": {"at_sentence": 2, "delay": 0.0},
+                    "end": {"at_sentence": 2, "delay": 0.55}, "center": [0.5, 0.62], "inner_radius": 0.32,
+                    "opacity": 0.6},
+    "impact": {"enabled": true, "at": [{"at_sentence": 2, "delay": 0.0}], "shake": 34.0, "settle": 0.45}
+  },
+  "cuts": [
+    {
+      "id": "c1_bitter",
+      "at": 0.0,
+      "keyframe": {"id": "cel_c1_eyes", "seed": 4101,
+                   "prompt": "anime screencap, close-up, portrait, face focus, looking down, bitter, frown, half-closed eyes, closed mouth, warm lantern light from the side, hard shadow across face, dark wooden interior, blurry background, orange lanterns, bokeh, embers, cinematic lighting, thick outlines, detailed eyes"},
+      "drawings": [
+        {"id": "cel_c1_m_half", "from": "key", "seed": 11, "denoise": 0.72, "feather": 14,
+         "shapes": [["ellipse", [0.455, 0.64, 0.055, 0.055]]],
+         "prompt": "anime screencap, close-up, face focus, looking down, bitter, frown, parted lips, open mouth, small mouth, talking, warm lantern light, hard shadow across face, thick outlines"},
+        {"id": "cel_c1_m_open", "from": "key", "seed": 12, "denoise": 0.78, "feather": 14,
+         "shapes": [["ellipse", [0.455, 0.645, 0.06, 0.065]]],
+         "prompt": "anime screencap, close-up, face focus, looking down, bitter, frown, open mouth, talking, teeth, warm lantern light, hard shadow across face, thick outlines"}
+      ],
+      "mouth": {"closed": "key", "half": "cel_c1_m_half", "open": "cel_c1_m_open"},
+      "layer": "bright",
+      "matte_ignore": [[0.0, 0.0, 0.15, 1.0]],
+      "acting": {"type": "talk", "lift_before_cut": 0.33},
+      "camera": {"zoom": [1.0, 1.06], "center": [0.47, 0.5]}
+    },
+    {
+      "id": "c2_fist",
+      "at": 2.95,
+      "keyframe": {"id": "cel_c2_fist", "seed": 4202,
+                   "prompt": "anime screencap, from below, foreshortening, clenched hand, fist in foreground, punching toward viewer, determined, angry, water swirling around arm, flowing water, water splash, glowing blue water, white foam, dynamic pose, motion lines, embers, japanese wooden fortress interior, lanterns, cinematic lighting, thick outlines"},
+      "drawings": [
+        {"id": "cel_c2_w2", "from": "key", "seed": 51, "denoise": 0.55, "feather": 20,
+         "shapes": [["rect", [0.5, 0.95, 0.5, 0.07]], ["ellipse", [0.86, 0.62, 0.16, 0.36]], ["ellipse", [0.1, 0.8, 0.14, 0.25]]],
+         "prompt": "anime screencap, from below, water swirling, flowing water, water splash, glowing blue water, white foam, spray, droplets, motion lines, thick outlines"},
+        {"id": "cel_c2_w3", "from": "key", "seed": 52, "denoise": 0.55, "feather": 20,
+         "shapes": [["rect", [0.5, 0.95, 0.5, 0.07]], ["ellipse", [0.86, 0.62, 0.16, 0.36]], ["ellipse", [0.1, 0.8, 0.14, 0.25]]],
+         "prompt": "anime screencap, from below, water swirling, flowing water, water splash, glowing blue water, white foam, spray, droplets, motion lines, thick outlines"},
+        {"id": "cel_c2_f_closed", "from": "key", "seed": 61, "denoise": 0.72, "feather": 10,
+         "shapes": [["ellipse", [0.487, 0.235, 0.05, 0.065]]],
+         "prompt": "anime screencap, from below, upper body, angry, v-shaped eyebrows, glaring, clenched teeth, gritted teeth, warm lantern light, thick outlines"},
+        {"id": "cel_c2_f_open", "from": "cel_c2_f_closed", "seed": 62, "denoise": 1.0, "fresh": true, "feather": 6,
+         "shapes": [["ellipse", [0.489, 0.275, 0.02, 0.028]]],
+         "prompt": "anime screencap, from below, angry, shouting, open mouth, wide open mouth, teeth, v-shaped eyebrows, warm lantern light, thick outlines"}
+      ],
+      "mouth": {"closed": "cel_c2_f_closed", "open": "cel_c2_f_open"},
+      "boil": {"drawings": ["key", "cel_c2_w2", "cel_c2_w3"], "on": 3, "after": {"at": {"at_sentence": 2, "delay": 0.0}, "on": 2}},
+      "layer": "matte",
+      "acting": {"type": "strike", "at": {"at_sentence": 2, "delay": 0.0}, "pivot": [0.41, 0.66]},
+      "camera": {"zoom": [1.0, 1.04], "center": [0.5, 0.55], "slam": {"at": {"at_sentence": 2, "delay": 0.0}, "amount": 0.1, "settle": 0.18}}
+    },
+    {
+      "id": "c3_shout",
+      "at": {"at_sentence": 2, "delay": 0.55},
+      "keyframe": {"id": "cel_c3_shout", "seed": 4303,
+                   "prompt": "anime screencap, close-up, face focus, angry, shouting, open mouth, teeth, v-shaped eyebrows, glaring, from below, hair blowing in wind, water droplets, blue rim light, embers, warm orange lanterns in background, blurry background, cinematic lighting, thick outlines, detailed eyes"},
+      "drawings": [
+        {"id": "cel_c3_m_open", "from": "key", "seed": 31, "denoise": 0.8, "feather": 22,
+         "shapes": [["ellipse", [0.43, 0.84, 0.2, 0.19]]],
+         "prompt": "anime screencap, close-up, face focus, angry, shouting, wide open mouth, upper teeth, tongue, v-shaped eyebrows, from below, warm light, thick outlines"},
+        {"id": "cel_c3_m_closed3", "from": "cel_c3_m_open", "seed": 72, "denoise": 1.0, "fresh": true, "feather": 16,
+         "shapes": [["ellipse", [0.44, 0.82, 0.19, 0.17]]],
+         "prompt": "anime screencap, close-up, face focus, from below, angry, clenched teeth, gritted teeth, teeth, grimace, wide mouth, thick outlines, warm light"},
+        {"id": "cel_c3_m_closed2", "from": "cel_c3_m_open", "seed": 71, "denoise": 1.0, "fresh": true, "feather": 16,
+         "shapes": [["ellipse", [0.44, 0.82, 0.19, 0.17]]],
+         "prompt": "anime screencap, close-up, face focus, from below, angry, clenched teeth, gritted teeth, teeth, grimace, wide mouth, thick outlines, warm light"},
+        {"id": "cel_c3_m_half3", "from": "cel_c3_m_open", "seed": 74, "denoise": 1.0, "fresh": true, "feather": 16,
+         "shapes": [["ellipse", [0.44, 0.82, 0.19, 0.17]]],
+         "prompt": "anime screencap, close-up, face focus, from below, angry, shouting, open mouth, teeth, upper teeth, lower teeth, thick outlines, warm light"}
+      ],
+      "mouth": {"closed": "cel_c3_m_closed3", "half": "cel_c3_m_closed2", "open": "cel_c3_m_half3"},
+      "layer": "none",
+      "acting": {"type": "shout"},
+      "camera": {"zoom": [1.04, 1.09], "center": [0.48, 0.64]}
+    },
+    {
+      "id": "c4_stare",
+      "at": {"after_speech": 0.06},
+      "keyframe": {"id": "cel_c4_eyes", "seed": 4404,
+                   "prompt": "anime screencap, extreme close-up, eye focus, eyes, glaring, v-shaped eyebrows, determined, shadow over upper face, catchlight, light particles, embers, cinematic lighting, thick outlines, detailed eyes"},
+      "layer": "none",
+      "acting": {"type": "stare"},
+      "camera": {"zoom": [1.02, 1.08], "center": [0.52, 0.5]},
+      "embers": 0.5
+    }
+  ]
+}

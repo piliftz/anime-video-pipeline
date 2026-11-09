@@ -39,6 +39,22 @@
         "negative": "text, sign, signboard, neon sign, kanji, hiragana, katakana, letters, english text, japanese text, writing, billboard, poster, banner, logo, number, screen",
         "seed": 7404
       }
+    },
+    {
+      "id": "bg_fortress_hall_a",
+      "generate": {
+        "prompt": "no humans, scenery, interior of a vast endless traditional japanese wooden fortress, many floors stacked in every direction, wooden walkways and staircases, rows of paper lanterns, warm orange lantern light, deep shadows, extreme depth, vertigo perspective, dark atmosphere, floating embers, cinematic lighting, highly detailed background art",
+        "negative": "text, sign, signboard, kanji, hiragana, katakana, letters, writing, banner, logo, number, people, person, character, blurry, lowres",
+        "seed": 8101
+      }
+    },
+    {
+      "id": "bg_fortress_hall_b",
+      "generate": {
+        "prompt": "no humans, scenery, interior of a vast endless traditional japanese wooden fortress, many floors stacked in every direction, wooden walkways and staircases, rows of paper lanterns, warm orange lantern light, deep shadows, extreme depth, vertigo perspective, dark atmosphere, floating embers, cinematic lighting, highly detailed background art",
+        "negative": "text, sign, signboard, kanji, hiragana, katakana, letters, writing, banner, logo, number, people, person, character, blurry, lowres",
+        "seed": 8202
+      }
     }
   ]
 }

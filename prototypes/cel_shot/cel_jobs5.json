@@ -1,0 +1,5 @@
+[
+ {"base": "cel_c2_f_closed", "out": "cel_c2_f_open", "seed": 62, "denoise": 1.0, "fresh": true, "feather": 6,
+  "shapes": [["ellipse", [0.489, 0.275, 0.02, 0.028]]],
+  "prompt": "anime screencap, from below, angry, shouting, open mouth, wide open mouth, teeth, v-shaped eyebrows, warm lantern light, thick outlines"}
+]

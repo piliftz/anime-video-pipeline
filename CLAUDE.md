@@ -24,6 +24,8 @@ scripts/
                           frames returned as lossless PNGs into a folder (usable as a scene clip) + MP4 preview
   episode_producer.py     episode script -> keyframes -> Wan motion (ONE ComfyUI session, resumable via job hash)
                           -> assembled storyboard -> orchestrator render. Stages: keyframes|motion|assemble|status
+  qwen3_tts_worker.py     runs INSIDE the Qwen3-TTS env ($QWEN3_TTS_PYTHON): batch voice clone (ICL) from reference
+                          clips, per-sentence deliveries, measured sentence timings. Called by voiceover_generator
   voicevox_client.py      VOICEVOX (local JA TTS) client: name->style-id resolve, audio_query+synthesis, terms;
                           auto-starts run.exe (VOICEVOX_RUN). CLI lists voices / auditions a line
   setup_voicevox.py       installs the VOICEVOX engine (Windows CPU .vvpp = ZIP, split parts listed in .vvpp.txt)
@@ -31,7 +33,12 @@ scripts/
   audio_manifest.py       audio license manifest (assets/audio/manifest.json): add/list/check; allow-list of licenses
                           safe for monetized video (CC0, YouTube Audio Library, CC-BY + attribution, own, generated)
   fetch_sfx.py            Freesound CC0-only SFX: search -> temp/sfx_candidates (audition) -> keep -> manifest
-  character_shot.py       shot spec -> voice -> Rhubarb mouth cues -> Blender frames -> one-scene storyboard -> MP4
+  cel_shot.py             THE APPROVED LOOK (2D, 2026-11-08): cel shot spec -> voice -> Animagine keyframe per cut +
+                          masked redraws (mouths/faces/effect boil) -> rembg cut-out -> RIGID acting (tilt/shift/scale,
+                          never bend a drawing) + flaps on twos + camera/embers/bloom on ones -> MP4.
+                          Template: cel_shot_template.json. Needs $REMBG_PYTHON (cel_matte_worker.py runs there)
+  cel_matte_worker.py     runs INSIDE the rembg env: isnet-anime alpha mattes (optional brightening for dark shots)
+  character_shot.py       (3D route, rejected as "looks 3D") shot spec -> voice -> Rhubarb -> Blender frames -> MP4
                           (frames reused by job hash; --benchmark N measures Eevee s/frame). Needs $BLENDER_EXE,
                           $RHUBARB_EXE and the Blender VRM add-on. Template: character_shot_template.json
   blender_vrm_shot.py     runs INSIDE Blender (bpy): VRM 1.0 import (MToon + outlines kept), anime mouth flaps,
@@ -88,6 +95,7 @@ python scripts/voicevox_client.py                         # list VOICEVOX voices
 python scripts/setup_models.py --model wan2.2-ti2v-5b
 python scripts/video_generator.py assets/generated/s02_hikari.png --prompt "..." [--length 121 --size 1280x704]
 python scripts/character_shot.py character_shot_template.json [--frames-only | --benchmark 48 | --draft]
+python scripts/cel_shot.py cel_shot_template.json [--dry-run | --stills 0.5,3.2 | --draft | --force]
 ```
 ComfyUI is optional: everything except `--generate-images` works without it. There is no real
 ComfyUI in the cloud sandbox; test the client against a mock that implements the same HTTP routes
@@ -121,7 +129,8 @@ a visual change works without inspecting frames.
   `validate_storyboard`, an example in `storyboard_template.json`, and a README entry.
 - ComfyUI graphs use only core nodes (CheckpointLoaderSimple, CLIPTextEncode, EmptyLatentImage, KSampler,
   VAEDecode/Encode, ImageScaleBy, SaveImage; for Wan also UNETLoader, ModelSamplingSD3, CLIPLoader, VAELoader,
-  LoadImage via /upload/image, Wan22ImageToVideoLatent). Video frames come back via SaveImage, NOT SaveVideo
+  LoadImage via /upload/image, Wan22ImageToVideoLatent; for cel redraws also LoadImageMask, SetLatentNoiseMask,
+  VAEEncodeForInpaint, ImageCompositeMasked). Video frames come back via SaveImage, NOT SaveVideo
   (its inputs change often). Validate checkpoint/sampler/scheduler names via `/object_info`
   before queueing. Never overwrite an image that has no `.png.json` sidecar (user-supplied) without --force.
 - Changing a character's tags in a storyboard changes the hash of EVERY take using that character, so the
@@ -131,8 +140,10 @@ a visual change works without inspecting frames.
   name (`from pipeline_utils import ...`). Don't convert to package-relative imports without
   updating every entry point.
 
-- TTS engines: speakers set `engine` edge|voicevox (+ `voicevox: {speaker, style, speed, ...}`); the voice
-  cache key includes engine settings. `narration.subtitle_text` shows different text than is spoken (JA dub,
+- TTS engines: speakers set `engine` edge|voicevox|qwen3 (+ `voicevox: {speaker, style, speed, ...}` or
+  `qwen3: {voice, delivery, seed, ...}`); the voice cache key includes engine settings (qwen3: reference clip hashes).
+  The hero (female) is `qwen3` voice `hero` (assets/voices/hero_ref.json, deliveries calm|shout), owner-locked
+  2026-11-08: don't swap her engine or references without the owner's ear check. `narration.subtitle_text` shows different text than is spoken (JA dub,
   EN subs). VOICEVOX credits must list only voices actually spoken in the render.
 - Audio: storyboard `audio.music` cues (by scene id or seconds; fades, ducking, `drops` = silence) and scene `sfx`
   cues. Every audio file must be in assets/audio/manifest.json (`audio.require_license`, default true); renders

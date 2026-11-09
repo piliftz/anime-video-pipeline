@@ -682,7 +682,8 @@ def setup_camera(job: dict):
     return cam
 
 
-def key_camera(cam, cut: Cut, t: float, job: dict, frame: int) -> None:
+def key_camera(cam, cut: Cut, t: float, job: dict, frame: int) -> float:
+    """Key the camera for frame; returns the focus distance (line widths scale with it)."""
     pos, q, d = cut.placement(t, job["camera"]["punches"])
     cam.location, cam.rotation_quaternion = pos, q
     data = cam.data
@@ -693,6 +694,7 @@ def key_camera(cam, cut: Cut, t: float, job: dict, frame: int) -> None:
     for obj, path in ((cam, "location"), (cam, "rotation_quaternion"), (data, "lens"), (data, "shift_x"),
                       (data.dof, "focus_distance"), (data.dof, "aperture_fstop")):
         obj.keyframe_insert(path, frame=frame)
+    return d
 
 
 def setup_render(job: dict) -> None:
@@ -714,12 +716,260 @@ def setup_render(job: dict) -> None:
 
 
 # --------------------------------------------------------------------------- #
+# Style pass (job["style"]): drawn ink lines, elemental FX that light the character, embers, bloom
+# --------------------------------------------------------------------------- #
+def gp_material(name: str, color: list[float]):
+    mat = bpy.data.materials.new(name)
+    bpy.data.materials.create_gpencil_data(mat)
+    mat.grease_pencil.color = (*[srgb_to_linear(c) for c in color[:3]], 1.0)
+    return mat
+
+
+def setup_line_art(name: str, objects: list, cfg: dict):
+    """Grease Pencil Line Art over `objects`: contours, creases, material borders and intersections, drawn as ink
+    strokes that taper at both ends (thick-to-thin). Stroke radius is keyed per frame (key_line_art) so the line
+    keeps the same width in pixels from a wide shot to an extreme close-up."""
+    src = bpy.data.collections.new(f"{name}Source")      # membership only; the objects stay in their own collections
+    for o in objects:
+        src.objects.link(o)
+    bpy.ops.object.grease_pencil_add(type="LINEART_SCENE")
+    gp = bpy.context.active_object
+    gp.name = name
+    la = gp.modifiers[0]
+    la.name = "LineArt"
+    la.source_type = "COLLECTION"
+    la.source_collection = src
+    la.use_contour = la.use_crease = la.use_material = la.use_intersection = True
+    la.crease_threshold = math.radians(float(cfg.get("crease_deg", 140.0)))
+    la.smooth_tolerance = 0.1
+    mat = gp_material(f"{name}Ink", cfg["color"])
+    gp.data.materials.clear()
+    gp.data.materials.append(mat)
+    la.target_material = mat
+    la.opacity = 1.0
+    taper = float(cfg.get("taper", 0.3))
+    if taper < 1.0:
+        th = gp.modifiers.new("Taper", "GREASE_PENCIL_THICKNESS")
+        th.use_custom_curve = True
+        curve = th.custom_curve.curves[0]
+        pts = curve.points
+        pts[0].location, pts[1].location = (0.0, taper), (1.0, taper)
+        pts.new(0.5, 1.0)
+        th.custom_curve.update()
+    return gp
+
+
+def key_line_art(gp, px: float, dist: float, cut, job: dict, frame: int) -> None:
+    """Stroke radius (world units) for a line `px` pixels wide at the camera's focus distance."""
+    pixel = dist * cut.sensor_h / cut.lens / float(job["resolution"][1])
+    la = gp.modifiers["LineArt"]
+    la.radius = max(1e-5, 0.5 * px * pixel)
+    gp.keyframe_insert(data_path='modifiers["LineArt"].radius', frame=frame)
+
+
+def _emit_material(name: str, color: list[float], strength: float):
+    mat = bpy.data.materials.new(name)
+    mat.use_nodes = True
+    nt = mat.node_tree
+    nt.nodes.clear()
+    em = nt.nodes.new("ShaderNodeEmission")
+    em.inputs["Color"].default_value = (*[srgb_to_linear(c) for c in color[:3]], 1.0)
+    em.inputs["Strength"].default_value = float(strength)
+    out = nt.nodes.new("ShaderNodeOutputMaterial")
+    nt.links.new(em.outputs["Emission"], out.inputs["Surface"])
+    return mat
+
+
+class Ribbon:
+    """An elemental motion trail (water by default): tapered strands spiralling around the path the target (a
+    fist) actually travels from `at` to `at + grow`. The trail's head is keyed to sit on the moving fist, so the
+    effect is drawn by the strike itself; after `hold` it dissolves tail-first over `fade`. Flat emissive colours
+    (no shading) + their own ink lines read as a drawn effect; values above 1 feed the bloom."""
+
+    def __init__(self, cfg: dict, rig: "Rig", job: dict, gestures: list) -> None:
+        self.cfg = cfg
+        self.at, self.grow = float(cfg["at"]), float(cfg["grow"])
+        self.hold, self.fade = float(cfg["hold"]), float(cfg["fade"])
+        steps = max(8, int(self.grow * 120))
+        self.times = [self.at + self.grow * k / steps for k in range(steps + 1)]
+        path = []
+        for t in self.times:
+            rig.apply(body_pose(rig, t, job, gestures), None)
+            path.append(rig.point(cfg["target"]))
+        cum = [0.0]
+        for a, b in zip(path, path[1:]):
+            cum.append(cum[-1] + (b - a).length)
+        if cum[-1] < 0.05:
+            raise PipelineError(f"style.ribbon: '{cfg['target']}' barely moves between {self.at:.2f}s and "
+                                f"{self.at + self.grow:.2f}s; start the ribbon with the strike's wind-up.")
+        self.frac = [c / cum[-1] for c in cum]              # arc-length fraction of the path at each sample time
+        taper = bpy.data.curves.new("RibbonTaper", "CURVE")
+        taper.dimensions = "2D"
+        sp = taper.splines.new("BEZIER")
+        sp.bezier_points.add(2)
+        for bp, (x, y) in zip(sp.bezier_points, ((0.0, 0.0), (0.7, 1.0), (1.0, 0.15))):
+            bp.co = (x, y, 0.0)
+            bp.handle_left_type = bp.handle_right_type = "AUTO"
+        taper_obj = bpy.data.objects.new("RibbonTaper", taper)
+        bpy.context.scene.collection.objects.link(taper_obj)
+        taper_obj.hide_render = taper_obj.hide_viewport = True
+        turns = float(cfg["turns"])
+        self.objects = []
+        for i, layer in enumerate(cfg["layers"]):
+            cu = bpy.data.curves.new(f"Ribbon{i}", "CURVE")
+            cu.dimensions = "3D"
+            cu.twist_mode = "MINIMUM"
+            cu.extrude = float(layer["width"]) / 2
+            cu.bevel_depth = float(layer.get("thickness", 0.003))
+            cu.taper_object = taper_obj
+            cu.use_map_taper = True
+            spl = cu.splines.new("POLY")
+            spl.points.add(len(path) - 1)
+            r0, phase = float(layer["radius"]), math.radians(float(layer.get("phase_deg", 0.0)))
+            for k, p in enumerate(spl.points):
+                a, b = path[max(0, k - 1)], path[min(len(path) - 1, k + 1)]
+                tangent = (b - a).normalized() if (b - a).length > 1e-6 else rig.forward
+                n1 = tangent.cross(UP)
+                n1 = n1.normalized() if n1.length > 1e-4 else tangent.cross(rig.forward).normalized()
+                n2 = n1.cross(tangent).normalized()
+                s = self.frac[k]
+                ang = phase + turns * 2 * math.pi * s
+                r = r0 * (0.35 + 0.65 * s) * (1.0 + 0.15 * math.sin(5 * ang))   # widens toward the fist
+                pos = path[k] + n1 * (r * math.cos(ang)) + n2 * (r * math.sin(ang))
+                p.co = (pos.x, pos.y, pos.z, 1.0)
+            obj = bpy.data.objects.new(f"Ribbon{i}", cu)
+            bpy.context.scene.collection.objects.link(obj)
+            obj.data.materials.append(_emit_material(f"RibbonMat{i}", layer["color"], layer["strength"]))
+            obj.visible_shadow = False
+            self.objects.append(obj)
+
+    def head(self, t: float) -> float:
+        """Arc-length fraction of the path the target has covered at time t (the trail's head)."""
+        if t <= self.at:
+            return 0.0
+        for k in range(1, len(self.times)):
+            if t <= self.times[k]:
+                u = (t - self.times[k - 1]) / max(1e-6, self.times[k] - self.times[k - 1])
+                return self.frac[k - 1] + u * (self.frac[k] - self.frac[k - 1])
+        return 1.0
+
+    def envelope(self, t: float) -> float:
+        """0..1 presence of the effect at time t (used for its light on the character)."""
+        end_hold = self.at + self.grow + self.hold
+        if t < end_hold:
+            return self.head(t) ** 0.5
+        return max(0.0, 1.0 - ease("ease_in", (t - end_hold) / self.fade))
+
+    def key(self, t: float, frame: int) -> None:
+        end_hold = self.at + self.grow + self.hold
+        gone = ease("ease_in", (t - end_hold) / self.fade) if t >= end_hold else 0.0
+        head = self.head(t)
+        for i, obj in enumerate(self.objects):
+            cu = obj.data
+            cu.bevel_factor_end = max(0.0, head - 0.04 * i * (1 - head))  # inner strands trail a hair behind
+            cu.bevel_factor_start = min(cu.bevel_factor_end, gone)
+            obj.hide_render = head <= 0.0 or gone >= 0.999
+            cu.keyframe_insert("bevel_factor_end", frame=frame)
+            cu.keyframe_insert("bevel_factor_start", frame=frame)
+            obj.keyframe_insert("hide_render", frame=frame)
+
+
+class FxLight:
+    """The effect lights the character: MToon ignores lamps, so the effect's light is keyed into each material's
+    rim colour / fresnel power and shade colour, scaled by the effect's envelope."""
+
+    def __init__(self, cfg: dict) -> None:
+        self.cfg = cfg
+        self.sockets = []
+        for mat in bpy.data.materials:
+            node = mat.node_tree.nodes.get("Mtoon1Material.Mtoon1Output") if mat.node_tree else None
+            if node is None or "Parametric Rim Color" not in node.inputs:
+                continue
+            ins = node.inputs
+            self.sockets.append((ins, tuple(ins["Parametric Rim Color"].default_value),
+                                 float(ins["Parametric Rim Fresnel Power"].default_value),
+                                 tuple(ins["Shade Color"].default_value)))
+
+    def key(self, k: float, frame: int) -> None:
+        c = [srgb_to_linear(x) * float(self.cfg["strength"]) for x in self.cfg["color"]]
+        tint = float(self.cfg["shade_tint"]) * k
+        power = float(self.cfg["fresnel_power"])
+        for ins, rim, p0, shade in self.sockets:
+            ins["Parametric Rim Color"].default_value = (*[r * (1 - k) + ci * k for r, ci in zip(rim[:3], c)], 1.0)
+            ins["Parametric Rim Fresnel Power"].default_value = p0 * (1 - k) + power * k
+            lit = [srgb_to_linear(x) for x in self.cfg["color"]]
+            shaded = [s * (1 - tint) + s * li * tint * 1.6 for s, li in zip(shade[:3], lit)]  # shadows go cyan
+            ins["Shade Color"].default_value = (*shaded, 1.0)
+            for name in ("Parametric Rim Color", "Parametric Rim Fresnel Power", "Shade Color"):
+                ins[name].keyframe_insert("default_value", frame=frame)
+
+
+def setup_embers(cfg: dict, rig: "Rig", plane_point: Vector, total: int, fps: int) -> None:
+    """Glowing embers rising through the space between the character and the background (never in front of the
+    face, where close-up lenses would turn them into blobs). Deterministic (seeded) particles."""
+    near = float(cfg.get("near", 0.6))
+    origin = rig.point("chest") * Vector((1, 1, 0))
+    depth = max(0.5, (origin - plane_point * Vector((1, 1, 0))).length - near)
+    mid = origin - rig.forward * (near + depth / 2) + UP * float(cfg.get("floor", -0.4))
+    bpy.ops.mesh.primitive_plane_add(size=1.0, location=mid)
+    em = bpy.context.active_object
+    em.name = "EmberEmitter"
+    em.rotation_mode = "QUATERNION"
+    em.rotation_quaternion = rig.forward.to_track_quat("Y", "Z")
+    em.scale = (float(cfg.get("width", 5.0)), depth, 1.0)
+    bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=1, radius=1.0)
+    spark = bpy.context.active_object
+    spark.name = "Ember"
+    spark.data.materials.append(_emit_material("EmberMat", cfg["color"], cfg["strength"]))
+    spark.hide_render = True
+    spark.location = (0, 0, -100)
+    ps = em.modifiers.new("Embers", "PARTICLE_SYSTEM").particle_system
+    st = ps.settings
+    pre = int(fps * 3)
+    st.count = int(cfg["count"])
+    st.frame_start, st.frame_end = -pre, total
+    st.lifetime = total + pre
+    st.emit_from = "FACE"
+    st.normal_factor = float(cfg.get("rise", 0.35))
+    st.factor_random = 0.12
+    st.brownian_factor = float(cfg.get("drift", 0.15))
+    st.effector_weights.gravity = 0.0
+    st.render_type = "OBJECT"
+    st.instance_object = spark
+    st.particle_size = float(cfg.get("size", 0.006))
+    st.size_random = 0.6
+    ps.seed = int(cfg.get("seed", 7))
+    em.show_instancer_for_render = False
+
+
+def setup_bloom(cfg: dict) -> None:
+    """Compositor bloom on pixels brighter than `threshold`: effects, embers and catchlights glow; the character's
+    MToon colours stay below 1 and stay crisp."""
+    scene = bpy.context.scene
+    ng = bpy.data.node_groups.new("ShotComp", "CompositorNodeTree")
+    scene.compositing_node_group = ng
+    scene.render.use_compositing = True
+    rl = ng.nodes.new("CompositorNodeRLayers")
+    gl = ng.nodes.new("CompositorNodeGlare")
+    gl.inputs["Type"].default_value = "Bloom"
+    gl.inputs["Threshold"].default_value = float(cfg["threshold"])
+    gl.inputs["Size"].default_value = float(cfg["size"])
+    gl.inputs["Strength"].default_value = float(cfg["strength"])
+    out = ng.nodes.new("NodeGroupOutput")
+    ng.interface.new_socket("Image", in_out="OUTPUT", socket_type="NodeSocketColor")
+    ng.links.new(rl.outputs["Image"], gl.inputs["Image"])
+    ng.links.new(gl.outputs[0], out.inputs[0])
+
+
+# --------------------------------------------------------------------------- #
 # Main
 # --------------------------------------------------------------------------- #
 def build(job: dict):
     arm = import_vrm(Path(job["vrm"]))
     rig = Rig(arm)
     face = Face(rig, float(job.get("mouth_gain", 1.0)))
+    character_meshes = [o for o in bpy.data.objects if o.type == "MESH"]  # before any set-dressing planes exist
+    style = job.get("style") or {}
     if job["mouth_style"] not in MOUTH_STYLES:
         raise PipelineError(f"mouth_style must be one of {', '.join(MOUTH_STYLES)}")
     gestures = []
@@ -762,12 +1012,26 @@ def build(job: dict):
             if node is not None and "Shading Shift" in node.inputs:
                 face_shift_sockets.append(node.inputs["Shading Shift"])
     cam = setup_camera(job)
+    rib_cfg, lines_cfg = style.get("ribbon") or {}, style.get("line_art") or {}
+    ribbon = Ribbon(rib_cfg, rig, job, gestures) if rib_cfg.get("enabled") else None
+    fx_light = FxLight(rib_cfg["light"]) if ribbon and rib_cfg.get("light", {}).get("enabled", True) else None
+    # Faces keep their MToon outline only: Line Art traces the stacked eye/lash/mouth layers inside a VRoid face
+    # mesh as scribbles. `exclude` = mesh-name substrings.
+    inked = [o for o in character_meshes
+             if not any(x.lower() in o.name.lower() for x in lines_cfg.get("exclude", ["Face"]))]
+    ink = setup_line_art("CharacterInk", inked, lines_cfg) if lines_cfg.get("enabled") and inked else None
+    fx_ink = (setup_line_art("FxInk", ribbon.objects, {**lines_cfg, **(rib_cfg.get("line_art") or {})})
+              if ribbon and ink is not None else None)
 
     scene = bpy.context.scene
     total = int(round(job["duration"] * job["fps"]))
     scene.frame_start, scene.frame_end = 1, total
     on = int(job["on"])
     drawings = [f for f in range(1, total + 1) if (f - 1) % on == 0]
+    # Mixed timing (style.fx_on_ones): the character holds each drawing for `on` frames, while camera, effects and
+    # lines move on every frame, like 2D characters composited over 3D cameras and effects.
+    char_frames = set(drawings)
+    frames = list(range(1, total + 1)) if style.get("fx_on_ones") else drawings
     blinks = blink_times(job)
     plane_point = cuts[0].target * Vector((1, 1, 0)) - rig.forward * float(job["camera"]["background_distance"])
     corners: list[Vector] = []
@@ -775,7 +1039,7 @@ def build(job: dict):
     old_interp = prefs.keyframe_new_interpolation_type
     prefs.keyframe_new_interpolation_type = "CONSTANT"  # held drawings and hard cuts, like limited animation
     try:
-        for f in drawings:
+        for f in frames:
             t = (f - 1) / job["fps"]
             cut = next(c for c in reversed(cuts) if c.at <= t + 1e-6)
             for flag, owner in zip(flags, cuts):
@@ -787,14 +1051,28 @@ def build(job: dict):
             for sock in face_shift_sockets:
                 sock.default_value = shift
                 sock.keyframe_insert("default_value", frame=f)
-            rig.apply(body_pose(rig, t, job, gestures), f)
-            face.apply(face_weights(t, job, blinks), f)
-            key_camera(cam, cut, t, job, f)
+            if f in char_frames:
+                rig.apply(body_pose(rig, t, job, gestures), f)
+                face.apply(face_weights(t, job, blinks), f)
+            dist = key_camera(cam, cut, t, job, f)
             corners += cut.corners(cam.location.copy(), cam.rotation_quaternion.copy(), plane_point, rig.forward)
+            if ink is not None:
+                key_line_art(ink, float(lines_cfg["px"]), dist, cut, job, f)
+            if fx_ink is not None:
+                key_line_art(fx_ink, float((rib_cfg.get("line_art") or {}).get("px", lines_cfg["px"])), dist, cut,
+                             job, f)
+            if ribbon is not None:
+                ribbon.key(t, f)
+                if fx_light is not None:
+                    fx_light.key(ribbon.envelope(t), f)
     finally:
         prefs.keyframe_new_interpolation_type = old_interp
     setup_background(job, rig, corners, plane_point)
-    return drawings, total
+    if (style.get("embers") or {}).get("enabled"):
+        setup_embers(style["embers"], rig, plane_point, total, int(job["fps"]))
+    if (style.get("bloom") or {}).get("enabled"):
+        setup_bloom(style["bloom"])
+    return frames, total
 
 
 def render(job: dict, drawings: list[int], total: int) -> dict:
@@ -808,6 +1086,7 @@ def render(job: dict, drawings: list[int], total: int) -> dict:
         total = min(total, int(limit))
         drawings = [f for f in drawings if f <= total]
     on = int(job["on"])
+    hold_frames = 1 if (job.get("style") or {}).get("fx_on_ones") else on
     if job.get("spring_bones", True):
         # Spring bones start from the T-pose; step the simulation through a pre-roll (held at the frame-1
         # pose by constant extrapolation) so hair and sleeves have settled when frame 1 renders.
@@ -824,7 +1103,7 @@ def render(job: dict, drawings: list[int], total: int) -> dict:
         times.append(time.perf_counter() - t0)
         if not out.is_file():
             raise PipelineError(f"Eevee did not write {out}")
-        for hold in range(f + 1, min(f + on, total + 1)):
+        for hold in range(f + 1, min(f + hold_frames, total + 1)):
             dst = frames_dir / f"frame_{hold:05d}.png"
             try:
                 os.link(out, dst)

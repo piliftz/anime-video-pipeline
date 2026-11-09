@@ -64,6 +64,17 @@
     "Ren": {
       "voice": "en-US-ChristopherNeural",
       "subtitle_color": "#1C5D99"
+    },
+    "Hero": {
+      "engine": "qwen3",
+      "qwen3": {
+        "voice": "hero",
+        "delivery": ["calm", "shout"],
+        "seed": 1,
+        "language": "English",
+        "sentence_pause": 0.35
+      },
+      "subtitle_color": "#E8590C"
     }
   },
   "audio": {

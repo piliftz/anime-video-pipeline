@@ -230,9 +230,12 @@ def build_storyboard(ep: Episode, lang: str) -> tuple[dict, list[str]]:
                 if not line.get(sub_lang):
                     raise PipelineError(f"[{cut['id']}] dialogue has no '{sub_lang}' text for the subtitles.")
                 scene["narration"]["subtitle_text"] = line[sub_lang]
-            style = line.get(f"{lang}_style")  # per-line emotion style, e.g. VOICEVOX "悲しみ"
-            if style and voices.get(line["speaker"], {}).get("engine") == "voicevox":
+            style = line.get(f"{lang}_style")  # per-line emotion: VOICEVOX style ("悲しみ") or qwen3 delivery
+            engine = voices.get(line["speaker"], {}).get("engine")
+            if style and engine == "voicevox":
                 scene["narration"]["voicevox"] = {**voices[line["speaker"]].get("voicevox", {}), "style": style}
+            elif style and engine == "qwen3":
+                scene["narration"]["qwen3"] = {**voices[line["speaker"]].get("qwen3", {}), "delivery": style}
         sfx = []
         for cue in cut.get("sfx", []):
             path = path_for_name(cue["name"], manifest)

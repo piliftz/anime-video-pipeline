@@ -2,6 +2,29 @@
 
 Read this, then `CLAUDE.md` ("Working with the owner") and `docs/LOCAL_ANIME_PIPELINE.md`, before doing anything.
 
+## UPDATE 2026-11-08: direction is now 2D cel, v4 APPROVED
+The owner rejected the Blender/VRM style test ("THIS LOOKS 3D I WANT 2D"); the 3D sections below are history.
+The **approved** look is the 2D cel prototype v4 (`output/cel_test/APPROVED_cel_v4.mp4`, code in
+`prototypes/cel_shot/`, run from the repo root; it reads `character_shot_style_template.json` for voice and timing):
+- One Animagine XL drawing per cut. Masked redraws (`cel_variants.py` + `cel_jobs*.json`) add mouth shapes, angry
+  faces and water "boil" frames, pasted back so the pixels outside the mask never change.
+- **Movement is rigid only.** The character is cut out with rembg `isnet-anime` (`cel_matte*.py`, venv
+  `C:\Users\adu94\tools\rembg-env`; dark close-ups need a brightened copy). It is moved by tilt, shift and uniform
+  scale over a push-pull-filled background plate. The owner rejected v3's bending warps as lens distortion: never
+  bend a drawing. Extreme close-ups move the whole cel.
+- Acting comes from the voice: an inhale before speaking, head nods on stressed-syllable onsets, and a beat (dip,
+  then lift) before the strike. The strike lunges on ones with a smear; the impact frame and flash come from the
+  orchestrator.
+- Lip sync: the mouth is on screen whenever she speaks, with three mouth drawings per talking cut, flaps on twos
+  (`drawn_mouth_cues`, lead 0.04 s). Cuts land in speech gaps.
+- **Now a module:** `scripts/cel_shot.py` + `cel_shot_template.json`, which reproduces v4. Audio is
+  bit-identical and frames are within 1/255. Speed: about 1.3 s per frame on CPU. `prototypes/cel_shot/` is
+  kept as the record of v4.
+- Not done yet:
+  - character consistency across cuts (hair colour drifts);
+  - hair motion via redrawn hair frames (not warps);
+  - new poses (ControlNet).
+
 ## Where things stand
 - The first show (Arc-Forge) was scrapped and removed; a **new story** will be written later. Don't write one yet.
 - The owner rejected the old output as a "school project": no lip-sync, no character movement, no expressions, flat
@@ -74,5 +97,22 @@ The owner is designing one character in **VRoid Studio** and will export a `.vrm
 Keep new code to the repo's rules in CLAUDE.md (pathlib, PipelineError, no stubs, verify by inspecting frames).
 
 ## Open research (in parallel, report before adopting)
-- Free, **commercially licensed**, expressive local TTS (the voice is the weakest link). Test by ear.
+- ~~Free, commercially licensed, expressive local TTS~~ **DONE 2026-11-08: hero voice LOCKED.** The hero is
+  female. Voice = Qwen3-TTS 1.7B **Base** clone (Apache-2.0) from two owner-approved Qwen3 VoiceDesign takes:
+  `assets/voices/hero_calm_seed3.wav` for quiet/bitter lines, `hero_shout_seed3.wav` for battle cries (the clone
+  copies delivery from the ref; it takes no text instructions). Recipe + ref texts: `assets/voices/hero_ref.json`
+  (WAVs gitignored). Runs in `C:\Users\adu94\tools\tts\qwen3` (torch cu128, HF_HOME=tools/tts/hf), ~2.3x realtime,
+  4.2 GB VRAM. Rejected: edge-tts (can't shout), Chatterbox and IndexTTS-2.5 clones (lose her voice), raw
+  VoiceDesign per line (voice drifts by seed). Never IndexTTS-2.0 (CC-BY-NC codec). **Wired in 2026-11-08:**
+  `engine: "qwen3"`, `qwen3: {voice: "hero", delivery: "calm" | "shout" | ["calm", "shout"] per sentence}`
+  (scripts/qwen3_tts_worker.py runs in $QWEN3_TTS_PYTHON; README "Qwen3 character voices"). Test render with the
+  approved v3 shot: output/hero_voice_test/ (spec temp/hero_voice_test.json, fx/ECU retimed to her shorter line).
+  **v2 APPROVED 2026-11-08** (owner: "ADJUST PACE, lip sync a little off" -> fixed -> "Approved"), now IS
+  `character_shot_template.json`: her voice, offset 0.7, 0.6 s silent beat (head lifts, fist winds up), fist apex
+  + impact + boom + punch + speed lines on the first shouted word, face cut +0.55, 1.5 s final eye close-up; all
+  hits use `at_sentence` so they follow the voice. Lip-sync is `mouth_source: flaps` (syllable envelope; Rhubarb
+  only for M/B/P closures) + `mouth_lead` 0.04: Rhubarb alone held one half-open shape through her whole shout.
+  The template render (output/lipsync_test/) matches the approved test: audio bit-identical, video 56.8 dB PSNR.
+  When hero.vrm lands: copy the template, point `vrm` at it, render. Known: with ~2 GB free RAM the Qwen3 worker can
+  crash loading weights (0xC0000005); it retries 3x. An idle ComfyUI (4.8 GB) + Chrome (13.6 GB) were the big users.
 - Music: MIDI + FluidSynth vs. CC0 tracks vs. a local music model, compared by ear.

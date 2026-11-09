@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
-"""Neural voiceover generation with edge-tts.
+"""Voiceover generation: edge-tts (online), VOICEVOX (local, Japanese) and Qwen3-TTS voice clones (local).
 
 NOTE: edge-tts is free and needs no API key, but it is NOT offline. It sends
 text to Microsoft's online Edge "Read Aloud" service. Use ``--fallback silence``
 to keep the rest of the pipeline working offline (silent placeholder tracks of
 estimated length).
+
+Qwen3 lines (engine "qwen3") clone a registered character voice, assets/voices/<voice>_ref.json, from the
+reference clip for the requested delivery (calm, shout, ...). They run in a separate Python env
+($QWEN3_TTS_PYTHON) through scripts/qwen3_tts_worker.py, one model load per render.
 
 Outputs, per line:
   <out_dir>/<id>_<hash>.wav    48 kHz PCM, ready for editing
@@ -24,14 +28,17 @@ import asyncio
 import contextlib
 import hashlib
 import json
+import os
 import re
 import subprocess
 import sys
+import time
 import wave
 from dataclasses import dataclass, field
 from pathlib import Path
 
 from pipeline_utils import (
+    ASSETS_DIR,
     TEMP_DIR,
     PipelineError,
     ensure_dir,
@@ -52,6 +59,12 @@ FALLBACK_WORDS_PER_SECOND = 2.6
 FALLBACK_CJK_CHARS_PER_SECOND = 7.0
 _CJK_RE = re.compile(r"[぀-ヿ㐀-䶿一-鿿가-힯]")
 _SENTENCE_RE = re.compile(r"(?<=[.!?。！？…])\s*")
+ENGINES = ("edge", "voicevox", "qwen3")
+VOICE_KEYS = ("voice", "rate", "pitch", "volume", "engine", "voicevox", "qwen3")  # speaker keys that set the voice
+VOICES_DIR = ASSETS_DIR / "voices"
+QWEN3_MODEL = "Qwen/Qwen3-TTS-12Hz-1.7B-Base"
+QWEN3_DEFAULTS = {"voice": None, "delivery": None, "seed": 1, "language": "English", "sentence_pause": 0.35}
+QWEN3_WORKER = Path(__file__).resolve().parent / "qwen3_tts_worker.py"
 
 
 @dataclass
@@ -64,13 +77,15 @@ class VoiceLine:
     volume: str = "+0%"
     speaker: str | None = None
     extra: dict = field(default_factory=dict)
-    engine: str = "edge"                              # "edge" (edge-tts) or "voicevox"
+    engine: str = "edge"                              # "edge" (edge-tts), "voicevox" or "qwen3"
     vv: dict = field(default_factory=dict)            # voicevox: speaker, style, speed, pitch, intonation, ...
+    qw: dict = field(default_factory=dict)            # qwen3, resolved: voice, delivery, seed, ref_audio, ref_sha...
 
     def cache_key(self) -> str:
         raw = "|".join([self.text, self.voice, self.rate, self.pitch, self.volume])
         if self.engine != "edge":
-            raw += "|" + self.engine + "|" + json.dumps(self.vv, sort_keys=True, ensure_ascii=False)
+            settings = self.qw if self.engine == "qwen3" else self.vv
+            raw += "|" + self.engine + "|" + json.dumps(settings, sort_keys=True, ensure_ascii=False)
         return hashlib.sha1(raw.encode("utf-8")).hexdigest()[:10]
 
     def stem(self) -> str:
@@ -85,6 +100,53 @@ def _validate_prosody(value: str, unit: str, name: str) -> str:
     if not re.fullmatch(rf"[+-]\d+{unit}", value):
         raise PipelineError(f"{name} must look like '+10{unit}' or '-5{unit}', got {value!r}")
     return value
+
+
+def resolve_qwen3_voice(cfg: dict, text: str, line_id: str) -> dict:
+    """Merge qwen3 settings with defaults and resolve reference clips from assets/voices/<voice>_ref.json.
+
+    The registry's ``engine.refs`` maps a delivery name to {audio (relative to the registry file), text (its exact
+    transcript)}. ``delivery`` is one name for the whole line, or a list with one name per sentence (the last one
+    repeats), e.g. ["calm", "shout"]: quiet setup, shouted payoff. Clip hashes go into the cache key, so
+    replacing a reference re-voices its lines.
+    """
+    cfg = {**QWEN3_DEFAULTS, **cfg}
+    voice, delivery = cfg.get("voice"), cfg.get("delivery")
+    if not voice:
+        raise PipelineError(f"[{line_id}] engine qwen3 needs qwen3.voice (a name in assets/voices/<name>_ref.json).")
+    registry = VOICES_DIR / f"{voice}_ref.json"
+    if not registry.is_file():
+        raise PipelineError(f"[{line_id}] qwen3 voice '{voice}' is not registered: {registry} is missing.")
+    engine = load_json(registry).get("engine") or {}
+    refs = engine.get("refs") or {}
+    if not refs:
+        raise PipelineError(f"[{line_id}] {registry.name} has no engine.refs (delivery -> reference clip).")
+    if not delivery:
+        if len(refs) != 1:
+            raise PipelineError(f"[{line_id}] qwen3 voice '{voice}' needs qwen3.delivery: one of {sorted(refs)}.")
+        delivery = next(iter(refs))
+    names = [delivery] if isinstance(delivery, str) else list(delivery)
+    if not names or not all(isinstance(n, str) for n in names):
+        raise PipelineError(f"[{line_id}] qwen3.delivery must be a name or a list of names, got {delivery!r}.")
+    sentences = split_sentences(text) if len(names) > 1 else [text]
+    segments = []
+    for i, sentence in enumerate(sentences):
+        name = names[min(i, len(names) - 1)]
+        if name not in refs:
+            raise PipelineError(f"[{line_id}] qwen3 voice '{voice}' has no delivery '{name}' "
+                                f"(registered: {sorted(refs)}).")
+        ref = refs[name]
+        audio = (registry.parent / ref["audio"]).resolve()
+        if not audio.is_file():
+            raise PipelineError(f"[{line_id}] reference clip for {voice}/{name} is missing: {audio} "
+                                "(voice WAVs are gitignored; copy them onto this machine).")
+        if not (ref.get("text") or "").strip():
+            raise PipelineError(f"[{line_id}] {registry.name}: refs.{name}.text (the clip's transcript) is empty.")
+        segments.append({"text": sentence, "delivery": name, "ref_audio": str(audio), "ref_text": ref["text"].strip(),
+                         "ref_sha": hashlib.sha1(audio.read_bytes()).hexdigest()[:12]})
+    return {"voice": voice, "delivery": delivery, "seed": int(cfg["seed"]), "language": cfg["language"],
+            "sentence_pause": float(cfg["sentence_pause"]), "model": engine.get("model_id") or QWEN3_MODEL,
+            "segments": segments}
 
 
 def make_line(entry: dict, defaults: dict, index: int) -> VoiceLine | None:
@@ -102,8 +164,11 @@ def make_line(entry: dict, defaults: dict, index: int) -> VoiceLine | None:
         engine=entry.get("engine") or defaults.get("engine") or "edge",
         vv={**(defaults.get("voicevox") or {}), **(entry.get("voicevox") or {})},
     )
-    if line.engine not in ("edge", "voicevox"):
-        raise PipelineError(f"[{line.id}] unknown TTS engine '{line.engine}' (use edge or voicevox).")
+    if line.engine not in ENGINES:
+        raise PipelineError(f"[{line.id}] unknown TTS engine '{line.engine}' (use {', '.join(ENGINES)}).")
+    if line.engine == "qwen3":
+        line.qw = resolve_qwen3_voice({**(defaults.get("qwen3") or {}), **(entry.get("qwen3") or {})}, text,
+                                      line.id)
     if line.engine == "voicevox" and not line.vv.get("speaker"):
         raise PipelineError(f"[{line.id}] engine voicevox needs voicevox.speaker (a VOICEVOX character name).")
     return line
@@ -118,7 +183,7 @@ def lines_from_storyboard(storyboard: dict) -> list[VoiceLine]:
         if not narration.get("text"):
             continue
         speaker_cfg = speakers.get(narration.get("speaker") or "", {})
-        merged_defaults = {**defaults, **{k: v for k, v in speaker_cfg.items() if k in ("voice", "rate", "pitch", "volume", "engine", "voicevox")}}
+        merged_defaults = {**defaults, **{k: v for k, v in speaker_cfg.items() if k in VOICE_KEYS}}
         entry = {**narration, "id": scene.get("id") or f"scene_{i:02d}"}
         line = make_line(entry, merged_defaults, i)
         if line:
@@ -274,6 +339,75 @@ def _synthesize_voicevox(line: VoiceLine, raw_wav: Path) -> list[dict]:
     return []  # sentence timings are spread proportionally (VOICEVOX gives per-mora data, not sentence events)
 
 
+_QW_ERRORS: dict[str, str] = {}  # line id -> error from the last Qwen3 worker batch
+_QW_BOUNDARIES: dict[str, list[dict]] = {}  # line id -> sentence timings measured by the worker
+
+
+def qwen3_python() -> Path:
+    exe = os.environ.get("QWEN3_TTS_PYTHON")
+    if not exe:
+        raise PipelineError("QWEN3_TTS_PYTHON is not set: point it at the python.exe of the Qwen3-TTS env "
+                            "(e.g. C:\\Users\\you\\tools\\tts\\qwen3\\Scripts\\python.exe).")
+    if not Path(exe).is_file():
+        raise PipelineError(f"QWEN3_TTS_PYTHON points at a missing file: {exe}")
+    return Path(exe)
+
+
+def run_qwen3_batch(lines: list[VoiceLine], out_dir: Path) -> None:
+    """Voice every pending Qwen3 line in ONE worker process per model (it loads once). Writes <stem>.raw.wav;
+    per-line failures land in _QW_ERRORS. Raises PipelineError if the worker cannot run at all."""
+    _QW_ERRORS.clear()
+    _QW_BOUNDARIES.clear()
+    exe = qwen3_python()
+    job_dir = ensure_dir(out_dir / "qwen3_jobs")
+    for model in sorted({l.qw["model"] for l in lines}):
+        batch = [l for l in lines if l.qw["model"] == model]
+        tag = hashlib.sha1("|".join(l.stem() for l in batch).encode()).hexdigest()[:10]
+        job, result = job_dir / f"job_{tag}.json", job_dir / f"result_{tag}.json"
+        result.unlink(missing_ok=True)
+        save_json(job, {"model": model, "lines": [
+            {"id": l.id, "out": str(out_dir / f"{l.stem()}.raw.wav"), "language": l.qw["language"],
+             "seed": l.qw["seed"], "sentence_pause": l.qw["sentence_pause"],
+             "segments": [{k: seg[k] for k in ("text", "ref_audio", "ref_text")} for seg in l.qw["segments"]]}
+            for l in batch]})
+        env = {**os.environ, "HF_HUB_OFFLINE": "1", "PYTHONIOENCODING": "utf-8"}
+        if os.environ.get("QWEN3_TTS_HF_HOME"):
+            env["HF_HOME"] = os.environ["QWEN3_TTS_HF_HOME"]
+        log.info("Qwen3-TTS: voicing %d line(s) with %s", len(batch), model)
+        # When RAM is tight, Windows can fail to page in the memory-mapped weights while the model loads, and the
+        # worker dies natively (0xC0000005, in torch storage __getitem__). The files are fine and a retry usually
+        # loads, so allow a few attempts; -X faulthandler puts the native crash site in stderr.
+        attempts = 3
+        for attempt in range(1, attempts + 1):
+            proc = subprocess.run([str(exe), "-I", "-X", "faulthandler", str(QWEN3_WORKER), str(job), str(result)],
+                                  env=env, capture_output=True, text=True, encoding="utf-8", errors="replace")
+            if result.is_file() or attempt == attempts:
+                break
+            log.warning("Qwen3-TTS worker crashed (exit %d, attempt %d/%d; usually low free RAM while loading); "
+                        "retrying in 5 s.", proc.returncode, attempt, attempts)
+            time.sleep(5)
+        for row in proc.stdout.splitlines():
+            if row.startswith("qwen3 worker:"):
+                log.info("%s", row)
+        if not result.is_file():
+            tail = "\n".join((proc.stderr or proc.stdout).strip().splitlines()[-8:])
+            raise PipelineError(f"Qwen3-TTS worker failed (exit {proc.returncode}) after {attempts} attempts. Check "
+                                f"QWEN3_TTS_PYTHON / QWEN3_TTS_HF_HOME and that {model} is downloaded; an access "
+                                f"violation while loading usually means too little free RAM (close big apps).\n{tail}")
+        res = load_json(result)
+        _QW_ERRORS.update(res.get("errors") or {})
+        _QW_BOUNDARIES.update(res.get("boundaries") or {})
+
+
+def _synthesize_qwen3(line: VoiceLine, raw_wav: Path) -> list[dict]:
+    """The batch already ran; pick up its output for this line."""
+    if line.id in _QW_ERRORS:
+        raise PipelineError(f"Qwen3-TTS: {_QW_ERRORS[line.id]}")
+    if not raw_wav.is_file():
+        raise PipelineError("Qwen3-TTS worker produced no audio for this line.")
+    return _QW_BOUNDARIES.get(line.id, [])  # measured per sentence when the line is split, else proportional
+
+
 async def synthesize_line(
     line: VoiceLine,
     out_dir: Path,
@@ -306,6 +440,8 @@ async def synthesize_line(
         try:
             if line.engine == "voicevox":
                 boundaries = await asyncio.to_thread(_synthesize_voicevox, line, mp3_path)
+            elif line.engine == "qwen3":
+                boundaries = _synthesize_qwen3(line, mp3_path)
             else:
                 boundaries = await _synthesize_edge(line, mp3_path, proxy)
             _mp3_to_wav(mp3_path, wav_path)
@@ -319,16 +455,22 @@ async def synthesize_line(
                 "rate": line.rate, "pitch": line.pitch, "volume": line.volume,
                 "audio": str(wav_path), "duration": round(duration, 3),
                 "boundaries": boundaries, "fallback": False, "engine": line.engine, "voicevox": line.vv or None,
+                "qwen3": line.qw or None,
                 "trimmed": True, "trimmed_seconds": [round(lead, 3), round(tail, 3)],
             }
             save_json(meta_path, meta)
-            who = f"VOICEVOX {line.vv.get('speaker')}/{line.vv.get('style_used', '')}" if line.engine == "voicevox" else line.voice
+            who = (f"VOICEVOX {line.vv.get('speaker')}/{line.vv.get('style_used', '')}" if line.engine == "voicevox"
+                   else f"Qwen3 {line.qw['voice']}/{'+'.join(s['delivery'] for s in line.qw['segments'])} "
+                        f"seed {line.qw['seed']}"
+                   if line.engine == "qwen3" else line.voice)
             log.info("voiced   %-14s %.2fs  %s (%s; trimmed %.2fs)",
                      line.id, duration, wav_path.name, who, lead + tail)
             return meta
         except Exception as exc:  # network errors, service hiccups, bad voice names
             last_error = exc
             mp3_path.unlink(missing_ok=True)
+            if line.engine == "qwen3":
+                break  # local batch output: retrying cannot change it
             if attempt < retries:
                 wait = 2 ** attempt
                 log.warning("%s failed for '%s' (attempt %d/%d): %s -- retrying in %ds",
@@ -337,9 +479,9 @@ async def synthesize_line(
 
     if fallback != "silence":
         raise PipelineError(
-            f"Voiceover for '{line.id}' ({line.engine}) failed after {retries} attempts: {last_error}\n"
+            f"Voiceover for '{line.id}' ({line.engine}) failed: {last_error}\n"
             + ("Start the VOICEVOX app or set VOICEVOX_RUN. "
-               if line.engine == "voicevox" and "Cannot reach" in str(last_error) else "" if line.engine == "voicevox" else
+               if line.engine == "voicevox" and "Cannot reach" in str(last_error) else "" if line.engine != "edge" else
                "edge-tts needs internet access to speech.platform.bing.com. ") +
             "Re-run with --tts-fallback silence (orchestrator) / --fallback silence to continue offline."
         )
@@ -353,7 +495,8 @@ async def synthesize_line(
         "fallback": True, "error": str(last_error),
     }
     save_json(meta_path, meta)
-    log.warning("SILENT   %-14s %.2fs  placeholder (edge-tts unavailable: %s)", line.id, duration, last_error)
+    log.warning("SILENT   %-14s %.2fs  placeholder (%s unavailable: %s)", line.id, duration, line.engine,
+                last_error)
     return meta
 
 
@@ -388,6 +531,15 @@ async def synthesize_all(
                 if fallback != "silence":
                     raise
                 log.warning("VOICEVOX engine unavailable; Japanese lines will be silent placeholders.")
+        pending_qw = [l for l in lines if l.engine == "qwen3" and not cached(l)]
+        if pending_qw:
+            try:
+                await asyncio.to_thread(run_qwen3_batch, pending_qw, out_dir)
+            except PipelineError as exc:
+                if fallback != "silence":
+                    raise
+                log.warning("Qwen3-TTS unavailable (%s); its lines will be silent placeholders.", exc)
+                _QW_ERRORS.update({l.id: str(exc) for l in pending_qw})
         try:
             results = await asyncio.gather(*(run(l) for l in lines))
         finally:

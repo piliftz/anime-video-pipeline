@@ -25,6 +25,7 @@ import os
 import shutil
 import subprocess
 import sys
+import wave
 from pathlib import Path
 
 from pipeline_utils import (
@@ -43,8 +44,9 @@ SHOT_DEFAULTS = {
     "duration": 10.0,
     "render": {"resolution": [1920, 1080], "fps": 24, "on": 2, "samples": 16},
     "line": {"text": "", "voice": None, "rate": "+0%", "pitch": "+0Hz", "volume": "+0%", "engine": "edge",
-             "voicevox": None, "offset": 1.0, "tail": 0.5, "recognizer": "pocketSphinx",
-             "mouth_style": "anime", "mouth_gain": 1.0, "subtitle_text": None},
+             "voicevox": None, "qwen3": None, "offset": 1.0, "tail": 0.5, "recognizer": "pocketSphinx",
+             "mouth_style": "anime", "mouth_gain": 1.0, "mouth_source": "flaps", "mouth_lead": 0.04,
+             "subtitle_text": None},
     # [{"name": VRM expression | "shape_keys": {key: weight}, "weight", "at"|"at_sentence"+"delay", "ramp"}]
     "expressions": [],
     "gestures": [],      # [{"name": fist_raise|fist_to_chest|head_down|nod, "side", "at"|"at_sentence", "hold"}]
@@ -66,6 +68,28 @@ SHOT_DEFAULTS = {
     "spring_bones": True,
     "sfx": [],           # [{"file", "at"|"at_sentence", "volume"}]
     "fx": {},            # passed to the storyboard scene (fade_in, fade_out, color_grade, ...)
+    # Hybrid "studio digital anime" pass (all off by default): drawn ink lines, an elemental ribbon that lights the
+    # character, embers, bloom, and camera/effects on ones while the character stays on `render.on`.
+    "style": {
+        "fx_on_ones": False,
+        "line_art": {"enabled": False, "px": 2.6, "color": [0.16, 0.08, 0.07], "crease_deg": 140, "taper": 0.3,
+                     "exclude": ["Face"]},
+        "ribbon": {
+            "enabled": False, "kind": "water", "at": 0.0, "grow": 0.3, "hold": 0.35, "fade": 0.45,
+            "target": "right_hand", "turns": 3.0,
+            "layers": [
+                {"radius": 0.075, "width": 0.032, "color": [0.30, 0.70, 1.0], "strength": 1.1},
+                {"radius": 0.065, "width": 0.022, "color": [0.70, 0.93, 1.0], "strength": 1.5, "phase_deg": 120},
+                {"radius": 0.055, "width": 0.008, "color": [1.0, 1.0, 1.0], "strength": 2.2, "phase_deg": 240},
+            ],
+            "line_art": {"color": [0.03, 0.10, 0.35], "px": 2.0},
+            "light": {"enabled": True, "color": [0.45, 0.85, 1.0], "strength": 1.6, "fresnel_power": 2.2,
+                      "shade_tint": 0.55},
+        },
+        "embers": {"enabled": False, "count": 260, "color": [1.0, 0.55, 0.18], "strength": 6.0, "size": 0.006,
+                   "rise": 0.35, "drift": 0.15, "near": 0.6, "floor": -0.4, "width": 5.0, "seed": 7},
+        "bloom": {"enabled": False, "threshold": 0.95, "size": 0.55, "strength": 0.9},
+    },
 }
 CUT_DEFAULTS = {
     "framing": "medium",       # extreme_closeup | closeup | medium_closeup | medium
@@ -77,6 +101,7 @@ CUT_DEFAULTS = {
 }
 RECOGNIZERS = ("pocketSphinx", "phonetic")
 MOUTH_STYLES = ("anime", "visemes")
+MOUTH_SOURCES = ("flaps", "rhubarb")
 
 
 # --------------------------------------------------------------------------- #
@@ -101,6 +126,15 @@ def load_shot(path: Path) -> tuple[dict, Path]:
         errors.append(f"line.recognizer must be one of {RECOGNIZERS} (phonetic for non-English).")
     if shot["line"]["mouth_style"] not in MOUTH_STYLES:
         errors.append(f"line.mouth_style must be one of {MOUTH_STYLES}.")
+    if shot["line"]["mouth_source"] not in MOUTH_SOURCES:
+        errors.append(f"line.mouth_source must be one of {MOUTH_SOURCES}.")
+    elif shot["line"]["mouth_source"] == "flaps" and shot["line"]["mouth_style"] != "anime":
+        errors.append("line.mouth_source 'flaps' needs mouth_style 'anime' (visemes need mouth_source 'rhubarb').")
+    if not 0.0 <= float(shot["line"]["mouth_lead"]) <= 0.15:
+        errors.append("line.mouth_lead must be 0-0.15 s (mouth drawn this much before the sound; ~1 frame).")
+    for key, val in fx_times(shot["fx"]):
+        if isinstance(val, dict) and ("at_sentence" not in val or "at" in val):
+            errors.append(f"fx {key}: a timed dict needs 'at_sentence' (+ optional 'delay'), or use seconds.")
     for i, cue in enumerate(shot["expressions"]):
         if ("name" in cue) == ("shape_keys" in cue):
             errors.append(f"expressions[{i}]: give exactly one of 'name' (VRM expression) or 'shape_keys'.")
@@ -115,6 +149,17 @@ def load_shot(path: Path) -> tuple[dict, Path]:
         for i, cue in enumerate(shot[group]):
             if ("at" in cue) == ("at_sentence" in cue):
                 errors.append(f"{group}[{i}]: give exactly one of 'at' (seconds) or 'at_sentence' (1-based).")
+    rib = shot["style"].get("ribbon") or {}
+    if rib.get("enabled"):
+        if rib.get("at_sentence") is not None and "at" in rib and rib["at"] != SHOT_DEFAULTS["style"]["ribbon"]["at"]:
+            errors.append("style.ribbon: give 'at' (seconds) or 'at_sentence', not both.")
+        if rib.get("at_sentence") is not None:
+            rib.pop("at", None)
+        if not rib.get("layers"):
+            errors.append("style.ribbon.layers: at least one layer {radius, width, color, strength}.")
+    lines = shot["style"].get("line_art") or {}
+    if lines.get("enabled") and not 0.5 <= float(lines.get("px", 0)) <= 12:
+        errors.append("style.line_art.px must be 0.5-12 (ink width in pixels at 1080p).")
     for i, p in enumerate(shot["camera"]["punches"]):
         if ("at" in p) == ("at_sentence" in p):
             errors.append(f"camera.punches[{i}]: give exactly one of 'at' or 'at_sentence'.")
@@ -122,6 +167,122 @@ def load_shot(path: Path) -> tuple[dict, Path]:
         raise PipelineError(f"{path}:\n  " + "\n  ".join(errors))
     shot["_vrm"], shot["_background"] = vrm, bg
     return shot, base
+
+
+def fx_times(fx: dict) -> list[tuple[str, object]]:
+    """The fx fields that are times: impact.at[i], speed_lines.start/end. Each is seconds or {at_sentence, delay}."""
+    out: list[tuple[str, object]] = []
+    for i, t in enumerate((fx.get("impact") or {}).get("at") or []):
+        out.append((f"impact.at[{i}]", t))
+    for k in ("start", "end"):
+        if k in (fx.get("speed_lines") or {}):
+            out.append((f"speed_lines.{k}", fx["speed_lines"][k]))
+    return out
+
+
+def resolve_fx(fx: dict, sentences: list[dict], offset: float) -> dict:
+    """Copy of fx with sentence-relative times turned into seconds, so hits follow the voice when it changes."""
+    fx = json.loads(json.dumps(fx))
+
+    def res(v: object) -> object:
+        return round(resolve_time(v, sentences, offset), 3) if isinstance(v, dict) else v
+
+    if (fx.get("impact") or {}).get("at"):
+        fx["impact"]["at"] = [res(t) for t in fx["impact"]["at"]]
+    for k in ("start", "end"):
+        if k in (fx.get("speed_lines") or {}):
+            fx["speed_lines"][k] = res(fx["speed_lines"][k])
+    return fx
+
+
+FLAP_OPEN, FLAP_HALF, FLAP_CLOSED = "D", "B", "X"   # anime flap drawings (blender_vrm_shot.ANIME_FLAPS)
+ROUNDED = ("E", "F")                                  # rounded vowels keep their own open drawing
+
+
+def drawn_mouth_cues(cues: list[dict], wav: Path, offset: float, duration: float, fps: int, on: int,
+                     source: str, lead: float) -> list[dict]:
+    """One mouth drawing per held frame group, decided over the whole time it is on screen (not its first instant).
+
+    Each drawing covers [t, t + on/fps) and looks ``lead`` seconds ahead (animators draw the mouth ~1 frame before
+    the sound). 'rhubarb': the Rhubarb shape covering most of that window. 'flaps' (anime): syllables from the voice's
+    loudness envelope -> open (loud) / half (soft) on each syllable, closed in the dips between syllables and in
+    silence; Rhubarb only contributes lip closures (M/B/P) and rounded vowels (oh/oo). Rhubarb alone misreads
+    shouted lines (one half-open shape held for a second), the envelope does not.
+    Returns line-relative cues, one per drawing, centred on the instant Blender samples it (no rounding overlaps).
+    """
+    import numpy as np
+
+    span = on / fps
+    grid = [(f - 1) / fps - offset for f in range(1, int(round(duration * fps)) + 1, on)]
+
+    def dominant(a: float, b: float) -> tuple[str, float]:
+        score: dict[str, float] = {"X": b - a}
+        for c in cues:
+            ov = min(b, c["end"]) - max(a, c["start"])
+            if ov > 0:
+                score[c["value"]] = score.get(c["value"], 0.0) + ov
+                score["X"] -= ov
+        best = max(score, key=lambda k: (round(score[k], 4), "XAGHFBECD".index(k)))
+        return best, score[best] / (b - a)
+
+    out: list[dict] = []
+    if source == "rhubarb":
+        for t in grid:
+            shape = dominant(t + lead, t + lead + span)[0]
+            out.append({"start": round(t - span / 2, 4), "end": round(t + span / 2, 4), "value": shape})
+        return out
+
+    with wave.open(str(wav), "rb") as wf:
+        sr, n = wf.getframerate(), wf.getnframes()
+        a = np.frombuffer(wf.readframes(n), dtype=np.int16).astype(np.float32) / 32768.0
+    hop, win = sr // 200, sr // 40                                   # 5 ms hop, 25 ms RMS window
+    frames = np.lib.stride_tricks.sliding_window_view(a, win)[::hop] if a.size > win else a[None, :]
+    db = 20 * np.log10(np.sqrt((frames ** 2).mean(axis=1)) + 1e-6)
+    db = np.convolve(db, np.ones(5) / 5, mode="same")                 # 25 ms smoothing
+    floor = float(db.max()) - 30.0
+    # syllable nuclei: local maxima above the floor that rise >= 4 dB over the valleys on both sides, >= 80 ms apart
+    peaks: list[int] = []
+    for i in range(1, len(db) - 1):
+        if not (db[i] >= db[i - 1] and db[i] > db[i + 1] and db[i] > floor):
+            continue
+        lo = i
+        while lo > 0 and db[lo - 1] <= db[i] and i - lo < 60:
+            lo -= 1
+        hi = i
+        while hi < len(db) - 1 and db[hi + 1] <= db[i] and hi - i < 60:
+            hi += 1
+        if db[i] - max(db[lo:i + 1].min(), db[i:hi + 1].min()) >= 4.0:
+            peaks.append(i)
+    kept: list[int] = []
+    for i in sorted(peaks, key=lambda i: -db[i]):
+        if all(abs(i - k) >= 16 for k in kept):
+            kept.append(i)
+    peak_t = np.array(sorted(kept), dtype=float) * hop / sr
+    peak_db = np.array([db[int(round(t * sr / hop))] for t in peak_t]) if peak_t.size else np.array([])
+
+    def env(a_s: float, b_s: float) -> np.ndarray:
+        i0, i1 = max(0, int(a_s * sr / hop)), min(len(db), int(np.ceil(b_s * sr / hop)))
+        return db[i0:i1] if i1 > i0 else np.array([-120.0])
+
+    for t in grid:
+        a_s, b_s = t + lead, t + lead + span
+        shape = FLAP_CLOSED
+        w = env(a_s, b_s)
+        rh, cover = dominant(a_s, b_s)
+        if w.max() > floor and not (rh == "A" and cover >= 0.5):      # voiced, and not a lip closure
+            inside = (peak_t >= a_s) & (peak_t < b_s)
+            if inside.any():
+                local = env(a_s - 0.6, b_s + 0.6).max()               # loudness relative to the phrase around it
+                loud = peak_db[inside].max() >= local - 6.0
+                shape = rh if rh in ROUNDED else FLAP_OPEN if loud else FLAP_HALF
+                if out and out[-1]["value"] not in (FLAP_CLOSED, "A", FLAP_HALF) and shape != FLAP_HALF:
+                    shape = FLAP_HALF  # a new syllable right after an open drawing: flap open -> half, never a hold
+            else:
+                near = peak_db[np.abs(peak_t - (a_s + b_s) / 2) < 0.2]
+                dip = (near.max() if near.size else w.max()) - w.min()
+                shape = FLAP_CLOSED if dip >= 8.0 else FLAP_HALF      # deep dip between syllables closes
+        out.append({"start": round(t - span / 2, 4), "end": round(t + span / 2, 4), "value": shape})
+    return out
 
 
 def resolve_time(cue: dict, sentences: list[dict], offset: float) -> float:
@@ -138,7 +299,8 @@ def resolve_time(cue: dict, sentences: list[dict], offset: float) -> float:
 # --------------------------------------------------------------------------- #
 def build_storyboard(shot: dict, base: Path, frames_dir: Path, output: Path, sfx_times: list[float]) -> dict:
     line, render = shot["line"], shot["render"]
-    voice_defaults = {k: line[k] for k in ("voice", "rate", "pitch", "volume", "engine", "voicevox") if line[k]}
+    voice_defaults = {k: line[k] for k in ("voice", "rate", "pitch", "volume", "engine", "voicevox", "qwen3")
+                      if line[k]}
     narration = {"text": line["text"], "offset": float(line["offset"]), "tail": float(line["tail"])}
     if line["subtitle_text"]:
         narration["subtitle_text"] = line["subtitle_text"]
@@ -261,7 +423,19 @@ def make_job(shot: dict, voice: dict, cues: list[dict], frames_dir: Path, work: 
         "blink": shot["blink"], "camera": camera, "cuts": cuts, "lighting": shot["lighting"],
         "background_mean": background_mean(shot["_background"]) if shot["_background"] else None,
         "spring_bones": bool(shot["spring_bones"]),
+        "style": resolve_style(shot["style"], sentences, offset),
     }
+
+
+def resolve_style(style: dict, sentences: list[dict], offset: float) -> dict:
+    """Copy of the style block with the ribbon's start time resolved (seconds or at_sentence + delay)."""
+    style = json.loads(json.dumps(style))
+    rib = style.get("ribbon") or {}
+    if rib.get("enabled"):
+        rib["at"] = round(resolve_time(rib, sentences, offset), 4)
+        rib.pop("at_sentence", None)
+        rib.pop("delay", None)
+    return style
 
 
 def render_frames(job: dict, work: Path, force: bool) -> None:
@@ -298,6 +472,14 @@ def run(args: argparse.Namespace) -> Path | None:
     log.info("Voice %.2fs, %d sentence(s): %s", voice["duration"], len(sentences),
              " | ".join(f"{s['start']:.2f}s" for s in sentences))
     cues = rhubarb_cues(voice, shot["line"]["recognizer"], work)
+    if cues:
+        line, render = shot["line"], shot["render"]
+        cues = drawn_mouth_cues(cues, Path(voice["audio"]), float(line["offset"]), float(shot["duration"]),
+                                int(render["fps"]), int(render["on"]), line["mouth_source"], float(line["mouth_lead"]))
+        opened = sum(1 for i, c in enumerate(cues[1:], 1) if c["value"] not in "AX" and cues[i - 1]["value"] in "AX")
+        log.info("Mouth: %s, %d drawings, %d flap openings, lead %.0f ms", line["mouth_source"],
+                 sum(1 for c in cues if c["value"] not in "AX"), opened, float(line["mouth_lead"]) * 1000)
+    shot["fx"] = resolve_fx(shot["fx"], sentences, float(shot["line"]["offset"]))
     job = make_job(shot, voice, cues, frames_dir, work)
 
     if args.benchmark:

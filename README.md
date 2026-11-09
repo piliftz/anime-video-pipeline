@@ -149,7 +149,7 @@ to the storyboard file**. Unspecified keys fall back to the defaults below.
 |---|---|
 | `project` | `title`, `output`, `resolution` [1920,1080], `fps` 24, `fit` (`cover`/`contain`/`stretch`), `background_color`, `crf` 16, `preset` `slow`, `tune` `animation`, `audio_bitrate` `192k`, `loudness_lufs` −14 (final mix normalized to YouTube's playback loudness with a −1 dBTP ceiling; `null` disables) |
 | `voice_defaults` | `voice`, `rate`, `pitch`, `volume` for every narration line |
-| `speakers` | `{ "Name": { voice, rate, pitch, volume, subtitle_color } }`, used when a narration sets `speaker`. For Japanese voices: `{ "engine": "voicevox", "voicevox": { "speaker": "青山龍星", "style": "ノーマル", "speed": 0.95 } }` (install the engine with `python scripts/setup_voicevox.py`, which needs no desktop app; list voices with `python scripts/voicevox_client.py`) |
+| `speakers` | `{ "Name": { voice, rate, pitch, volume, subtitle_color } }`, used when a narration sets `speaker`. For Japanese voices: `{ "engine": "voicevox", "voicevox": { "speaker": "青山龍星", "style": "ノーマル", "speed": 0.95 } }` (install the engine with `python scripts/setup_voicevox.py`, which needs no desktop app; list voices with `python scripts/voicevox_client.py`). For a cloned character voice (local, free, Apache-2.0): `{ "engine": "qwen3", "qwen3": { "voice": "hero", "delivery": "calm", "seed": 1, "language": "English", "sentence_pause": 0.35 } }`; see *Qwen3 character voices* below |
 | `audio` | `narration_volume`, `clip_audio_volume`, `bgm { path, volume, loop, duck_to, duck_fade, fade_in, fade_out }`. `duck_to` 0.35 means BGM drops to 35% while someone speaks. |
 | `transitions.default` | `{ "type": "cut" \| "fade_black" \| "crossfade", "duration": s }` |
 | `subtitles` | `enabled`, `burn_in`, `export_srt`, `soft_subtitles` (adds a selectable track), `show_speaker`, `max_chars_per_line`, `max_lines`, `min_cue_duration`, `style { font, font_size, bold, primary_color, outline_color, outline, shadow, shadow_alpha, blur, margin_v, margin_h, alignment, fade_in_ms, fade_out_ms }` |
@@ -328,6 +328,28 @@ for a dramatic beat; scene `sfx: [{ file, at, volume }]`; `audio.require_license
 writes `output/<name>_credits.txt` with the attribution lines your audio requires. Audio files are gitignored,
 so licensed tracks are never pushed to your repository; only the manifest is.
 
+### Qwen3 character voices
+
+`engine: "qwen3"` clones a registered character voice locally with Qwen3-TTS 1.7B Base (Apache-2.0, ~2.3x
+realtime and 4.2 GB VRAM on an RTX 5060). A voice is `assets/voices/<voice>_ref.json`, whose `engine.refs` maps a
+delivery name to a reference clip and its exact transcript (`audio` is relative to that file):
+
+```json
+{"engine": {"model_id": "Qwen/Qwen3-TTS-12Hz-1.7B-Base",
+            "refs": {"calm":  {"audio": "hero_calm_seed3.wav",  "text": "I'm not running anymore. ..."},
+                     "shout": {"audio": "hero_shout_seed3.wav", "text": "Get out of my way!"}}}}
+```
+
+The clone copies the voice **and the delivery** from the clip; there are no text instructions, and `rate` /
+`pitch` / `volume` do not apply. `qwen3` keys: `voice`, `delivery` (one name, or one per sentence with the last
+repeating, e.g. `["calm", "shout"]` for a quiet setup and a shouted payoff; split lines get measured sentence
+timings), `seed` 1, `language` `English`, `sentence_pause` 0.35 s. In episode scripts a line's `<lang>_style` sets
+the delivery. Clip hashes are in the voice cache key, so replacing a reference re-voices its lines.
+
+The model runs in its own Python env, called once per render so it loads once (`scripts/qwen3_tts_worker.py`):
+set `QWEN3_TTS_PYTHON` to that env's `python.exe` and `QWEN3_TTS_HF_HOME` to the Hugging Face cache holding the
+model. Voice WAVs are gitignored; the JSON recipe is committed.
+
 ### Character shots: lip-synced 3D cel-shaded characters (Blender + VRM + Rhubarb)
 A VRoid character (`.vrm`, **VRM 1.0**) speaks one line in front of a background, rendered headless in Blender:
 ```powershell
@@ -348,9 +370,25 @@ debug `.blend` in `temp/character_shots/<id>/`.
 
 Spec keys (`character_shot_template.json` shows all of them; paths are relative to the spec file):
 `id`, `vrm`, `background` (image on a plane behind the character, sized to cover every cut), `duration`,
-`render: {resolution, fps, on, samples}`, `line: {text, voice, rate, pitch, volume, engine, voicevox, offset,
+`render: {resolution, fps, on, samples}`, `line: {text, voice, rate, pitch, volume, engine, voicevox, qwen3, offset,
 tail, recognizer, mouth_style: anime|visemes, mouth_gain, subtitle_text}`. `anime` mouth style = readable
 closed / half / open flaps; `mouth_gain` above 1 opens wider than the model's own shapes (try 1.2-1.4).
+`mouth_source`: `flaps` (default; anime) times the flaps from the voice's syllables: open on loud syllables, half on
+soft ones or a syllable right after an open drawing, closed in the dips and on Rhubarb's M/B/P closures. Rhubarb
+alone misreads shouted lines and can hold one half-open shape for a second. `rhubarb` uses Rhubarb's shapes, and
+`visemes` style needs it. Either way each drawing gets the shape that covers most of its time on screen, drawn
+`mouth_lead` 0.04 s (about a frame) before the sound, as animators do. `fx.impact.at[]` and
+`fx.speed_lines.start/end` also take `{"at_sentence": n, "delay": s}`, so hits follow the voice when it changes.
+`style` (all off by default; `character_shot_style_template.json` turns everything on) is a hybrid studio-anime
+pass: `fx_on_ones` (camera, effects and ink move every frame while the character holds on `render.on`),
+`line_art {px, color, crease_deg, taper, exclude}` (Grease Pencil Line Art ink, constant width in pixels per cut,
+tapered ends; meshes named in `exclude` keep only their MToon outline, because a VRoid face's stacked eye layers
+trace as scribbles), `ribbon {at|at_sentence+delay, grow, hold, fade, target, turns, layers[{radius, width, color,
+strength, phase_deg}], line_art, light}` (an elemental motion trail spiralling around the path the target hand
+travels, its head on the moving fist; `light` keys a cyan rim and shadow tint into the MToon materials while it's
+up, since MToon ignores lamps), `embers {count, color, strength, size, rise, drift, near, ...}` (seeded glowing
+particles between character and background) and `bloom {threshold, size, strength}` (compositor glare on pixels
+above the threshold). Cost: ~1.5 s/frame at 1080p with everything on (vs ~0.7 s per drawing without).
 `expressions: [{name | shape_keys: {key: weight}, weight, at|at_sentence+delay, ramp}]`: `name` is any VRM
 expression on the model (`happy angry sad relaxed surprised`...; VRM override rules apply, and VRoid's emotions
 also move the mouth), `shape_keys` drives raw keys such as VRoid's `Fcl_BRW_Angry` + `Fcl_EYE_Angry` (brows and
@@ -378,6 +416,88 @@ angry brows, open angry eyes and gritted teeth between flaps from wind-up to rel
 that sentence (1-based) of the spoken line plus `delay`. Backgrounds for character shots are generated from
 `character_backgrounds.json` (`python scripts/image_generator.py character_backgrounds.json`).
 Measured on an RTX 5060 Laptop: 1080p, 16 samples, about 0.56 s per frame after the first (one medium shot).
+
+### 2D cel shots (the approved look): drawn cuts, rigid acting, lip sync
+`cel_shot.py` makes a 2D anime shot from generated drawings. The owner rejected the 3D route as looking 3D, so
+this is the main character-animation path now.
+```powershell
+# once: rembg in its own env (character cut-outs), plus Rhubarb as for character shots
+python -m venv $HOME\tools\rembg-env; & $HOME\tools\rembg-env\Scripts\pip install "rembg[cpu]"
+setx REMBG_PYTHON "$HOME\tools\rembg-env\Scripts\python.exe"
+.venv\Scripts\python scripts\cel_shot.py cel_shot_template.json --dry-run          # validate, list drawings
+.venv\Scripts\python scripts\cel_shot.py cel_shot_template.json --stills 0.5,3.2   # review PNGs only
+.venv\Scripts\python scripts\cel_shot.py cel_shot_template.json                    # drawings, frames, MP4
+```
+How a shot is built:
+1. The line is voiced exactly as in character shots.
+2. Each cut gets an Animagine keyframe, built with `image_generator`'s own job, so it is cached the same way.
+3. Each cut gets masked **redraws** for mouth shapes, faces and effect "boil" frames. A redraw is pasted back with
+   `ImageCompositeMasked`, so every pixel outside its mask stays identical to its base. `fresh: true` blanks the
+   mask first (`VAEEncodeForInpaint`), which can draw a new shape, e.g. turning an open mouth into a closed one.
+   Without it, a partial repaint keeps the existing structure.
+4. The character is cut out with rembg `isnet-anime`.
+5. Frames are composited and encoded once by the orchestrator.
+
+**Acting moves the cut-out as one rigid piece (tilt, shift, uniform scale) over a filled background plate. It
+never bends a drawing:** the owner rejected bending warps as "lens distortion". Extreme close-ups move the whole
+drawing.
+
+The motion follows the voice:
+- an inhale before she speaks;
+- head nods on stressed syllables;
+- a dip, then a look-up, just before the next cut;
+- a stepped tremble while shouting.
+
+Mouths flap from the voice envelope (`drawn_mouth_cues`); drawings and acting change on `on` (twos). The strike
+moves every frame, with a smear. Camera, embers and bloom also move every frame. Camera and pose are one bilinear
+resample. A shot takes about 1.3 s per frame on CPU, so about 3.5 min for 6.6 s, plus about 1 min per new drawing on the GPU.
+
+Spec keys (`cel_shot_template.json` reproduces the approved demo):
+
+- **Top level:**
+  - `id`, `duration`, `fps`, `on`.
+  - `line`: same keys as character shots.
+  - `character: {name, tags}`: the tags go into every drawing.
+  - `image_generation: {checkpoint, output_dir, rating}`.
+  - `redraw: {steps, cfg, sampler, scheduler, quality_tags, negative}`.
+  - `matte: {model, bright_gamma, edge, soften, grow}`.
+  - `comp: {embers: {count, seed}, bloom: {threshold, strength}}`.
+  - `sfx`, `fx`: as in character shots.
+- **`cuts[]`:** the camera hard-cuts at each `at`.
+  - `id`, `at`.
+  - `keyframe: {id, prompt, seed}`.
+  - `drawings: [{id, from: key|earlier id, shapes: [[ellipse|rect, [cx, cy, rx, ry]]], prompt, seed, denoise,
+    fresh, feather}]`.
+  - `mouth: {closed, half?, open}`: drawing ids or `key`. With no `half`, the open drawing is used.
+  - `boil: {drawings, on, after: {at, on}}`: effect frames that cycle on threes, or on twos after the hit.
+  - `layer`:
+    - `matte`: cut-out;
+    - `bright`: matte a brightened copy, for dark close-ups;
+    - `none`: move the whole drawing.
+  - `matte_ignore: [[x0, y0, x1, y1]]`: areas to drop from the cut-out, e.g. a lantern.
+  - `acting: {type, ...}`, with these types:
+    - `talk {pivot, head_down, lift_before_cut, nod, inhale_px, sway}`;
+    - `strike {at, pivot = the fist, travel, lean_deg, windup_px, follow_px, lunge, settle, smear_taps}`;
+    - `shout {scale, thrust, nod_px, tremble: [while speaking, after]}`;
+    - `stare {scale, pant_px, period}`.
+  - `camera: {zoom: [start, end] >= 1, center, slam: {at, amount, settle}}`.
+  - `embers`: strength for this cut.
+
+Times can be any of:
+- seconds;
+- `{"at_sentence": n, "delay": s}`;
+- `{"after_speech": s}`.
+
+Caching:
+- Drawings carry `.png.json` sidecars and are redrawn only when their recipe or base image changes.
+- Images without a sidecar are yours and are kept; `--force-drawings` replaces them.
+- Frames are reused while nothing changed; `--force` re-renders them.
+- Output goes to `output/<id>/`; work files go to `temp/cel_shots/<id>/`.
+
+Limits:
+- No new poses: turning, or a swinging arm, needs ControlNet.
+- Hair doesn't sway, because there are no hair redraws yet.
+- The character's look can drift between keyframes: lock the tags and check the cuts side by side.
 
 ## 5. Using Stable Diffusion and AnimateDiff output
 
